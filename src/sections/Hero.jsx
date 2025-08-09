@@ -361,52 +361,71 @@ const Hero = () => {
     if (saeMaskRef.current && !showMainContent) {
       try {
         const saeMaskTl = gsap.timeline({
-        onComplete: () => {
-          setShowMainContent(true);
-        }
-      });
-
-      // Start SLOW then ACCELERATE - no waiting, smooth transition
-      saeMaskTl
-        .set(".sae-mask-group", { 
-          rotation: 0,
-          scale: 1,
-          opacity: 1,
-          transformOrigin: "center center"
-        })
-        // Animation starts - no audio logic here
-        .call(() => {
-        })
-        .to(".sae-mask-group", {
-          rotation: 5,
-          duration: 2.5, // Start slow
-          ease: "Power1.easeIn", // Slow start
-          onComplete: function() {
+          onComplete: () => {
             setShowMainContent(true);
-            // Audio control enabled after animation completes
           }
-        })
-        .to(".sae-mask-group", {
-          scale: 25,
-          duration: 1.5, // Then accelerate fast
-          ease: "Power3.easeOut", // Fast finish
-          transformOrigin: "center center",
-          onUpdate: function() {
-            if (this.progress() >= 0.3) {
+        });
+
+        // Start SLOW then ACCELERATE - no waiting, smooth transition
+        saeMaskTl
+          .set(".sae-mask-group", { 
+            rotation: 0,
+            scale: 1,
+            opacity: 1,
+            transformOrigin: "center center"
+          })
+          // Animation starts - no audio logic here
+          .call(() => {
+            console.log("🎭 Mask animation starting");
+          })
+          .to(".sae-mask-group", {
+            rotation: window.innerWidth < 640 ? 3 : 5, // Less rotation on mobile
+            duration: window.innerWidth < 640 ? 2.0 : 2.5, // Faster on mobile
+            ease: "power1.easeIn", // Slow start
+            onComplete: function() {
+              console.log("🔄 First rotation complete");
+              // Audio control enabled after animation completes
+            }
+          })
+          .to(".sae-mask-group", {
+            scale: window.innerWidth < 640 ? 15 : 25, // Less scale on mobile for smoother animation
+            duration: window.innerWidth < 640 ? 1.2 : 1.5, // Slightly faster on mobile
+            ease: "power3.easeOut", // Fast finish
+            transformOrigin: "center center",
+            onUpdate: function() {
+              if (this.progress() >= 0.3) {
+                setShowMainContent(true);
+              }
+            },
+            onComplete: function() {
+              console.log("📈 Scale animation complete");
+            }
+          }, "-=0.5") // Minimal overlap for seamless transition
+          // Add final massive expansion that fills entire screen including mobile
+          .to(".sae-mask-group", {
+            scale: window.innerWidth < 640 ? 45 : 60, // Massive scale to completely cover mobile screens
+            duration: 0.6,
+            ease: "power2.easeIn",
+            transformOrigin: "center center",
+            onComplete: function() {
+              console.log("🎯 Final massive expansion complete - full screen covered");
+            }
+          }, "-=0.2")
+          .to(".sae-mask-group", {
+            opacity: 0,
+            duration: 0.4,
+            ease: "power2.easeOut",
+            onComplete: function() {
+              console.log("✅ Mask animation fully complete");
               setShowMainContent(true);
             }
-          }
-        }, "-=0.5") // Minimal overlap for seamless transition
-        .to(".sae-mask-group", {
-          opacity: 0,
-          duration: 0.5,
-          ease: "Power2.easeOut"
-        }, "-=0.5");
+          }, "-=0.2");
 
-      return () => {
-        saeMaskTl.kill();
-      };
+        return () => {
+          saeMaskTl.kill();
+        };
       } catch (error) {
+        console.error("❌ Mask animation failed:", error);
         // Fallback if mask animation fails
         setShowMainContent(true);
       }
@@ -791,11 +810,11 @@ const Hero = () => {
       
       {/* SAE Text Mask Reveal Animation - Like GTA VI */}
       {!showMainContent && (
-        <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
+        <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden">
           <svg 
             ref={saeMaskRef}
             viewBox="0 0 1200 800" 
-            className="w-full h-full"
+            className="w-full h-full max-w-full max-h-full"
             preserveAspectRatio="xMidYMid slice"
             style={{
               imageRendering: 'auto',
@@ -810,13 +829,13 @@ const Hero = () => {
                   <text
                     x="600"
                     y="400"
-                    fontSize="300"
+                    fontSize="240"
                     fontFamily="Impact, Arial Black, sans-serif"
                     textAnchor="middle"
                     dominantBaseline="central"
                     fill="white"
                     fontWeight="900"
-                    letterSpacing="0.1em"
+                    letterSpacing="0.08em"
                     style={{
                       filter: 'none',
                       textShadow: 'none',
@@ -829,8 +848,9 @@ const Hero = () => {
                 </g>
               </mask>
             </defs>
+            
             <image
-              href={background1}
+              href={typeof window !== 'undefined' && window.innerWidth < 640 ? '/mobile-bg.jpg' : background1}
               width="100%"
               height="100%"
               mask="url(#saeMask)"
@@ -849,11 +869,11 @@ const Hero = () => {
           transition: 'opacity 0.1s ease-out'
         }}
       >
-        {/* Background Image with Blur */}
+        {/* Desktop Background Image with Blur */}
         <img 
           src={background1} 
           alt="Background" 
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover hidden sm:block"
           style={{
             filter: 'blur(2px)',
             transform: 'scale(1.05)',
@@ -869,11 +889,23 @@ const Hero = () => {
           }}
         />
         
-        {/* Fallback background if image fails */}
+        {/* Mobile Background Image */}
+        <img 
+          src="/mobile-bg.jpg" 
+          alt="Mobile Background" 
+          className="absolute inset-0 w-full h-full object-cover block sm:hidden"
+          style={{
+            filter: 'blur(1px)',
+            transform: 'scale(1.02)',
+            zIndex: 1
+          }}
+        />
+        
+        {/* Fallback background if images fail */}
         <div 
           className="absolute inset-0 w-full h-full"
           style={{
-            backgroundImage: imageError ? 'none' : `url(${background1})`,
+            backgroundImage: imageError ? 'none' : window.innerWidth >= 640 ? `url(${background1})` : 'url(/mobile-bg.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat',
@@ -898,9 +930,9 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20 z-[5]" />
 
         {/* GTA 5 Style Audio Control - Center Top */}
-        <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-30">
+        <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-30">
           <button
-            className="audio-control-button group relative bg-black/90 border border-gray-600/50 text-white px-5 py-2 rounded-full hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-xl backdrop-blur-sm"
+            className="audio-control-button group relative bg-black/90 border border-gray-600/50 text-white px-3 sm:px-5 py-2 rounded-full hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-xl backdrop-blur-sm"
             onClick={async (e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -985,7 +1017,7 @@ const Hero = () => {
         {/* SAE Engineering HUD */}
         <div 
           ref={hudRef}
-          className="absolute top-6 left-6 z-20 opacity-0 group"
+          className="absolute top-6 left-6 z-20 opacity-0 group hidden sm:block"
           style={{ transform: 'translateX(-100px)' }}
         >
           <div className="relative w-72 h-32">
@@ -1162,11 +1194,11 @@ const Hero = () => {
           
           {/* Animated SAE Title */}
           <div className="relative mb-8">
-            {/* LARGE SAE Letters - FIXED SIZE */}
-            <div className="flex justify-center items-center space-x-4 mb-6">
+            {/* LARGE SAE Letters - RESPONSIVE SIZE */}
+            <div className="flex justify-center items-center space-x-2 sm:space-x-4 mb-4 sm:mb-6">
               <span 
                 ref={saeLetterS}
-                className="font-black opacity-0 text-[12rem] leading-none tracking-[0.05em] skew-x-[-5deg]"
+                className="font-black opacity-0 text-[8rem] sm:text-[12rem] leading-none tracking-[0.05em] skew-x-[-5deg]"
                 style={{
                   fontFamily: 'Impact, Arial Black, sans-serif',
                   color: '#ffffff',
@@ -1177,7 +1209,7 @@ const Hero = () => {
               </span>
               <span 
                 ref={saeLetterA}
-                className="font-black opacity-0 text-[12rem] leading-none tracking-[0.05em] skew-x-[-5deg]"
+                className="font-black opacity-0 text-[8rem] sm:text-[12rem] leading-none tracking-[0.05em] skew-x-[-5deg]"
                 style={{
                   fontFamily: 'Impact, Arial Black, sans-serif',
                   color: '#ffffff',
@@ -1188,7 +1220,7 @@ const Hero = () => {
               </span>
               <span 
                 ref={saeLetterE}
-                className="font-black opacity-0 text-[12.5rem] leading-none tracking-[0.05em] skew-x-[-5deg]"
+                className="font-black opacity-0 text-[8rem] sm:text-[12.5rem] leading-none tracking-[0.05em] skew-x-[-5deg]"
                 style={{
                   fontFamily: 'Impact, Arial Black, sans-serif',
                   color: '#ffffff',
@@ -1281,7 +1313,7 @@ const Hero = () => {
           {/* Clean Subtitle */}
           <h2 
             ref={subtitleRef}
-            className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-widest mb-8 opacity-0 transform translate-y-8"
+            className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-widest mb-6 sm:mb-8 opacity-0 transform translate-y-8"
             style={{
               fontFamily: 'Arial, sans-serif',
               color: '#ffffff',
@@ -1292,7 +1324,7 @@ const Hero = () => {
           </h2>
           
           {/* Description */}
-          <p className="text-xl md:text-2xl text-white mb-12 max-w-4xl leading-relaxed font-medium"
+          <p className="text-base sm:text-xl md:text-2xl text-white mb-8 sm:mb-12 max-w-4xl leading-relaxed font-medium px-4 sm:px-0"
              style={{ 
                textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
                fontFamily: 'Arial, sans-serif'
@@ -1307,10 +1339,10 @@ const Hero = () => {
         {/* REAL GTA 5 MINIMAP - SATELLITE VIEW (NOT RADAR!) */}
         <div 
           ref={mapRef}
-          className="absolute bottom-6 left-6 z-20 opacity-0 transform translate-y-24 scale-75"
+          className="absolute bottom-20 sm:bottom-6 left-2 sm:left-6 z-20 opacity-0 transform translate-y-24 scale-75"
         >
           {/* TRANSPARENT RECTANGULAR MINIMAP CONTAINER */}
-          <div className="w-64 h-48 relative overflow-hidden rounded-xl border-2 border-white/20 bg-black/30 backdrop-blur-lg"
+          <div className="w-40 sm:w-64 h-28 sm:h-48 relative overflow-hidden rounded-lg sm:rounded-xl border-2 border-white/20 bg-black/30 backdrop-blur-lg"
                style={{
                  boxShadow: `
                    0 0 30px rgba(0, 0, 0, 0.7),
@@ -1460,42 +1492,55 @@ const Hero = () => {
 
 
         {/* Bottom Right Learn More Button - GTA Style */}
-        <div className="absolute bottom-8 right-8 z-30">
+        <div className="absolute bottom-4 sm:bottom-8 right-2 sm:right-8 z-30">
           <button
             onClick={openIntroPopup}
-            className="group relative bg-black/90 border border-gray-600/50 text-white px-6 py-3 rounded-lg hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm"
+            className="group relative bg-black/90 border border-gray-600/50 text-white px-3 sm:px-6 py-1.5 sm:py-3 rounded-md sm:rounded-lg hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm"
           >
             {/* Corner brackets for GTA 5 feel */}
-            <div className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
-            <div className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
-            <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+            <div className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300 hidden sm:block"></div>
+            <div className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300 hidden sm:block"></div>
+            <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300 hidden sm:block"></div>
+            <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300 hidden sm:block"></div>
             
-            <div className="flex items-center space-x-3">
-              {/* Info Icon */}
-              <div className="w-5 h-5 transition-transform duration-300 group-hover:scale-110">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-gray-300 group-hover:text-white transition-colors duration-300">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M12 16v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
+            <div className="flex items-center space-x-1 sm:space-x-3">
+              {/* Mobile: Just arrow, Desktop: Full content */}
+              <div className="block sm:hidden">
+                {/* Mobile: Only right arrow */}
+                <div className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white group-hover:text-gray-200 transition-colors duration-300">
+                    <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
               </div>
               
-              {/* Button text */}
-              <div className="flex flex-col items-start">
-                <span className="text-white font-bold text-sm tracking-wider group-hover:text-white transition-colors duration-300 font-mono">
-                  LEARN MORE
-                </span>
-                <span className="text-gray-400 text-xs font-mono tracking-wide group-hover:text-gray-300 transition-colors duration-300">
-                  PRESS TO CONTINUE
-                </span>
-              </div>
-              
-              {/* Animated arrow */}
-              <div className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-400 group-hover:text-white transition-colors duration-300">
-                  <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              {/* Desktop: Full button content */}
+              <div className="hidden sm:flex items-center space-x-3">
+                {/* Info Icon */}
+                <div className="w-5 h-5 transition-transform duration-300 group-hover:scale-110">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-gray-300 group-hover:text-white transition-colors duration-300">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M12 16v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                
+                {/* Button text */}
+                <div className="flex flex-col items-start">
+                  <span className="text-white font-bold text-sm tracking-wider group-hover:text-white transition-colors duration-300 font-mono">
+                    LEARN MORE
+                  </span>
+                  <span className="text-gray-400 text-xs font-mono tracking-wide group-hover:text-gray-300 transition-colors duration-300">
+                    PRESS TO CONTINUE
+                  </span>
+                </div>
+                
+                {/* Animated arrow */}
+                <div className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-400 group-hover:text-white transition-colors duration-300">
+                    <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
               </div>
             </div>
             
@@ -1544,7 +1589,7 @@ const Hero = () => {
                 {/* Inner scrollable content */}
                 <div className="w-full">
                 {/* Hero Section */}
-                <div className="relative h-screen flex items-center justify-center px-12">
+                <div className="relative h-screen flex items-center justify-center px-4 sm:px-6 md:px-12">
                   {/* Background Pattern */}
                   <div className="absolute inset-0 opacity-5">
                     <div className="absolute inset-0" style={{
@@ -1554,16 +1599,16 @@ const Hero = () => {
                   
                   <div className="text-center max-w-4xl relative">
                     <div className="mb-8">
-                      <div className="text-white/40 text-sm font-mono tracking-[0.3em] mb-4">EST. MMMUT CHAPTER</div>
-                      <h1 className="text-white text-7xl font-thin tracking-tight mb-6 leading-none">
+                      <div className="text-white/40 text-xs sm:text-sm font-mono tracking-[0.2em] sm:tracking-[0.3em] mb-4">EST. MMMUT CHAPTER</div>
+                      <h1 className="text-white text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-thin tracking-tight mb-6 leading-none px-2 sm:px-0">
                         SOCIETY OF
                         <br />
                         <span className="font-black">AUTOMOTIVE</span>
                         <br />
                         ENGINEERS
                       </h1>
-                      <div className="w-24 h-px bg-white mx-auto mb-8"></div>
-                      <p className="text-white/80 text-xl leading-relaxed max-w-2xl mx-auto">
+                      <div className="w-16 sm:w-24 h-px bg-white mx-auto mb-6 sm:mb-8"></div>
+                      <p className="text-white/80 text-sm sm:text-base lg:text-xl leading-relaxed max-w-2xl mx-auto px-4 sm:px-0">
                         Where engineering vision meets automotive reality. We don't just build machines—
                         <span className="text-white font-medium"> we craft the future of mobility.</span>
                       </p>
@@ -1572,40 +1617,40 @@ const Hero = () => {
                 </div>
 
                 {/* Our Philosophy */}
-                <div className="px-12 py-24">
+                <div className="px-4 sm:px-8 md:px-12 py-12 sm:py-16 md:py-24">
                   <div className="max-w-5xl mx-auto">
-                    <div className="grid md:grid-cols-2 gap-16 items-center">
+                    <div className="grid md:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-center">
                       <div>
-                        <div className="text-white/40 text-sm font-mono tracking-wider mb-4">OUR PHILOSOPHY</div>
-                        <h2 className="text-white text-4xl font-thin mb-8 leading-tight">
+                        <div className="text-white/40 text-xs sm:text-sm font-mono tracking-wider mb-4">OUR PHILOSOPHY</div>
+                        <h2 className="text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl font-thin mb-6 sm:mb-8 leading-tight px-2 sm:px-0">
                           Engineering Excellence
                           <br />
                           <span className="font-black">Through Innovation</span>
                         </h2>
-                        <p className="text-white/70 text-lg leading-relaxed mb-8">
+                        <p className="text-white/70 text-sm sm:text-base lg:text-lg leading-relaxed mb-6 sm:mb-8 px-2 sm:px-0">
                           At SAE MMMUT, we believe that true engineering mastery comes from pushing boundaries. 
                           Every project, every competition, every innovation is a step toward reshaping what's possible 
                           in automotive and aerospace engineering.
                         </p>
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                           {[
                             'Hands-on learning that transcends textbooks',
                             'Competition-driven excellence',
                             'Industry collaboration and mentorship',
                             'Innovation through research and development'
                           ].map((item, i) => (
-                            <div key={i} className="flex items-center space-x-4">
-                              <div className="w-2 h-px bg-white"></div>
-                              <span className="text-white/80 text-base">{item}</span>
+                            <div key={i} className="flex items-center space-x-3 sm:space-x-4 px-2 sm:px-0">
+                              <div className="w-1.5 sm:w-2 h-px bg-white"></div>
+                              <span className="text-white/80 text-sm sm:text-base">{item}</span>
                             </div>
                           ))}
                         </div>
                       </div>
-                      <div className="relative">
+                      <div className="relative px-2 sm:px-0">
                         <div className="aspect-square bg-gray-900/30 border border-white/10 flex items-center justify-center">
                           <div className="text-center">
-                            <div className="text-white/20 text-8xl font-thin mb-4">SAE</div>
-                            <div className="text-white/60 text-sm tracking-[0.2em]">ENGINEERING LEGACY</div>
+                            <div className="text-white/20 text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-thin mb-2 sm:mb-4">SAE</div>
+                            <div className="text-white/60 text-xs sm:text-sm tracking-[0.2em]">ENGINEERING LEGACY</div>
                           </div>
                         </div>
                       </div>
@@ -1614,11 +1659,11 @@ const Hero = () => {
                 </div>
 
                 {/* Four Chambers - Cinematic Reveal */}
-                <div className="py-24 px-12">
+                <div className="py-12 sm:py-16 md:py-24 px-4 sm:px-8 md:px-12">
                   <div className="max-w-6xl mx-auto">
-                    <div className="text-center mb-20">
-                      <div className="text-white/40 text-sm font-mono tracking-wider mb-4">SPECIALIZED DIVISIONS</div>
-                      <h2 className="text-white text-5xl font-thin mb-8">
+                    <div className="text-center mb-12 sm:mb-16 md:mb-20">
+                      <div className="text-white/40 text-xs sm:text-sm font-mono tracking-wider mb-4">SPECIALIZED DIVISIONS</div>
+                      <h2 className="text-white text-xl sm:text-2xl md:text-3xl lg:text-5xl font-thin mb-8 leading-tight px-4 sm:px-0">
                         Four Pillars of
                         <br />
                         <span className="font-black">Engineering Excellence</span>
@@ -1626,7 +1671,7 @@ const Hero = () => {
                       <div className="w-32 h-px bg-white mx-auto"></div>
                     </div>
 
-                    <div className="space-y-24">
+                    <div className="space-y-12 sm:space-y-16 md:space-y-24">
                       {[
                         {
                           name: 'BAJA',
@@ -1662,21 +1707,21 @@ const Hero = () => {
                         }
                       ].map((division, i) => (
                         <div key={i} className="group">
-                          <div className={`grid md:grid-cols-2 gap-16 items-center ${i % 2 === 1 ? 'md:grid-flow-col-dense' : ''}`}>
-                            <div className={i % 2 === 1 ? 'md:col-start-2' : ''}>
-                              <div className="flex items-center space-x-6 mb-6">
-                                <div className="text-white/20 text-6xl font-thin">{division.number}</div>
+                          <div className={`grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-16 items-center ${i % 2 === 1 ? 'md:grid-flow-col-dense' : ''}`}>
+                            <div className={`px-2 sm:px-0 ${i % 2 === 1 ? 'md:col-start-2' : ''}`}>
+                              <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 lg:space-x-6 mb-3 sm:mb-4 md:mb-6">
+                                <div className="text-white/20 text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-thin">{division.number}</div>
                                 <div>
-                                  <h3 className="text-white text-3xl font-black tracking-wide">{division.name}</h3>
-                                  <div className="text-white/60 text-lg italic">{division.tagline}</div>
+                                  <h3 className="text-white text-base sm:text-lg md:text-xl lg:text-3xl font-black tracking-wide">{division.name}</h3>
+                                  <div className="text-white/60 text-xs sm:text-sm md:text-base lg:text-lg italic">{division.tagline}</div>
                                 </div>
                               </div>
-                              <p className="text-white/70 text-lg leading-relaxed mb-8">
+                              <p className="text-white/70 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed mb-4 sm:mb-6 md:mb-8">
                                 {division.description}
                               </p>
-                              <div className="grid grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
                                 {division.expertise.map((skill, j) => (
-                                  <div key={j} className="text-white/50 text-sm border-l-2 border-white/20 pl-4">
+                                  <div key={j} className="text-white/50 text-xs sm:text-sm border-l-2 border-white/20 pl-2 sm:pl-3 md:pl-4">
                                     {skill}
                                   </div>
                                 ))}
@@ -1699,7 +1744,7 @@ const Hero = () => {
                 </div>
 
                 {/* GTA 5 Wanted Level Stars */}
-                <div className="relative px-12 py-24 border-t border-white/10 overflow-hidden">
+                <div className="relative px-4 sm:px-6 md:px-12 py-12 sm:py-16 md:py-24 border-t border-white/10 overflow-hidden">
                   {/* Gritty Background Elements */}
                   <div className="absolute inset-0">
                     {Array.from({ length: 15 }).map((_, i) => (
@@ -1741,11 +1786,11 @@ const Hero = () => {
                   <div className="relative w-full h-full flex items-center justify-center">
                     <div className="text-center">
                       {/* GTA 5 Wanted Level Style Stars */}
-                      <div className="flex items-center justify-center space-x-4 mb-4">
+                      <div className="flex items-center justify-center space-x-1 sm:space-x-2 md:space-x-4 mb-3 sm:mb-4">
                         {[...Array(5)].map((_, i) => (
                           <div
                             key={i}
-                            className="text-white font-black text-4xl select-none opacity-60 hover:opacity-100 transition-opacity duration-300"
+                            className="text-white font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl select-none opacity-60 hover:opacity-100 transition-opacity duration-300"
                             style={{
                               fontFamily: 'Impact, Arial Black, sans-serif',
                               textShadow: '2px 2px 0px #000000, -1px -1px 0px #333333',
@@ -1757,7 +1802,7 @@ const Hero = () => {
                           </div>
                         ))}
                       </div>
-                      <div className="text-white/40 text-xs font-mono tracking-widest">
+                      <div className="text-white/40 text-xs sm:text-sm font-mono tracking-widest px-4 sm:px-0">
                         LOS SANTOS AUTO EMPIRE
                       </div>
                     </div>
@@ -1800,6 +1845,25 @@ const Hero = () => {
           position: fixed !important;
           width: 100% !important;
           height: 100% !important;
+        }
+        
+        /* Mobile viewport adjustments */
+        @media (max-width: 640px) {
+          body {
+            overflow-x: hidden;
+          }
+          
+          /* Prevent horizontal scroll on mobile */
+          * {
+            max-width: 100vw;
+            box-sizing: border-box;
+          }
+          
+          /* Better touch targets on mobile */
+          button, a {
+            min-height: 44px;
+            min-width: 44px;
+          }
         }
         
         /* Hide all scrollbars globally */

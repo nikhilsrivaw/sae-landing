@@ -9,6 +9,12 @@ gsap.registerPlugin(ScrollTrigger);
 import background1 from '../assets/background (2).jpg'; // Trevor with palm trees - MAIN HERO
 // Other backgrounds removed for performance optimization
 
+// Import division logos
+import bajaLogo from '../../logo/baja.jpg';
+import supraLogo from '../../logo/supra.jpg';
+import aeroLogo from '../../logo/aero.jpg';
+import discoLogo from '../../logo/disco.jpg';
+
 const Hero = () => {
   const heroRef = useRef(null);
   const titleRef = useRef(null);
@@ -1425,28 +1431,32 @@ const Hero = () => {
                           tagline: 'Conquer Every Terrain',
                           description: 'Where rugged engineering meets unforgiving landscapes. Our BAJA division masters the art of all-terrain vehicle design, pushing suspension dynamics and engine optimization to their absolute limits.',
                           expertise: ['Suspension Architecture', 'Powertrain Optimization', 'Durability Engineering', 'Competition Racing'],
-                          number: '01'
+                          number: '01',
+                          logo: bajaLogo
                         },
                         {
                           name: 'SUPRA',
                           tagline: 'Speed Redefined',
                           description: 'Precision engineering at 200+ mph. SUPRA division focuses on formula racing excellence, where aerodynamics, weight distribution, and performance tuning create championship-winning machines.',
                           expertise: ['Aerodynamic Design', 'Performance Tuning', 'Chassis Engineering', 'Race Strategy'],
-                          number: '02'
+                          number: '02',
+                          logo: supraLogo
                         },
                         {
                           name: 'AERO',
                           tagline: 'Mastering Flight',
                           description: 'Beyond the horizon lies infinite possibility. Our Aerospace division pioneers flight technology, from unmanned systems to advanced propulsion, pushing the boundaries of what can soar.',
                           expertise: ['Aircraft Design', 'Propulsion Systems', 'Flight Dynamics', 'Autonomous Flight'],
-                          number: '03'
+                          number: '03',
+                          logo: aeroLogo
                         },
                         {
                           name: 'DISCO',
                           tagline: 'Digital Revolution',
                           description: 'The future is intelligent. DISCO division integrates cutting-edge digital solutions, IoT systems, and autonomous technologies that make vehicles smarter than ever imagined.',
                           expertise: ['IoT Integration', 'Autonomous Systems', 'Smart Manufacturing', 'Digital Innovation'],
-                          number: '04'
+                          number: '04',
+                          logo: discoLogo
                         }
                       ].map((division, i) => (
                         <div key={i} className="group">
@@ -1471,8 +1481,12 @@ const Hero = () => {
                               </div>
                             </div>
                             <div className={i % 2 === 1 ? 'md:col-start-1' : ''}>
-                              <div className="aspect-[4/3] bg-gray-900/20 border border-white/10 flex items-center justify-center group-hover:border-white/30 transition-colors duration-500">
-                                <div className="text-white/10 text-9xl font-thin">{division.name}</div>
+                              <div className="aspect-[4/3] bg-gray-900/20 border border-white/10 overflow-hidden group-hover:border-white/30 transition-all duration-500">
+                                <img 
+                                  src={division.logo} 
+                                  alt={`${division.name} Division`}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
                               </div>
                             </div>
                           </div>

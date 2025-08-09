@@ -39,9 +39,12 @@ const Hero = () => {
   const [showMainContent, setShowMainContent] = useState(false);
   const saeMaskRef = useRef(null);
   const audioRef = useRef(null);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(true); // Audio plays automatically when site loads
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false); // Will be set to true once audio starts
+  const [audioReady, setAudioReady] = useState(false);
+  const [userHasInteracted, setUserHasInteracted] = useState(false);
   const [showIntroPopup, setShowIntroPopup] = useState(false);
   const popupRef = useRef(null);
+  const smoothScrollRef = useRef(null);
   
   // Memoized handlers for better performance
   const openIntroPopup = useCallback(() => {
@@ -52,9 +55,9 @@ const Hero = () => {
     setShowIntroPopup(false);
   }, []);
   
-  // Complete scroll isolation for popup
+  // Complete scroll isolation for popup with GSAP smooth scroll
   useEffect(() => {
-    if (showIntroPopup) {
+    if (showIntroPopup && popupRef.current) {
       // Store current scroll position
       const scrollY = window.scrollY;
       
@@ -62,28 +65,167 @@ const Hero = () => {
       document.body.classList.add('popup-no-scroll');
       document.body.style.top = `-${scrollY}px`;
       
-      // Prevent all scroll events on document except within popup
-      const preventScroll = (e) => {
-        // Only prevent if not within popup
-        if (!popupRef.current || !popupRef.current.contains(e.target)) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
+      // Create inner scrollable content wrapper
+      const scrollContent = popupRef.current.firstElementChild;
+      if (!scrollContent) return;
+      
+      // Initialize GSAP smooth scrolling variables
+      let currentY = 0;
+      let targetY = 0;
+      let ease = 0.08; // Smoother easing
+      let velocity = 0;
+      let isScrolling = false;
+      
+      const smoothScroll = () => {
+        // Calculate smooth easing with momentum
+        const distance = targetY - currentY;
+        
+        if (Math.abs(distance) > 0.1) {
+          currentY += distance * ease;
+          velocity = distance * ease;
+          
+          // Apply transform to scroll content, not popup container
+          if (scrollContent) {
+            scrollContent.style.transform = `translateY(${-currentY}px)`;
+            scrollContent.style.willChange = 'transform';
+          }
+          
+          smoothScrollRef.current = requestAnimationFrame(smoothScroll);
+        } else {
+          isScrolling = false;
+          if (scrollContent) {
+            scrollContent.style.willChange = 'auto';
+          }
         }
       };
       
-      // Add scroll prevention 
-      document.addEventListener('wheel', preventScroll, { passive: false, capture: true });
-      document.addEventListener('touchmove', preventScroll, { passive: false, capture: true });
+      // Handle wheel events with GSAP
+      const handleWheel = (e) => {
+        if (popupRef.current?.contains(e.target)) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Improved scroll calculation
+          const delta = e.deltaY;
+          const scrollSpeed = 1.5; // Responsive speed
+          targetY += delta * scrollSpeed;
+          
+          // Calculate boundaries correctly
+          const containerHeight = popupRef.current.clientHeight;
+          const contentHeight = scrollContent?.scrollHeight || 0;
+          const maxScroll = Math.max(0, contentHeight - containerHeight);
+          
+          // Apply boundaries
+          targetY = Math.max(0, Math.min(targetY, maxScroll));
+          
+          // Start smooth scrolling
+          if (!isScrolling) {
+            isScrolling = true;
+            smoothScroll();
+          }
+        }
+      };
+      
+      // Handle touch events with improved momentum
+      let touchStartY = 0;
+      let lastTouchY = 0;
+      let touchVelocity = 0;
+      let lastTouchTime = 0;
+      
+      const handleTouchStart = (e) => {
+        if (popupRef.current?.contains(e.target)) {
+          touchStartY = e.touches[0].clientY;
+          lastTouchY = touchStartY;
+          touchVelocity = 0;
+          lastTouchTime = Date.now();
+        }
+      };
+      
+      const handleTouchMove = (e) => {
+        if (popupRef.current?.contains(e.target)) {
+          e.preventDefault();
+          
+          const now = Date.now();
+          const touchY = e.touches[0].clientY;
+          const deltaY = lastTouchY - touchY;
+          const deltaTime = now - lastTouchTime;
+          
+          // Calculate velocity for momentum
+          touchVelocity = deltaTime > 0 ? deltaY / deltaTime : 0;
+          
+          targetY += deltaY;
+          
+          // Calculate boundaries
+          const containerHeight = popupRef.current.clientHeight;
+          const contentHeight = scrollContent?.scrollHeight || 0;
+          const maxScroll = Math.max(0, contentHeight - containerHeight);
+          
+          // Apply boundaries with rubber band effect
+          if (targetY < 0) {
+            targetY = targetY * 0.3; // Rubber band at top
+          } else if (targetY > maxScroll) {
+            targetY = maxScroll + (targetY - maxScroll) * 0.3; // Rubber band at bottom
+          }
+          
+          lastTouchY = touchY;
+          lastTouchTime = now;
+          
+          if (!isScrolling) {
+            isScrolling = true;
+            smoothScroll();
+          }
+        }
+      };
+      
+      const handleTouchEnd = (e) => {
+        if (popupRef.current?.contains(e.target)) {
+          // Add momentum based on touch velocity
+          const momentum = touchVelocity * 300; // Momentum multiplier
+          targetY += momentum;
+          
+          // Calculate final boundaries
+          const containerHeight = popupRef.current.clientHeight;
+          const contentHeight = scrollContent?.scrollHeight || 0;
+          const maxScroll = Math.max(0, contentHeight - containerHeight);
+          
+          // Apply final boundaries
+          targetY = Math.max(0, Math.min(targetY, maxScroll));
+          
+          if (!isScrolling) {
+            isScrolling = true;
+            smoothScroll();
+          }
+        }
+      };
+      
+      // Add event listeners with proper options
+      document.addEventListener('wheel', handleWheel, { passive: false });
+      document.addEventListener('touchstart', handleTouchStart, { passive: true });
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd, { passive: true });
       
       return () => {
-        // Restore scrolling
+        // Cleanup
         document.body.classList.remove('popup-no-scroll');
         document.body.style.top = '';
         
         // Remove event listeners
-        document.removeEventListener('wheel', preventScroll, true);
-        document.removeEventListener('touchmove', preventScroll, true);
+        document.removeEventListener('wheel', handleWheel);
+        document.removeEventListener('touchstart', handleTouchStart);
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
+        
+        // Cancel animation frame
+        if (smoothScrollRef.current) {
+          cancelAnimationFrame(smoothScrollRef.current);
+          smoothScrollRef.current = null;
+        }
+        
+        // Reset transforms
+        if (scrollContent) {
+          scrollContent.style.transform = '';
+          scrollContent.style.willChange = 'auto';
+        }
         
         // Restore scroll position
         window.scrollTo(0, scrollY);
@@ -95,42 +237,61 @@ const Hero = () => {
   // Debug: Log background imports on component mount
 
 
-  // Auto-start audio when site loads
+  // Auto-start audio when site loads with aggressive autoplay
   useEffect(() => {
-    const startAudio = () => {
-      if (audioRef.current) {
-        audioRef.current.muted = false;
-        audioRef.current.volume = 0.8;
-        audioRef.current.play()
-          .then(() => {
-            console.log("🎵 Audio started automatically on site load");
-            setIsAudioPlaying(true);
-          })
-          .catch(e => {
-            console.log("⚠️ Autoplay blocked by browser - user must click UNMUTE");
-            setIsAudioPlaying(false);
-          });
+    const startAudio = async () => {
+      if (audioRef.current && audioReady && !userHasInteracted) {
+        try {
+          // Set audio properties first
+          audioRef.current.muted = false;
+          audioRef.current.volume = 0.8;
+          audioRef.current.currentTime = 0;
+          
+          // Try to play
+          await audioRef.current.play();
+          console.log("🎵 Audio started successfully on site load");
+          setIsAudioPlaying(true);
+        } catch (e) {
+          console.log("⚠️ Autoplay blocked by browser, will try on user interaction");
+          setIsAudioPlaying(false);
+          
+          // Set up fallback trigger for first user interaction
+          const handleUserInteraction = async (event) => {
+            // Don't trigger if this is the audio button click
+            if (event.target?.closest('.audio-control-button')) {
+              return;
+            }
+            
+            try {
+              if (audioRef.current && !isAudioPlaying && !userHasInteracted) {
+                audioRef.current.muted = false;
+                audioRef.current.volume = 0.8;
+                await audioRef.current.play();
+                console.log("🎵 Audio started after user interaction");
+                setIsAudioPlaying(true);
+                setUserHasInteracted(true);
+                
+                // Remove listeners once audio starts
+                document.removeEventListener('click', handleUserInteraction);
+                document.removeEventListener('touchstart', handleUserInteraction);
+              }
+            } catch (err) {
+              console.log("Audio still blocked:", err.message);
+            }
+          };
+          
+          // Add event listeners
+          document.addEventListener('click', handleUserInteraction);
+          document.addEventListener('touchstart', handleUserInteraction);
+        }
       }
     };
 
-    // Try to start immediately
-    startAudio();
-    
-    // Also try after a short delay
-    setTimeout(startAudio, 100);
-    setTimeout(startAudio, 500);
-    
-    // Fallback: start on any user interaction
-    const handleFirstClick = () => {
+    // Try to start audio when ready
+    if (audioReady) {
       startAudio();
-      document.removeEventListener('click', handleFirstClick);
-    };
-    document.addEventListener('click', handleFirstClick);
-
-    return () => {
-      document.removeEventListener('click', handleFirstClick);
-    };
-  }, []);
+    }
+  }, [audioReady, isAudioPlaying, userHasInteracted]);
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -539,37 +700,33 @@ const Hero = () => {
 
   return (
     <>
-      {/* GTA V Audio - Autoplays when site loads */}
+      {/* GTA V Audio - Aggressive Autoplay Setup */}
       <audio 
         ref={audioRef} 
         autoPlay
         loop
         preload="auto"
         muted={false}
-        volume="0.8"
+        playsInline
         className="hidden"
+        onCanPlay={() => {
+          console.log("✅ Audio can play - triggering autostart");
+          setAudioReady(true);
+        }}
         onLoadedData={() => {
           console.log("✅ Audio loaded and ready");
-          // Try to start playing when audio data is loaded
-          if (audioRef.current) {
-            audioRef.current.play()
-              .then(() => {
-                console.log("🎵 Audio started on data load");
-                setIsAudioPlaying(true);
-              })
-              .catch(e => {
-                console.log("⚠️ Autoplay blocked on data load");
-                setIsAudioPlaying(false);
-              });
-          }
+          setAudioReady(true);
         }}
         onPlay={() => {
+          console.log("▶️ Audio event: playing");
           setIsAudioPlaying(true);
-          console.log("▶️ Audio is now playing");
         }}
         onPause={() => {
+          console.log("⏸️ Audio event: paused");
           setIsAudioPlaying(false);
-          console.log("⏸️ Audio is now paused");
+        }}
+        onEnded={() => {
+          console.log("🔄 Audio ended, will loop");
         }}
         onError={(e) => {
           console.log("❌ Audio error:", e);
@@ -743,31 +900,46 @@ const Hero = () => {
         {/* GTA 5 Style Audio Control - Center Top */}
         <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-30">
           <button
-            onClick={() => {
+            className="audio-control-button group relative bg-black/90 border border-gray-600/50 text-white px-5 py-2 rounded-full hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-xl backdrop-blur-sm"
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              
+              console.log("🎵 Audio button clicked, current state:", {
+                isAudioPlaying,
+                paused: audioRef.current?.paused,
+                currentTime: audioRef.current?.currentTime,
+                volume: audioRef.current?.volume
+              });
+              
               if (!audioRef.current) {
                 console.log("❌ No audio element found");
                 return;
               }
 
-              if (isAudioPlaying) {
-                // Pause the audio
-                console.log("🔇 Pausing audio");
-                audioRef.current.pause();
-              } else {
-                // Play the audio
-                console.log("🔊 Starting audio");
-                audioRef.current.muted = false;
-                audioRef.current.volume = 0.8;
-                audioRef.current.play()
-                  .then(() => {
-                    console.log("✅ Audio started successfully");
-                  })
-                  .catch(e => {
-                    console.log("❌ Audio failed to start:", e.message);
-                  });
+              setUserHasInteracted(true);
+
+              try {
+                if (isAudioPlaying && !audioRef.current.paused) {
+                  // Pause the audio
+                  console.log("🔇 Button: Pausing audio");
+                  audioRef.current.pause();
+                  // State will be updated by onPause event
+                } else {
+                  // Play the audio
+                  console.log("🔊 Button: Starting audio");
+                  audioRef.current.muted = false;
+                  audioRef.current.volume = 0.8;
+                  
+                  await audioRef.current.play();
+                  console.log("✅ Button: Audio started successfully");
+                  // State will be updated by onPlay event
+                }
+              } catch (e) {
+                console.log("❌ Audio control failed:", e.message);
+                setIsAudioPlaying(false);
               }
             }}
-            className="group relative bg-black/90 border border-gray-600/50 text-white px-5 py-2 rounded-full hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-xl backdrop-blur-sm"
           >
             {/* Corner brackets for GTA 5 feel */}
             <div className="absolute -top-1 -left-1 w-2 h-2 border-t border-l border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
@@ -794,14 +966,14 @@ const Hero = () => {
               
               {/* Button text */}
               <span className="text-gray-200 font-bold text-sm tracking-wider group-hover:text-white transition-colors duration-300 font-mono">
-                {isAudioPlaying ? 'MUTE' : 'UNMUTE'}
+                {isAudioPlaying && !audioRef.current?.paused ? 'MUTE' : 'UNMUTE'}
               </span>
               
               {/* Status indicator */}
               <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                isAudioPlaying 
+                isAudioPlaying && !audioRef.current?.paused
                   ? 'bg-green-500/80 animate-pulse' 
-                  : 'bg-red-500/80 animate-pulse'
+                  : 'bg-red-500/80'
               }`}></div>
             </div>
             
@@ -843,10 +1015,22 @@ const Hero = () => {
                 {/* Header with logo */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    {/* Simple SAE logo */}
+                    {/* SAE Logo */}
                     <div className="relative">
-                      <div className="w-12 h-12 bg-gray-700 rounded-full border border-gray-600 flex items-center justify-center group-hover:border-gray-500 transition-colors duration-300">
-                        <span className="text-gray-300 text-xs font-bold group-hover:text-white transition-colors duration-300">SAE</span>
+                      <div className="w-12 h-12 rounded-full border border-gray-600 group-hover:border-gray-500 transition-colors duration-300 overflow-hidden bg-white/10">
+                        <img 
+                          src="/sae-logo.jpg" 
+                          alt="SAE Logo" 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          onError={(e) => {
+                            // Fallback to text if image fails to load
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div className="w-full h-full bg-gray-700 rounded-full border border-gray-600 flex items-center justify-center group-hover:border-gray-500 transition-colors duration-300" style={{display: 'none'}}>
+                          <span className="text-gray-300 text-xs font-bold group-hover:text-white transition-colors duration-300">SAE</span>
+                        </div>
                       </div>
                     </div>
                     
@@ -1275,30 +1459,48 @@ const Hero = () => {
         </div>
 
 
-        {/* Bottom Right Arrow Button */}
+        {/* Bottom Right Learn More Button - GTA Style */}
         <div className="absolute bottom-8 right-8 z-30">
           <button
             onClick={openIntroPopup}
-            className="group bg-black text-white p-4 rounded-full border-2 border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-110 shadow-2xl hover:shadow-white/20"
+            className="group relative bg-black/90 border border-gray-600/50 text-white px-6 py-3 rounded-lg hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm"
           >
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              className="transition-transform duration-300 group-hover:translate-x-1"
-            >
-              <path 
-                d="M5 12h14m-7-7l7 7-7 7" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-            </svg>
-            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black text-white px-3 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-              Learn More
+            {/* Corner brackets for GTA 5 feel */}
+            <div className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+            <div className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+            <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+            <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+            
+            <div className="flex items-center space-x-3">
+              {/* Info Icon */}
+              <div className="w-5 h-5 transition-transform duration-300 group-hover:scale-110">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-gray-300 group-hover:text-white transition-colors duration-300">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M12 16v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </div>
+              
+              {/* Button text */}
+              <div className="flex flex-col items-start">
+                <span className="text-white font-bold text-sm tracking-wider group-hover:text-white transition-colors duration-300 font-mono">
+                  LEARN MORE
+                </span>
+                <span className="text-gray-400 text-xs font-mono tracking-wide group-hover:text-gray-300 transition-colors duration-300">
+                  PRESS TO CONTINUE
+                </span>
+              </div>
+              
+              {/* Animated arrow */}
+              <div className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-400 group-hover:text-white transition-colors duration-300">
+                  <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
             </div>
+            
+            {/* Subtle glow effect */}
+            <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-gray-400/5 via-gray-300/10 to-gray-400/5"></div>
           </button>
         </div>
 
@@ -1330,17 +1532,17 @@ const Hero = () => {
                 </svg>
               </button>
 
-              {/* Scrollable Content */}
+              {/* Scrollable Content Container */}
               <div 
                 ref={popupRef}
-                className="h-full overflow-y-auto"
+                className="h-full overflow-hidden relative"
                 style={{
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none'
                 }}
-                onWheel={(e) => e.stopPropagation()}
-                onTouchMove={(e) => e.stopPropagation()}
               >
+                {/* Inner scrollable content */}
+                <div className="w-full">
                 {/* Hero Section */}
                 <div className="relative h-screen flex items-center justify-center px-12">
                   {/* Background Pattern */}
@@ -1561,6 +1763,7 @@ const Hero = () => {
                     </div>
                   </div>
                 </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1609,6 +1812,31 @@ const Hero = () => {
           display: none !important;
           width: 0 !important;
           background: transparent !important;
+        }
+        
+        /* Enhanced smooth scrolling */
+        html {
+          scroll-behavior: smooth;
+        }
+        
+        /* Custom smooth scrolling for popup */
+        .popup-scroll {
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
+          scroll-padding-top: 2rem;
+          transform: translateZ(0);
+          will-change: scroll-position;
+        }
+        
+        /* Webkit smooth scrolling */
+        .popup-scroll::-webkit-scrollbar {
+          display: none;
+        }
+        
+        .popup-scroll {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
         }
         
         /* New animations for enhanced popup */

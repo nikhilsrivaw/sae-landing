@@ -6,14 +6,14 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 // Import only the main background for production
-import background1 from '../assets/background (2).jpg'; // Trevor with palm trees - MAIN HERO
+import background1 from '../assets/background (2).webp'; // Trevor with palm trees - MAIN HERO
 // Other backgrounds removed for performance optimization
 
 // Import division logos
-import bajaLogo from '../../logo/baja.jpg';
-import supraLogo from '../../logo/supra.jpg';
-import aeroLogo from '../../logo/aero.jpg';
-import discoLogo from '../../logo/disco.jpg';
+import bajaLogo from '../../logo/baja (1).webp';
+import supraLogo from '../../logo/supra.webp';
+import aeroLogo from '../../logo/aero (1) (1).webp';
+import discoLogo from '../../logo/disco (1).webp';
 
 const Hero = () => {
   const heroRef = useRef(null);
@@ -237,61 +237,97 @@ const Hero = () => {
   // Debug: Log background imports on component mount
 
 
-  // Auto-start audio when site loads with aggressive autoplay
+  // Force unmuted audio to play immediately when site loads
   useEffect(() => {
-    const startAudio = async () => {
-      if (audioRef.current && audioReady && !userHasInteracted) {
+    const forceAudioStart = async () => {
+      if (audioRef.current) {
         try {
-          // Set audio properties first
+          // Force unmute and set volume
           audioRef.current.muted = false;
           audioRef.current.volume = 0.8;
           audioRef.current.currentTime = 0;
           
-          // Try to play
+          // Force play immediately
           await audioRef.current.play();
-          console.log("🎵 Audio started successfully on site load");
+          console.log("🎵 FORCED Audio started successfully on site load");
           setIsAudioPlaying(true);
+          setUserHasInteracted(true);
         } catch (e) {
-          console.log("⚠️ Autoplay blocked by browser, will try on user interaction");
-          setIsAudioPlaying(false);
+          console.log("⚠️ Initial autoplay failed:", e.message);
           
-          // Set up fallback trigger for first user interaction
-          const handleUserInteraction = async (event) => {
-            // Don't trigger if this is the audio button click
-            if (event.target?.closest('.audio-control-button')) {
-              return;
-            }
-            
+          // Immediate retry with different approach
+          setTimeout(async () => {
             try {
-              if (audioRef.current && !isAudioPlaying && !userHasInteracted) {
+              if (audioRef.current) {
+                audioRef.current.load(); // Reload audio
                 audioRef.current.muted = false;
                 audioRef.current.volume = 0.8;
                 await audioRef.current.play();
-                console.log("🎵 Audio started after user interaction");
+                console.log("🎵 FORCED Audio started on immediate retry");
                 setIsAudioPlaying(true);
                 setUserHasInteracted(true);
-                
-                // Remove listeners once audio starts
-                document.removeEventListener('click', handleUserInteraction);
-                document.removeEventListener('touchstart', handleUserInteraction);
               }
-            } catch (err) {
-              console.log("Audio still blocked:", err.message);
+            } catch (retryError) {
+              console.log("⚠️ Immediate retry failed, setting up interaction triggers");
+              
+              // Set up interaction triggers as last resort
+              const forceAudioOnInteraction = async () => {
+                try {
+                  if (audioRef.current && !isAudioPlaying) {
+                    audioRef.current.muted = false;
+                    audioRef.current.volume = 0.8;
+                    await audioRef.current.play();
+                    console.log("🎵 FORCED Audio started after ANY interaction");
+                    setIsAudioPlaying(true);
+                    setUserHasInteracted(true);
+                  }
+                } catch (err) {
+                  console.log("Audio completely blocked:", err.message);
+                }
+              };
+              
+              // Add listeners for ANY user interaction
+              document.addEventListener('click', forceAudioOnInteraction, { once: true });
+              document.addEventListener('touchstart', forceAudioOnInteraction, { once: true });
+              document.addEventListener('keydown', forceAudioOnInteraction, { once: true });
+              document.addEventListener('scroll', forceAudioOnInteraction, { once: true });
+              document.addEventListener('mousemove', forceAudioOnInteraction, { once: true });
             }
-          };
-          
-          // Add event listeners
-          document.addEventListener('click', handleUserInteraction);
-          document.addEventListener('touchstart', handleUserInteraction);
+          }, 50);
         }
       }
     };
 
-    // Try to start audio when ready
+    // Try multiple times when component mounts
     if (audioReady) {
-      startAudio();
+      forceAudioStart();
+      
+      // Additional attempts at different intervals
+      setTimeout(forceAudioStart, 500);
+      setTimeout(forceAudioStart, 1000);
+      setTimeout(forceAudioStart, 2000);
     }
-  }, [audioReady, isAudioPlaying, userHasInteracted]);
+  }, [audioReady]);
+
+  // Additional effect to force audio on component mount
+  useEffect(() => {
+    const immediateAudioStart = async () => {
+      if (audioRef.current) {
+        try {
+          audioRef.current.muted = false;
+          audioRef.current.volume = 0.8;
+          await audioRef.current.play();
+          console.log("🎵 IMMEDIATE Audio started on component mount");
+          setIsAudioPlaying(true);
+        } catch (e) {
+          console.log("Immediate mount audio failed:", e.message);
+        }
+      }
+    };
+
+    // Try immediately when component mounts
+    immediateAudioStart();
+  }, []);
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -719,7 +755,7 @@ const Hero = () => {
 
   return (
     <>
-      {/* GTA V Audio - Aggressive Autoplay Setup */}
+      {/* GTA V Audio - FORCE UNMUTED AUTOPLAY */}
       <audio 
         ref={audioRef} 
         autoPlay
@@ -727,17 +763,75 @@ const Hero = () => {
         preload="auto"
         muted={false}
         playsInline
+        controls={false}
         className="hidden"
-        onCanPlay={() => {
-          console.log("✅ Audio can play - triggering autostart");
+        volume={0.8}
+        onCanPlay={async () => {
+          console.log("✅ Audio can play - FORCING immediate start");
           setAudioReady(true);
+          // Force play immediately when ready
+          try {
+            if (audioRef.current) {
+              audioRef.current.muted = false;
+              audioRef.current.volume = 0.8;
+              await audioRef.current.play();
+              console.log("🎵 FORCED play on canPlay event");
+              setIsAudioPlaying(true);
+            }
+          } catch (e) {
+            console.log("canPlay force failed:", e.message);
+          }
         }}
-        onLoadedData={() => {
-          console.log("✅ Audio loaded and ready");
+        onCanPlayThrough={async () => {
+          console.log("✅ Audio can play through - FORCING start");
           setAudioReady(true);
+          // Force play when fully ready
+          try {
+            if (audioRef.current) {
+              audioRef.current.muted = false;
+              audioRef.current.volume = 0.8;
+              await audioRef.current.play();
+              console.log("🎵 FORCED play on canPlayThrough event");
+              setIsAudioPlaying(true);
+            }
+          } catch (e) {
+            console.log("canPlayThrough force failed:", e.message);
+          }
+        }}
+        onLoadedData={async () => {
+          console.log("✅ Audio loaded - FORCING start");
+          setAudioReady(true);
+          // Force play when loaded
+          try {
+            if (audioRef.current) {
+              audioRef.current.muted = false;
+              audioRef.current.volume = 0.8;
+              await audioRef.current.play();
+              console.log("🎵 FORCED play on loadedData event");
+              setIsAudioPlaying(true);
+            }
+          } catch (e) {
+            console.log("loadedData force failed:", e.message);
+          }
+        }}
+        onLoadedMetadata={async () => {
+          console.log("✅ Audio metadata loaded - FORCING start");
+          setAudioReady(true);
+          // Force play when metadata loaded
+          try {
+            if (audioRef.current) {
+              audioRef.current.muted = false;
+              audioRef.current.volume = 0.8;
+              await audioRef.current.play();
+              console.log("🎵 FORCED play on loadedMetadata event");
+              setIsAudioPlaying(true);
+            }
+          } catch (e) {
+            console.log("loadedMetadata force failed:", e.message);
+          }
         }}
         onPlay={() => {
-          console.log("▶️ Audio event: playing");
+          console.log("▶️ Audio event: playing - SUCCESS!");
           setIsAudioPlaying(true);
         }}
         onPause={() => {
@@ -850,7 +944,7 @@ const Hero = () => {
             </defs>
             
             <image
-              href={typeof window !== 'undefined' && window.innerWidth < 640 ? '/mobile-bg.jpg' : background1}
+              href={typeof window !== 'undefined' && window.innerWidth < 640 ? '/mobile-bg (2).webp' : background1}
               width="100%"
               height="100%"
               mask="url(#saeMask)"
@@ -891,7 +985,7 @@ const Hero = () => {
         
         {/* Mobile Background Image */}
         <img 
-          src="/mobile-bg.jpg" 
+          src="/mobile-bg (2).webp" 
           alt="Mobile Background" 
           className="absolute inset-0 w-full h-full object-cover block sm:hidden"
           style={{
@@ -905,7 +999,7 @@ const Hero = () => {
         <div 
           className="absolute inset-0 w-full h-full"
           style={{
-            backgroundImage: imageError ? 'none' : window.innerWidth >= 640 ? `url(${background1})` : 'url(/mobile-bg.jpg)',
+            backgroundImage: imageError ? 'none' : window.innerWidth >= 640 ? `url(${background1})` : 'url(/mobile-bg (2).webp)',
             backgroundSize: 'cover',
             backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat',
@@ -1492,25 +1586,41 @@ const Hero = () => {
 
 
         {/* Bottom Right Learn More Button - GTA Style */}
-        <div className="absolute bottom-4 sm:bottom-8 right-2 sm:right-8 z-30">
+        <div className="absolute bottom-4 sm:bottom-8 right-4 sm:right-8 z-30">
           <button
             onClick={openIntroPopup}
-            className="group relative bg-black/90 border border-gray-600/50 text-white px-3 sm:px-6 py-1.5 sm:py-3 rounded-md sm:rounded-lg hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm"
+            className="group relative bg-black/90 border border-gray-600/50 text-white px-4 sm:px-6 py-3 sm:py-3 rounded-lg hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm min-h-[48px] min-w-[48px] flex items-center justify-center"
           >
-            {/* Corner brackets for GTA 5 feel */}
-            <div className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300 hidden sm:block"></div>
-            <div className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300 hidden sm:block"></div>
-            <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300 hidden sm:block"></div>
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300 hidden sm:block"></div>
+            {/* Corner brackets for GTA 5 feel - Show on all devices */}
+            <div className="absolute -top-1 -left-1 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+            <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+            <div className="absolute -bottom-1 -left-1 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+            <div className="absolute -bottom-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
             
-            <div className="flex items-center space-x-1 sm:space-x-3">
-              {/* Mobile: Just arrow, Desktop: Full content */}
+            <div className="flex items-center justify-center space-x-2 sm:space-x-3">
+              {/* Mobile: Better styled content */}
               <div className="block sm:hidden">
-                {/* Mobile: Only right arrow */}
-                <div className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white group-hover:text-gray-200 transition-colors duration-300">
-                    <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                <div className="flex items-center space-x-2">
+                  {/* Info Icon for mobile */}
+                  <div className="w-4 h-4 transition-transform duration-300 group-hover:scale-110">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-300 group-hover:text-white transition-colors duration-300">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M12 16v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      <path d="M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                  
+                  {/* Mobile text */}
+                  <span className="text-white font-bold text-sm tracking-wide group-hover:text-white transition-colors duration-300 font-mono">
+                    INFO
+                  </span>
+                  
+                  {/* Arrow for mobile */}
+                  <div className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-white group-hover:text-gray-200 transition-colors duration-300">
+                      <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
                 </div>
               </div>
               

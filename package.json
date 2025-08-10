@@ -1,3 +1,4 @@
+
 {
   "name": "sae-vite-project",
   "private": true,
@@ -25,5 +26,11 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
     "vite": "^7.1.0"
-  }
+  },
+  
+      "name1": "my-package",
+      "version1": "1.0.0",
+      "description1": "A description of my package",
+      "author1": "Nikhil srivastava nikhilksrivastav190@gmail.com "
+
 }

@@ -31,6 +31,7 @@ const Hero = () => {
   const saeDefinitions = useRef(null);
   const starLineRef = useRef(null);
   const fullTextRef = useRef(null);
+  const descriptionRef = useRef(null);
   
   
   const [isLoading, setIsLoading] = useState(true);
@@ -47,6 +48,8 @@ const Hero = () => {
   const [showIntroPopup, setShowIntroPopup] = useState(false);
   const popupRef = useRef(null);
   const smoothScrollRef = useRef(null);
+  const [showStartButton, setShowStartButton] = useState(true);
+  const [experienceStarted, setExperienceStarted] = useState(false);
   
   // Memoized handlers for better performance
   const openIntroPopup = useCallback(() => {
@@ -55,6 +58,17 @@ const Hero = () => {
   
   const closeIntroPopup = useCallback(() => {
     setShowIntroPopup(false);
+  }, []);
+
+  // Start the experience - NO AUDIO RESTART
+  const startExperience = useCallback(async () => {
+    console.log("🚀 CONTINUE BUTTON CLICKED!");
+    
+    // NO AUDIO RESTART - just proceed with experience
+    setShowStartButton(false);
+    setUserHasInteracted(true);
+    setExperienceStarted(true);
+    console.log("✅ Experience started! Audio continues seamlessly.");
   }, []);
   
   // SIMPLIFIED SMOOTH SCROLLING - Performance First
@@ -97,73 +111,47 @@ const Hero = () => {
   // Debug: Log background imports on component mount
 
 
-  // Force unmuted audio to play immediately when site loads
+  // Auto-start audio when ready - seamless experience
   useEffect(() => {
-    const forceAudioStart = async () => {
-      if (audioRef.current) {
+    const startAudioSeamlessly = async () => {
+      if (audioRef.current && audioReady && !isAudioPlaying) {
         try {
-          // Force unmute and set volume
+          console.log("🎵 Starting audio seamlessly...");
           audioRef.current.muted = false;
           audioRef.current.volume = 0.8;
-          audioRef.current.currentTime = 0;
-          
-          // Force play immediately
           await audioRef.current.play();
-          console.log("🎵 FORCED Audio started successfully on site load");
+          console.log("🎵 Audio playing seamlessly!");
           setIsAudioPlaying(true);
           setUserHasInteracted(true);
         } catch (e) {
-          console.log("⚠️ Initial autoplay failed:", e.message);
+          console.log("⚠️ Auto-play blocked, will start on first interaction:", e.message);
           
-          // Immediate retry with different approach
-          setTimeout(async () => {
+          // Set up ONE interaction listener if autoplay fails
+          const startOnInteraction = async () => {
             try {
-              if (audioRef.current) {
-                audioRef.current.load(); // Reload audio
+              if (audioRef.current && !isAudioPlaying) {
                 audioRef.current.muted = false;
                 audioRef.current.volume = 0.8;
                 await audioRef.current.play();
-                console.log("🎵 FORCED Audio started on immediate retry");
+                console.log("🎵 Audio started on first interaction");
                 setIsAudioPlaying(true);
                 setUserHasInteracted(true);
               }
-            } catch {
-              console.log("⚠️ Immediate retry failed, setting up interaction triggers");
-              
-              // Set up interaction triggers as last resort
-              const forceAudioOnInteraction = async () => {
-                try {
-                  if (audioRef.current && !isAudioPlaying) {
-                    audioRef.current.muted = false;
-                    audioRef.current.volume = 0.8;
-                    await audioRef.current.play();
-                    console.log("🎵 FORCED Audio started after ANY interaction");
-                    setIsAudioPlaying(true);
-                    setUserHasInteracted(true);
-                  }
-                } catch (err) {
-                  console.log("Audio completely blocked:", err.message);
-                }
-              };
-              
-              // Add listeners for ANY user interaction
-              document.addEventListener('click', forceAudioOnInteraction, { once: true });
-              document.addEventListener('touchstart', forceAudioOnInteraction, { once: true });
-              document.addEventListener('keydown', forceAudioOnInteraction, { once: true });
-              document.addEventListener('scroll', forceAudioOnInteraction, { once: true });
-              document.addEventListener('mousemove', forceAudioOnInteraction, { once: true });
+            } catch (err) {
+              console.log("Audio blocked:", err.message);
             }
-          }, 50);
+          };
+          
+          // Add one-time listener
+          document.addEventListener('click', startOnInteraction, { once: true });
         }
       }
     };
 
-    // Single audio start - only when both conditions are met and not already playing
-    if (audioReady && showMainContent && !isAudioPlaying) {
-      console.log("🎵 Starting audio - conditions met");
-      forceAudioStart();
+    if (audioReady && !isAudioPlaying) {
+      startAudioSeamlessly();
     }
-  }, [audioReady, showMainContent, isAudioPlaying]);
+  }, [audioReady, isAudioPlaying]);
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -230,7 +218,7 @@ const Hero = () => {
     }
 
     // SAE TEXT MASK REVEAL ANIMATION - EXACTLY LIKE GTA VI
-    if (saeMaskRef.current && !showMainContent) {
+    if (saeMaskRef.current && !showMainContent && experienceStarted) {
       try {
         const saeMaskTl = gsap.timeline({
           onComplete: () => {
@@ -246,23 +234,9 @@ const Hero = () => {
             opacity: 1,
             transformOrigin: "center center"
           })
-          // Animation starts - TRIGGER AUDIO
-          .call(async () => {
-            console.log("🎭 Mask animation starting - TRIGGERING AUDIO");
-            // Force audio to play when mask animation begins
-            if (audioRef.current) {
-              try {
-                audioRef.current.muted = false;
-                audioRef.current.volume = 0.8;
-                audioRef.current.currentTime = 0;
-                await audioRef.current.play();
-                console.log("🎵 Audio started with mask animation!");
-                setIsAudioPlaying(true);
-                setUserHasInteracted(true);
-              } catch (e) {
-                console.log("⚠️ Audio failed to start with mask animation:", e.message);
-              }
-            }
+          // Animation starts - NO AUDIO RESTART
+          .call(() => {
+            console.log("🎭 Mask animation starting - audio continues playing");
           })
           .to(".sae-mask-group", {
             rotation: window.innerWidth < 640 ? 3 : 5, // Less rotation on mobile
@@ -329,13 +303,14 @@ const Hero = () => {
     gsap.set('[style*="backgroundImage"]', { opacity: 0 });
     
     // HIDE ALL ELEMENTS - use proper refs instead of CSS selectors (with null checks)
-    const elementsToHide = [title, subtitle, hud, mapRef.current, saeDefinitions.current, starLineRef.current, fullTextRef.current].filter(Boolean);
+    const elementsToHide = [title, subtitle, hud, mapRef.current, saeDefinitions.current, starLineRef.current, fullTextRef.current, descriptionRef.current].filter(Boolean);
     if (elementsToHide.length > 0) {
       gsap.set(elementsToHide, { opacity: 0 });
     }
     // Set initial positions correctly for hero elements
     if (hud) gsap.set(hud, { opacity: 0, x: -100 });
     if (mapRef.current) gsap.set(mapRef.current, { opacity: 0, scale: 0.8, y: 100 });
+    if (descriptionRef.current) gsap.set(descriptionRef.current, { opacity: 0, y: 30 });
     // Hide bottom fade with more specific targeting
     gsap.set('.absolute.bottom-0.left-0.w-full.h-32', { opacity: 0 }); // Bottom fade
     
@@ -463,6 +438,14 @@ const Hero = () => {
       scale: 1,
       ease: "power2.out"
     }, "-=0.5")
+    
+    // Description fades in after subtitle
+    .to(descriptionRef.current, {
+      duration: 0.8,
+      opacity: 1,
+      y: 0,
+      ease: "power2.out"
+    }, "-=0.3")
     .addLabel("objective")
 
     // HUD elements boot up FAST
@@ -602,7 +585,7 @@ const Hero = () => {
         // Error cleanup
       }
     };
-  }, [imageLoaded, showMainContent]);
+  }, [imageLoaded, showMainContent, experienceStarted]);
 
 
   return (
@@ -619,68 +602,46 @@ const Hero = () => {
         className="hidden"
         volume={0.8}
         onCanPlay={async () => {
-          console.log("✅ Audio can play - FORCING immediate start");
+          console.log("✅ Audio can play - attempting seamless start");
           setAudioReady(true);
-          // Force play immediately when ready
+          // Try to start audio immediately when ready
           try {
             if (audioRef.current) {
               audioRef.current.muted = false;
               audioRef.current.volume = 0.8;
               await audioRef.current.play();
-              console.log("🎵 FORCED play on canPlay event");
+              console.log("🎵 Audio started seamlessly on canPlay");
               setIsAudioPlaying(true);
             }
           } catch (e) {
-            console.log("canPlay force failed:", e.message);
+            console.log("Auto-play blocked on canPlay:", e.message);
           }
         }}
         onCanPlayThrough={async () => {
-          console.log("✅ Audio can play through - FORCING start");
+          console.log("✅ Audio can play through - attempting seamless start");
           setAudioReady(true);
-          // Force play when fully ready
+          // Try to start audio when fully ready
           try {
-            if (audioRef.current) {
+            if (audioRef.current && !isAudioPlaying) {
               audioRef.current.muted = false;
               audioRef.current.volume = 0.8;
               await audioRef.current.play();
-              console.log("🎵 FORCED play on canPlayThrough event");
+              console.log("🎵 Audio started seamlessly on canPlayThrough");
               setIsAudioPlaying(true);
             }
           } catch (e) {
-            console.log("canPlayThrough force failed:", e.message);
+            console.log("Auto-play blocked on canPlayThrough:", e.message);
           }
         }}
-        onLoadedData={async () => {
-          console.log("✅ Audio loaded - FORCING start");
+        onLoadedData={() => {
+          console.log("✅ Audio loaded - ready for user interaction");
           setAudioReady(true);
-          // Force play when loaded
-          try {
-            if (audioRef.current) {
-              audioRef.current.muted = false;
-              audioRef.current.volume = 0.8;
-              await audioRef.current.play();
-              console.log("🎵 FORCED play on loadedData event");
-              setIsAudioPlaying(true);
-            }
-          } catch (e) {
-            console.log("loadedData force failed:", e.message);
-          }
+          // NO AUTO-PLAY - wait for user to click continue
         }}
-        onLoadedMetadata={async () => {
-          console.log("✅ Audio metadata loaded - FORCING start");
+        onLoadedMetadata={() => {
+          console.log("✅ Audio metadata loaded - ready for user interaction");
           setAudioReady(true);
-          // Force play when metadata loaded
-          try {
-            if (audioRef.current) {
-              audioRef.current.muted = false;
-              audioRef.current.volume = 0.8;
-              await audioRef.current.play();
-              console.log("🎵 FORCED play on loadedMetadata event");
-              setIsAudioPlaying(true);
-            }
-          } catch (e) {
-            console.log("loadedMetadata force failed:", e.message);
-          }
+          // NO AUTO-PLAY - wait for user to click continue
         }}
         onPlay={() => {
           console.log("▶️ Audio event: playing - SUCCESS!");
@@ -764,8 +725,106 @@ const Hero = () => {
       )}
 
       
+      {/* Classic GTA V Start Screen */}
+      {showStartButton && (
+        <div className="fixed inset-0 z-[200] bg-black flex items-center justify-center">
+          {/* Subtle grid pattern like GTA V */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="w-full h-full"
+                 style={{
+                   backgroundImage: `
+                     linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                     linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+                   `,
+                   backgroundSize: '50px 50px'
+                 }}>
+            </div>
+          </div>
+          
+          <div className="text-center max-w-4xl px-6 relative py-12 flex flex-col justify-center min-h-screen">
+            
+            {/* Classic GTA V Style Title */}
+            <div className="mb-24">
+              <div className="text-white/60 text-sm sm:text-base font-mono tracking-[0.5em] mb-8 uppercase">
+                Welcome to Los Santos
+              </div>
+              
+              <h1 className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-12 leading-tight"
+                  style={{
+                    fontFamily: 'Arial, sans-serif',
+                    textShadow: '3px 3px 0px #000000, -1px -1px 0px #333333',
+                    letterSpacing: '0.02em'
+                  }}>
+                Ready to see the
+                <br />
+                <span className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black"
+                      style={{
+                        fontFamily: 'Impact, Arial Black, sans-serif',
+                        color: '#ffffff',
+                        textShadow: '4px 4px 0px #000000, -2px -2px 0px #333333'
+                      }}>
+                  NEXT LEVEL
+                </span>
+                <br />
+                experience?
+              </h1>
+            </div>
+
+            {/* Classic GTA V Style Button */}
+            <div className="space-y-6 mt-20">
+              <button
+                onClick={(e) => {
+                  console.log("Button clicked!");
+                  e.preventDefault();
+                  startExperience();
+                }}
+                className="group relative bg-gradient-to-b from-gray-800 to-black border border-white/50 text-white px-16 py-6 hover:from-gray-700 hover:to-gray-900 hover:border-white/70 transition-all duration-300 shadow-2xl cursor-pointer"
+                style={{ 
+                  fontFamily: 'Arial, sans-serif',
+                  zIndex: 10,
+                  position: 'relative'
+                }}
+              >
+                {/* GTA V authentic corner lines */}
+                <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-white/70 pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-white/70 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-white/70 pointer-events-none"></div>
+                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-white/70 pointer-events-none"></div>
+                
+                <div className="flex items-center justify-center space-x-4">
+                  <span className="text-2xl font-bold tracking-[0.1em] pointer-events-none">
+                    LET'S BEGIN
+                  </span>
+                  <div className="w-6 h-6 border border-white/60 flex items-center justify-center pointer-events-none">
+                    <div className="w-0 h-0 border-l-[6px] border-l-white border-y-[4px] border-y-transparent ml-0.5"></div>
+                  </div>
+                </div>
+                
+                {/* Subtle glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+              </button>
+
+              {/* Classic instruction text */}
+              <div className="text-white/50 text-sm font-mono tracking-wide">
+                Press to begin your journey through the streets
+              </div>
+            </div>
+
+            {/* Classic GTA V bottom credits */}
+            <div className="mt-16 text-center">
+              <div className="text-white/30 text-xs font-mono tracking-widest mb-1">
+                LOS SANTOS AUTOMOTIVE DIVISION
+              </div>
+              <div className="text-white/20 text-xs font-mono">
+                MMMUT © 2024
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* SAE Text Mask Reveal Animation - Like GTA VI */}
-      {!showMainContent && (
+      {!showMainContent && experienceStarted && (
         <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden">
           <svg 
             ref={saeMaskRef}
@@ -816,15 +875,16 @@ const Hero = () => {
       )}
 
       {/* Main Hero Section */}
-      <section 
-        id="hero"
-        ref={heroRef}
-        className="relative h-screen overflow-hidden"
-        style={{ 
-          opacity: showMainContent ? 1 : 0,
-          transition: 'opacity 0.1s ease-out'
-        }}
-      >
+      {experienceStarted && (
+        <section 
+          id="hero"
+          ref={heroRef}
+          className="relative h-screen overflow-hidden"
+          style={{ 
+            opacity: showMainContent ? 1 : 0,
+            transition: 'opacity 0.1s ease-out'
+          }}
+        >
         {/* Desktop Background Image with Blur */}
         <img 
           src={background1} 
@@ -1272,11 +1332,13 @@ const Hero = () => {
           </h2>
           
           {/* Description */}
-          <p className="text-base sm:text-xl md:text-2xl text-white mb-8 sm:mb-12 max-w-4xl leading-relaxed font-medium px-4 sm:px-0"
-             style={{ 
-               textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
-               fontFamily: 'Arial, sans-serif'
-             }}>
+          <p 
+            ref={descriptionRef}
+            className="text-base sm:text-xl md:text-2xl text-white mb-8 sm:mb-12 max-w-4xl leading-relaxed font-medium px-4 sm:px-0 opacity-0"
+            style={{ 
+              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
+              fontFamily: 'Arial, sans-serif'
+            }}>
             Welcome to Los Santos' most elite automotive engineering crew. 
             Where cutting-edge technology meets street racing culture in the neon-soaked nights of Vice City.
           </p>
@@ -1787,6 +1849,7 @@ const Hero = () => {
         )}
 
       </section>
+      )}
 
       {/* Add CSS animations and styles */}
       <style jsx>{`
@@ -1948,6 +2011,17 @@ const Hero = () => {
             opacity: 1; 
             transform: translateY(0) scale(1); 
           }
+        }
+        
+        /* Custom border widths for GTA V style */
+        .border-t-3 { border-top-width: 3px; }
+        .border-l-3 { border-left-width: 3px; }
+        .border-r-3 { border-right-width: 3px; }
+        .border-b-3 { border-bottom-width: 3px; }
+        
+        /* GTA V style gradients */
+        .bg-gradient-radial {
+          background: radial-gradient(circle, var(--tw-gradient-from), var(--tw-gradient-to));
         }
         
         /* GTA 5 Style Animations */

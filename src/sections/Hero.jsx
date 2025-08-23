@@ -246,9 +246,23 @@ const Hero = () => {
             opacity: 1,
             transformOrigin: "center center"
           })
-          // Animation starts - no audio logic here
-          .call(() => {
-            console.log("🎭 Mask animation starting");
+          // Animation starts - TRIGGER AUDIO
+          .call(async () => {
+            console.log("🎭 Mask animation starting - TRIGGERING AUDIO");
+            // Force audio to play when mask animation begins
+            if (audioRef.current) {
+              try {
+                audioRef.current.muted = false;
+                audioRef.current.volume = 0.8;
+                audioRef.current.currentTime = 0;
+                await audioRef.current.play();
+                console.log("🎵 Audio started with mask animation!");
+                setIsAudioPlaying(true);
+                setUserHasInteracted(true);
+              } catch (e) {
+                console.log("⚠️ Audio failed to start with mask animation:", e.message);
+              }
+            }
           })
           .to(".sae-mask-group", {
             rotation: window.innerWidth < 640 ? 3 : 5, // Less rotation on mobile

@@ -9,11 +9,11 @@ gsap.registerPlugin(ScrollTrigger);
 import background1 from '../assets/background (2).webp'; // Trevor with palm trees - MAIN HERO
 // Other backgrounds removed for performance optimization
 
-// Import division logos
-import bajaLogo from '../../logo/baja (1).webp';
-import supraLogo from '../../logo/supra.webp';
-import aeroLogo from '../../logo/aero (1) (1).webp';
-import discoLogo from '../../logo/disco (1).webp';
+// Import division logos - COMMENTED OUT FOR SCROLLING PERFORMANCE
+// import bajaLogo from '../../logo/baja (1).webp';
+// import supraLogo from '../../logo/supra.webp';
+// import aeroLogo from '../../logo/aero (1) (1).webp';
+// import discoLogo from '../../logo/disco (1).webp';
 
 const Hero = () => {
   const heroRef = useRef(null);
@@ -40,8 +40,10 @@ const Hero = () => {
   const saeMaskRef = useRef(null);
   const audioRef = useRef(null);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false); // Will be set to true once audio starts
+  const [isAudioMuted, setIsAudioMuted] = useState(false); // Track mute state separately
+  const [, forceUpdate] = useState({}); // For forcing re-renders when audio state changes
   const [audioReady, setAudioReady] = useState(false);
-  const [userHasInteracted, setUserHasInteracted] = useState(false);
+  const [, setUserHasInteracted] = useState(false);
   const [showIntroPopup, setShowIntroPopup] = useState(false);
   const popupRef = useRef(null);
   const smoothScrollRef = useRef(null);
@@ -55,7 +57,7 @@ const Hero = () => {
     setShowIntroPopup(false);
   }, []);
   
-  // Complete scroll isolation for popup with GSAP smooth scroll
+  // SIMPLIFIED SMOOTH SCROLLING - Performance First
   useEffect(() => {
     if (showIntroPopup && popupRef.current) {
       // Store current scroll position
@@ -65,166 +67,24 @@ const Hero = () => {
       document.body.classList.add('popup-no-scroll');
       document.body.style.top = `-${scrollY}px`;
       
-      // Create inner scrollable content wrapper
-      const scrollContent = popupRef.current.firstElementChild;
-      if (!scrollContent) return;
+      const container = popupRef.current;
       
-      // Initialize GSAP smooth scrolling variables
-      let currentY = 0;
-      let targetY = 0;
-      let ease = 0.08; // Smoother easing
-      let velocity = 0;
-      let isScrolling = false;
+      // Much simpler approach - just enhance native scrolling
+      container.style.scrollBehavior = 'smooth';
       
-      const smoothScroll = () => {
-        // Calculate smooth easing with momentum
-        const distance = targetY - currentY;
-        
-        if (Math.abs(distance) > 0.1) {
-          currentY += distance * ease;
-          velocity = distance * ease;
-          
-          // Apply transform to scroll content, not popup container
-          if (scrollContent) {
-            scrollContent.style.transform = `translateY(${-currentY}px)`;
-            scrollContent.style.willChange = 'transform';
-          }
-          
-          smoothScrollRef.current = requestAnimationFrame(smoothScroll);
-        } else {
-          isScrolling = false;
-          if (scrollContent) {
-            scrollContent.style.willChange = 'auto';
-          }
-        }
-      };
-      
-      // Handle wheel events with GSAP
-      const handleWheel = (e) => {
-        if (popupRef.current?.contains(e.target)) {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          // Improved scroll calculation
-          const delta = e.deltaY;
-          const scrollSpeed = 1.5; // Responsive speed
-          targetY += delta * scrollSpeed;
-          
-          // Calculate boundaries correctly
-          const containerHeight = popupRef.current.clientHeight;
-          const contentHeight = scrollContent?.scrollHeight || 0;
-          const maxScroll = Math.max(0, contentHeight - containerHeight);
-          
-          // Apply boundaries
-          targetY = Math.max(0, Math.min(targetY, maxScroll));
-          
-          // Start smooth scrolling
-          if (!isScrolling) {
-            isScrolling = true;
-            smoothScroll();
-          }
-        }
-      };
-      
-      // Handle touch events with improved momentum
-      let touchStartY = 0;
-      let lastTouchY = 0;
-      let touchVelocity = 0;
-      let lastTouchTime = 0;
-      
-      const handleTouchStart = (e) => {
-        if (popupRef.current?.contains(e.target)) {
-          touchStartY = e.touches[0].clientY;
-          lastTouchY = touchStartY;
-          touchVelocity = 0;
-          lastTouchTime = Date.now();
-        }
-      };
-      
-      const handleTouchMove = (e) => {
-        if (popupRef.current?.contains(e.target)) {
-          e.preventDefault();
-          
-          const now = Date.now();
-          const touchY = e.touches[0].clientY;
-          const deltaY = lastTouchY - touchY;
-          const deltaTime = now - lastTouchTime;
-          
-          // Calculate velocity for momentum
-          touchVelocity = deltaTime > 0 ? deltaY / deltaTime : 0;
-          
-          targetY += deltaY;
-          
-          // Calculate boundaries
-          const containerHeight = popupRef.current.clientHeight;
-          const contentHeight = scrollContent?.scrollHeight || 0;
-          const maxScroll = Math.max(0, contentHeight - containerHeight);
-          
-          // Apply boundaries with rubber band effect
-          if (targetY < 0) {
-            targetY = targetY * 0.3; // Rubber band at top
-          } else if (targetY > maxScroll) {
-            targetY = maxScroll + (targetY - maxScroll) * 0.3; // Rubber band at bottom
-          }
-          
-          lastTouchY = touchY;
-          lastTouchTime = now;
-          
-          if (!isScrolling) {
-            isScrolling = true;
-            smoothScroll();
-          }
-        }
-      };
-      
-      const handleTouchEnd = (e) => {
-        if (popupRef.current?.contains(e.target)) {
-          // Add momentum based on touch velocity
-          const momentum = touchVelocity * 300; // Momentum multiplier
-          targetY += momentum;
-          
-          // Calculate final boundaries
-          const containerHeight = popupRef.current.clientHeight;
-          const contentHeight = scrollContent?.scrollHeight || 0;
-          const maxScroll = Math.max(0, contentHeight - containerHeight);
-          
-          // Apply final boundaries
-          targetY = Math.max(0, Math.min(targetY, maxScroll));
-          
-          if (!isScrolling) {
-            isScrolling = true;
-            smoothScroll();
-          }
-        }
-      };
-      
-      // Add event listeners with proper options
-      document.addEventListener('wheel', handleWheel, { passive: false });
-      document.addEventListener('touchstart', handleTouchStart, { passive: true });
-      document.addEventListener('touchmove', handleTouchMove, { passive: false });
-      document.addEventListener('touchend', handleTouchEnd, { passive: true });
+      // No custom event listeners - let native scrolling work
       
       return () => {
         // Cleanup
         document.body.classList.remove('popup-no-scroll');
         document.body.style.top = '';
         
-        // Remove event listeners
-        document.removeEventListener('wheel', handleWheel);
-        document.removeEventListener('touchstart', handleTouchStart);
-        document.removeEventListener('touchmove', handleTouchMove);
-        document.removeEventListener('touchend', handleTouchEnd);
+        // Simple cleanup - no custom event listeners to remove
         
-        // Cancel animation frame
+        // Cancel animation frame if exists
         if (smoothScrollRef.current) {
           cancelAnimationFrame(smoothScrollRef.current);
           smoothScrollRef.current = null;
-        }
-        
-        // Reset transforms
-        if (scrollContent) {
-          scrollContent.style.transform = '';
-          scrollContent.style.willChange = 'auto';
         }
         
         // Restore scroll position
@@ -267,7 +127,7 @@ const Hero = () => {
                 setIsAudioPlaying(true);
                 setUserHasInteracted(true);
               }
-            } catch (retryError) {
+            } catch {
               console.log("⚠️ Immediate retry failed, setting up interaction triggers");
               
               // Set up interaction triggers as last resort
@@ -298,36 +158,12 @@ const Hero = () => {
       }
     };
 
-    // Try multiple times when component mounts
-    if (audioReady) {
+    // Single audio start - only when both conditions are met and not already playing
+    if (audioReady && showMainContent && !isAudioPlaying) {
+      console.log("🎵 Starting audio - conditions met");
       forceAudioStart();
-      
-      // Additional attempts at different intervals
-      setTimeout(forceAudioStart, 500);
-      setTimeout(forceAudioStart, 1000);
-      setTimeout(forceAudioStart, 2000);
     }
-  }, [audioReady]);
-
-  // Additional effect to force audio on component mount
-  useEffect(() => {
-    const immediateAudioStart = async () => {
-      if (audioRef.current) {
-        try {
-          audioRef.current.muted = false;
-          audioRef.current.volume = 0.8;
-          await audioRef.current.play();
-          console.log("🎵 IMMEDIATE Audio started on component mount");
-          setIsAudioPlaying(true);
-        } catch (e) {
-          console.log("Immediate mount audio failed:", e.message);
-        }
-      }
-    };
-
-    // Try immediately when component mounts
-    immediateAudioStart();
-  }, []);
+  }, [audioReady, showMainContent, isAudioPlaying]);
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -358,7 +194,7 @@ const Hero = () => {
           setTimeout(() => setIsLoading(false), 200);
         }
       });
-    } catch (error) {
+    } catch {
       // Fallback if GSAP fails
       setTimeout(() => setIsLoading(false), 100);
       return;
@@ -384,7 +220,7 @@ const Hero = () => {
             duration: 0.8,
             ease: "power2.inOut"
           });
-      } catch (error) {
+      } catch {
         // Fallback if animation fails
         setTimeout(() => setIsLoading(false), 100);
       }
@@ -707,8 +543,9 @@ const Hero = () => {
     window.handleTooltipHide = handleTooltipHide;
 
     // Parallax scroll effect (with null checks)
+    let parallaxTl;
     if (hero && background) {
-      const parallaxTl = gsap.timeline({
+      parallaxTl = gsap.timeline({
         scrollTrigger: {
           trigger: hero,
           start: "top top",
@@ -747,7 +584,8 @@ const Hero = () => {
         
         
         // No cleanup needed for simplified audio
-      } catch (error) {
+      } catch {
+        // Error cleanup
       }
     };
   }, [imageLoaded, showMainContent]);
@@ -837,6 +675,16 @@ const Hero = () => {
         onPause={() => {
           console.log("⏸️ Audio event: paused");
           setIsAudioPlaying(false);
+        }}
+        onVolumeChange={() => {
+          console.log("🔊 Audio volume/mute changed:", {
+            muted: audioRef.current?.muted,
+            volume: audioRef.current?.volume
+          });
+          if (audioRef.current) {
+            setIsAudioMuted(audioRef.current.muted);
+            forceUpdate({}); // Force re-render to update UI
+          }
         }}
         onEnded={() => {
           console.log("🔄 Audio ended, will loop");
@@ -977,7 +825,7 @@ const Hero = () => {
             setImageLoaded(true);
             setImageError(false);
           }}
-          onError={(e) => {
+          onError={() => {
             setImageError(true);
             setImageLoaded(false);
           }}
@@ -1027,15 +875,16 @@ const Hero = () => {
         <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-30">
           <button
             className="audio-control-button group relative bg-black/90 border border-gray-600/50 text-white px-3 sm:px-5 py-2 rounded-full hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-xl backdrop-blur-sm"
-            onClick={async (e) => {
+            onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               
-              console.log("🎵 Audio button clicked, current state:", {
+              console.log("🎵 BUTTON CLICKED! Current state:", {
                 isAudioPlaying,
-                paused: audioRef.current?.paused,
-                currentTime: audioRef.current?.currentTime,
-                volume: audioRef.current?.volume
+                isAudioMuted,
+                actualMuted: audioRef.current?.muted,
+                actualPaused: audioRef.current?.paused,
+                actualVolume: audioRef.current?.volume
               });
               
               if (!audioRef.current) {
@@ -1045,26 +894,17 @@ const Hero = () => {
 
               setUserHasInteracted(true);
 
-              try {
-                if (isAudioPlaying && !audioRef.current.paused) {
-                  // Pause the audio
-                  console.log("🔇 Button: Pausing audio");
-                  audioRef.current.pause();
-                  // State will be updated by onPause event
-                } else {
-                  // Play the audio
-                  console.log("🔊 Button: Starting audio");
-                  audioRef.current.muted = false;
-                  audioRef.current.volume = 0.8;
-                  
-                  await audioRef.current.play();
-                  console.log("✅ Button: Audio started successfully");
-                  // State will be updated by onPlay event
-                }
-              } catch (e) {
-                console.log("❌ Audio control failed:", e.message);
-                setIsAudioPlaying(false);
+              // Simple mute toggle - let onVolumeChange event handle state updates
+              if (audioRef.current.muted) {
+                console.log("🔊 UNMUTING audio...");
+                audioRef.current.muted = false;
+                audioRef.current.volume = 0.8;
+              } else {
+                console.log("🔇 MUTING audio...");
+                audioRef.current.muted = true;
               }
+              
+              console.log("🔄 Audio muted property set to:", audioRef.current.muted);
             }}
           >
             {/* Corner brackets for GTA 5 feel */}
@@ -1076,7 +916,7 @@ const Hero = () => {
             <div className="flex items-center space-x-3">
               {/* Audio icon with SVG */}
               <div className="w-4 h-4 transition-transform duration-300 group-hover:scale-110">
-                {isAudioPlaying ? (
+                {!isAudioMuted && isAudioPlaying ? (
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-300 group-hover:text-white transition-colors duration-300">
                     <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse"/>
@@ -1092,12 +932,12 @@ const Hero = () => {
               
               {/* Button text */}
               <span className="text-gray-200 font-bold text-sm tracking-wider group-hover:text-white transition-colors duration-300 font-mono">
-                {isAudioPlaying && !audioRef.current?.paused ? 'MUTE' : 'UNMUTE'}
+                {isAudioMuted ? 'UNMUTE' : 'MUTE'}
               </span>
               
               {/* Status indicator */}
               <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                isAudioPlaying && !audioRef.current?.paused
+                !isAudioMuted && isAudioPlaying
                   ? 'bg-green-500/80 animate-pulse' 
                   : 'bg-red-500/80'
               }`}></div>
@@ -1690,10 +1530,12 @@ const Hero = () => {
               {/* Scrollable Content Container */}
               <div 
                 ref={popupRef}
-                className="h-full overflow-hidden relative"
+                className="h-full overflow-y-auto relative popup-scroll"
                 style={{
                   scrollbarWidth: 'none',
-                  msOverflowStyle: 'none'
+                  msOverflowStyle: 'none',
+                  WebkitOverflowScrolling: 'touch',
+                  scrollBehavior: 'smooth'
                 }}
               >
                 {/* Inner scrollable content */}
@@ -1789,7 +1631,7 @@ const Hero = () => {
                           description: 'Where rugged engineering meets unforgiving landscapes. Our BAJA division masters the art of all-terrain vehicle design, pushing suspension dynamics and engine optimization to their absolute limits.',
                           expertise: ['Suspension Architecture', 'Powertrain Optimization', 'Durability Engineering', 'Competition Racing'],
                           number: '01',
-                          logo: bajaLogo
+                          // logo: bajaLogo // COMMENTED OUT FOR SCROLLING PERFORMANCE
                         },
                         {
                           name: 'SUPRA',
@@ -1797,7 +1639,7 @@ const Hero = () => {
                           description: 'Precision engineering at 200+ mph. SUPRA division focuses on formula racing excellence, where aerodynamics, weight distribution, and performance tuning create championship-winning machines.',
                           expertise: ['Aerodynamic Design', 'Performance Tuning', 'Chassis Engineering', 'Race Strategy'],
                           number: '02',
-                          logo: supraLogo
+                          // logo: supraLogo // COMMENTED OUT FOR SCROLLING PERFORMANCE
                         },
                         {
                           name: 'AERO',
@@ -1805,7 +1647,7 @@ const Hero = () => {
                           description: 'Beyond the horizon lies infinite possibility. Our Aerospace division pioneers flight technology, from unmanned systems to advanced propulsion, pushing the boundaries of what can soar.',
                           expertise: ['Aircraft Design', 'Propulsion Systems', 'Flight Dynamics', 'Autonomous Flight'],
                           number: '03',
-                          logo: aeroLogo
+                          // logo: aeroLogo // COMMENTED OUT FOR SCROLLING PERFORMANCE
                         },
                         {
                           name: 'DISCO',
@@ -1813,7 +1655,7 @@ const Hero = () => {
                           description: 'The future is intelligent. DISCO division integrates cutting-edge digital solutions, IoT systems, and autonomous technologies that make vehicles smarter than ever imagined.',
                           expertise: ['IoT Integration', 'Autonomous Systems', 'Smart Manufacturing', 'Digital Innovation'],
                           number: '04',
-                          logo: discoLogo
+                          // logo: discoLogo // COMMENTED OUT FOR SCROLLING PERFORMANCE
                         }
                       ].map((division, i) => (
                         <div key={i} className="group">
@@ -1839,11 +1681,17 @@ const Hero = () => {
                             </div>
                             <div className={i % 2 === 1 ? 'md:col-start-1' : ''}>
                               <div className="aspect-[4/3] bg-gray-900/20 border border-white/10 overflow-hidden group-hover:border-white/30 transition-all duration-500">
-                                <img 
+                                {/* IMAGES COMMENTED OUT FOR SCROLLING PERFORMANCE */}
+                                {/* <img 
                                   src={division.logo} 
                                   alt={`${division.name} Division`}
                                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                />
+                                  loading="lazy"
+                                  decoding="async"
+                                /> */}
+                                <div className="w-full h-full flex items-center justify-center text-white/40 text-4xl font-bold">
+                                  {division.name}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1993,24 +1841,32 @@ const Hero = () => {
           scroll-behavior: smooth;
         }
         
-        /* Custom smooth scrolling for popup */
+        /* BUTTER SMOOTH SCROLLING - Optimized */
         .popup-scroll {
-          scroll-behavior: smooth;
-          -webkit-overflow-scrolling: touch;
-          overscroll-behavior: contain;
-          scroll-padding-top: 2rem;
-          transform: translateZ(0);
+          transform: translate3d(0,0,0);
+          backface-visibility: hidden;
           will-change: scroll-position;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
         }
         
-        /* Webkit smooth scrolling */
+        /* Hide scrollbars but keep functionality */
         .popup-scroll::-webkit-scrollbar {
           display: none;
+          width: 0;
+          background: transparent;
         }
         
         .popup-scroll {
           scrollbar-width: none;
           -ms-overflow-style: none;
+        }
+        
+        /* Better touch scrolling momentum */
+        .popup-scroll {
+          -webkit-overflow-scrolling: touch;
+          -ms-overflow-style: -ms-autohiding-scrollbar;
+          overflow-scrolling: touch;
         }
         
         /* New animations for enhanced popup */

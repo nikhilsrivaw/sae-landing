@@ -314,6 +314,52 @@ body {
 .parallax-layer-3 { transform: translateZ(-100px) scale(2); }
 .parallax-layer-4 { transform: translateZ(0px) scale(1); }
 
+/* FloatingDropdown animations */
+@keyframes holoCorner {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes quantumStream {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes quantumField {
+  0%, 100% {
+    opacity: 0.2;
+    filter: blur(1px) hue-rotate(0deg);
+  }
+  25% {
+    opacity: 0.4;
+    filter: blur(0.5px) hue-rotate(90deg);
+  }
+  50% {
+    opacity: 0.3;
+    filter: blur(1.5px) hue-rotate(180deg);
+  }
+  75% {
+    opacity: 0.5;
+    filter: blur(0.8px) hue-rotate(270deg);
+  }
+}
+
 /* Cinematic transitions */
 .cinematic-enter {
   animation: cinematic-slide-in 1.5s cubic-bezier(0.23, 1, 0.32, 1);
@@ -329,5 +375,103 @@ body {
     transform: translateY(0) scale(1);
     opacity: 1;
     filter: blur(0);
+  }
+}
+
+/* TRANSCENDENT particle animations */
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(90deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(180deg);
+  }
+  75% {
+    transform: translateY(-15px) rotate(270deg);
+  }
+}
+
+@keyframes superParticleOrbit {
+  0% {
+    transform: rotate(0deg) translateX(30px) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(30px) rotate(-360deg);
+  }
+}
+
+@keyframes quantumPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  25% {
+    box-shadow: 0 0 40px rgba(255, 0, 128, 0.7);
+    filter: hue-rotate(90deg) brightness(1.3);
+  }
+  50% {
+    box-shadow: 0 0 60px rgba(255, 215, 0, 0.8);
+    filter: hue-rotate(180deg) brightness(1.6);
+  }
+  75% {
+    box-shadow: 0 0 45px rgba(128, 0, 255, 0.6);
+    filter: hue-rotate(270deg) brightness(1.2);
+  }
+}
+
+@keyframes cosmicBreath {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+@keyframes dimensionalShift {
+  0% {
+    filter: hue-rotate(0deg) blur(0px) saturate(1);
+    transform: translateZ(0);
+  }
+  25% {
+    filter: hue-rotate(90deg) blur(1px) saturate(1.5);
+    transform: translateZ(10px);
+  }
+  50% {
+    filter: hue-rotate(180deg) blur(2px) saturate(2);
+    transform: translateZ(20px);
+  }
+  75% {
+    filter: hue-rotate(270deg) blur(1px) saturate(1.5);
+    transform: translateZ(10px);
+  }
+  100% {
+    filter: hue-rotate(360deg) blur(0px) saturate(1);
+    transform: translateZ(0);
+  }
+}
+
+@keyframes soulResonance {
+  0%, 100% {
+    text-shadow: 0 0 20px currentColor;
+    transform: scale(1);
+  }
+  50% {
+    text-shadow: 0 0 40px currentColor, 0 0 60px rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes heartbeatGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 20, 147, 1), 0 0 50px rgba(255, 255, 255, 0.3);
   }
 }

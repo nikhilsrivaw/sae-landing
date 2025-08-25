@@ -1,4 +1,3 @@
-
 {
   "name": "sae-vite-project",
   "private": true,
@@ -14,7 +13,8 @@
     "@tailwindcss/vite": "^4.1.11",
     "gsap": "^3.13.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^6.28.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
@@ -27,10 +27,8 @@
     "globals": "^16.3.0",
     "vite": "^7.1.0"
   },
-  
-      "name1": "my-package",
-      "version1": "1.0.0",
-      "description1": "A description of my package",
-      "author1": "Nikhil srivastava nikhilksrivastav190@gmail.com "
-
+  "name1": "my-package",
+  "version1": "1.0.0",
+  "description1": "A description of my package",
+  "author1": "Nikhil srivastava nikhilksrivastav190@gmail.com "
 }

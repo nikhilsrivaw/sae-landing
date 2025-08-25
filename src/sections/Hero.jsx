@@ -15,7 +15,7 @@ import background1 from '../assets/background (2).webp'; // Trevor with palm tre
 // import aeroLogo from '../../logo/aero (1) (1).webp';
 // import discoLogo from '../../logo/disco (1).webp';
 
-const Hero = () => {
+const Hero = ({ onStateChange }) => {
   const heroRef = useRef(null);
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
@@ -50,6 +50,13 @@ const Hero = () => {
   const smoothScrollRef = useRef(null);
   const [showStartButton, setShowStartButton] = useState(true);
   const [experienceStarted, setExperienceStarted] = useState(false);
+
+  // Notify parent about state changes
+  useEffect(() => {
+    if (onStateChange) {
+      onStateChange({ experienceStarted, showMainContent });
+    }
+  }, [experienceStarted, showMainContent, onStateChange]);
   
   // Memoized handlers for better performance
   const openIntroPopup = useCallback(() => {
@@ -879,10 +886,13 @@ const Hero = () => {
         <section 
           id="hero"
           ref={heroRef}
-          className="relative h-screen overflow-hidden"
+          className="relative overflow-hidden"
           style={{ 
             opacity: showMainContent ? 1 : 0,
-            transition: 'opacity 0.1s ease-out'
+            transition: 'opacity 0.1s ease-out',
+            height: '100vh',
+            paddingTop: '80px',
+            marginTop: '0px'
           }}
         >
         {/* Desktop Background Image with Blur */}

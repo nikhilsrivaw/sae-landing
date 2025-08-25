@@ -5,6 +5,7 @@ import { gsap } from 'gsap';
 const FloatingDropdown = () => {
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   const [hoverIntensity, setHoverIntensity] = useState(0);
   const [waveOffset, setWaveOffset] = useState(0);
@@ -94,7 +95,18 @@ const FloatingDropdown = () => {
   const toggleDropdown = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDropdownOpen(!isDropdownOpen);
+    
+    if (isDropdownOpen) {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setIsDropdownOpen(false);
+        setIsAnimating(false);
+      }, isMobile ? 250 : 400);
+    } else {
+      setIsDropdownOpen(true);
+      setIsAnimating(true);
+      setTimeout(() => setIsAnimating(false), isMobile ? 300 : 600);
+    }
   };
 
   const menuItems = [
@@ -162,9 +174,17 @@ const FloatingDropdown = () => {
       {/* BEAUTIFUL DIVINE Dropdown Menu */}
       {isDropdownOpen && (
         <div 
-          className={`absolute top-full right-0 ${isMobile ? 'mt-2' : 'mt-4'} ${isMobile ? 'w-[280px] max-w-[calc(100vw-20px)]' : 'w-72'} origin-top-right transform transition-all duration-600 ease-out z-[10000] opacity-100 scale-100 translate-y-0 rotate-0`}
+          className={`absolute top-full right-0 ${isMobile ? 'mt-2' : 'mt-4'} ${isMobile ? 'w-[280px] max-w-[calc(100vw-20px)]' : 'w-72'} origin-top-right transform transition-all ${isMobile ? 'duration-300' : 'duration-600'} ${isMobile ? 'ease-[cubic-bezier(0.34,1.56,0.64,1)]' : 'ease-out'} z-[10000] ${isAnimating && !isDropdownOpen ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}
           style={{
-            background: `
+            background: isMobile ? `
+              linear-gradient(145deg,
+                rgba(60, 55, 50, 0.98) 0%,
+                rgba(45, 40, 35, 0.99) 25%,
+                rgba(35, 30, 25, 0.995) 50%,
+                rgba(25, 22, 18, 0.998) 75%,
+                rgba(15, 12, 8, 1) 100%
+              )
+            ` : `
               conic-gradient(from ${timeRef.current * 45}deg at 50% 50%,
                 rgba(220, 200, 150, 0.12) 0deg,
                 rgba(180, 140, 100, 0.10) 60deg,
@@ -189,8 +209,8 @@ const FloatingDropdown = () => {
                 rgba(190, 160, 130, 0.05) 100%
               )
             `,
-            border: '3px solid transparent',
-            borderImage: `conic-gradient(from ${timeRef.current * 60}deg at 50% 50%, 
+            border: isMobile ? '2px solid rgba(220, 200, 150, 0.4)' : '3px solid transparent',
+            borderImage: isMobile ? 'none' : `conic-gradient(from ${timeRef.current * 60}deg at 50% 50%, 
               rgba(220, 200, 150, 0.5) 0deg,
               rgba(180, 140, 100, 0.45) 72deg,
               rgba(200, 170, 120, 0.48) 144deg,
@@ -210,144 +230,159 @@ const FloatingDropdown = () => {
               inset 0 0 50px rgba(220, 200, 150, 0.04),
               0 0 0 1px rgba(255, 255, 255, 0.12)
             `,
-            backdropFilter: `blur(${isMobile ? '25px' : '40px'}) saturate(${isMobile ? '250%' : '300%'}) contrast(150%) brightness(110%)`,
+            backdropFilter: isMobile ? 'blur(20px) saturate(180%)' : `blur(40px) saturate(300%) contrast(150%) brightness(110%)`,
             filter: `drop-shadow(0 0 30px rgba(220, 200, 150, 0.25)) drop-shadow(0 0 60px rgba(180, 140, 100, 0.15))`,
             pointerEvents: 'auto'
           }}
         >
-          {/* BEAUTIFUL Holographic Corner System */}
-          <div className="absolute -top-2 -left-2 w-6 h-6">
+          {/* BEAUTIFUL Holographic Corner System - Simplified for mobile */}
+          {!isMobile && (
+            <div className="absolute -top-2 -left-2 w-6 h-6">
+              <div 
+                className="w-full h-full border-t-3 border-l-3 shadow-lg"
+                style={{
+                  borderColor: 'rgba(220, 200, 150, 0.8)',
+                  boxShadow: '0 0 10px rgba(220, 200, 150, 0.6)',
+                  filter: 'drop-shadow(0 0 15px rgba(220, 200, 150, 0.6))',
+                  animation: 'holoCorner 4s ease-in-out infinite'
+                }}
+              ></div>
+              <div className="absolute top-1 left-1 w-2 h-2 blur-sm animate-pulse" style={{backgroundColor: 'rgba(220, 200, 150, 0.4)'}}></div>
+            </div>
+          )}
+          
+          {!isMobile && (
+            <>
+              <div className="absolute -top-2 -right-2 w-6 h-6">
+                <div 
+                  className="w-full h-full border-t-3 border-r-3 shadow-lg"
+                  style={{
+                    borderColor: 'rgba(180, 140, 100, 0.8)',
+                    boxShadow: '0 0 10px rgba(180, 140, 100, 0.6)',
+                    filter: 'drop-shadow(0 0 15px rgba(180, 140, 100, 0.6))',
+                    animation: 'holoCorner 4.2s ease-in-out infinite'
+                  }}
+                ></div>
+                <div className="absolute top-1 right-1 w-2 h-2 blur-sm animate-pulse" style={{backgroundColor: 'rgba(180, 140, 100, 0.4)'}}></div>
+              </div>
+              
+              <div className="absolute -bottom-2 -left-2 w-6 h-6">
+                <div 
+                  className="w-full h-full border-b-3 border-l-3 shadow-lg"
+                  style={{
+                    borderColor: 'rgba(200, 170, 120, 0.8)',
+                    boxShadow: '0 0 10px rgba(200, 170, 120, 0.6)',
+                    filter: 'drop-shadow(0 0 15px rgba(200, 170, 120, 0.6))',
+                    animation: 'holoCorner 3.8s ease-in-out infinite'
+                  }}
+                ></div>
+                <div className="absolute bottom-1 left-1 w-2 h-2 blur-sm animate-pulse" style={{backgroundColor: 'rgba(200, 170, 120, 0.4)'}}></div>
+              </div>
+              
+              <div className="absolute -bottom-2 -right-2 w-6 h-6">
+                <div 
+                  className="w-full h-full border-b-3 border-r-3 shadow-lg"
+                  style={{
+                    borderColor: 'rgba(190, 150, 110, 0.8)',
+                    boxShadow: '0 0 10px rgba(190, 150, 110, 0.6)',
+                    filter: 'drop-shadow(0 0 15px rgba(190, 150, 110, 0.6))',
+                    animation: 'holoCorner 4.5s ease-in-out infinite'
+                  }}
+                ></div>
+                <div className="absolute bottom-1 right-1 w-2 h-2 blur-sm animate-pulse" style={{backgroundColor: 'rgba(190, 150, 110, 0.4)'}}></div>
+              </div>
+            </>
+          )}
+          
+          {/* Quantum Energy Streams - Simplified for mobile */}
+          {!isMobile && (
+            <>
+              <div 
+                className="absolute -top-1 left-6 right-6 h-1 blur-sm"
+                style={{
+                  background: 'linear-gradient(to right, transparent, rgba(220, 200, 150, 0.7), transparent)',
+                  animation: 'quantumStream 2s ease-in-out infinite'
+                }}
+              ></div>
+              
+              <div 
+                className="absolute -bottom-1 left-6 right-6 h-1 blur-sm"
+                style={{
+                  background: 'linear-gradient(to right, transparent, rgba(180, 140, 100, 0.7), transparent)',
+                  animation: 'quantumStream 2.5s ease-in-out infinite reverse'
+                }}
+              ></div>
+              
+              <div 
+                className="absolute -left-1 top-6 bottom-6 w-1 blur-sm"
+                style={{
+                  background: 'linear-gradient(to bottom, transparent, rgba(200, 170, 120, 0.7), transparent)',
+                  animation: 'quantumStream 3s ease-in-out infinite'
+                }}
+              ></div>
+              
+              <div 
+                className="absolute -right-1 top-6 bottom-6 w-1 blur-sm"
+                style={{
+                  background: 'linear-gradient(to bottom, transparent, rgba(190, 150, 110, 0.7), transparent)',
+                  animation: 'quantumStream 2.8s ease-in-out infinite reverse'
+                }}
+              ></div>
+            </>
+          )}
+          
+          {/* Central Holographic Field - Simplified for mobile */}
+          {!isMobile && (
             <div 
-              className="w-full h-full border-t-3 border-l-3 shadow-lg"
+              className="absolute inset-2 opacity-20 pointer-events-none"
               style={{
-                borderColor: 'rgba(220, 200, 150, 0.8)',
-                boxShadow: '0 0 10px rgba(220, 200, 150, 0.6)',
-                filter: 'drop-shadow(0 0 15px rgba(220, 200, 150, 0.6))',
-                animation: 'holoCorner 4s ease-in-out infinite'
+                background: `conic-gradient(from ${timeRef.current * 90}deg at 50% 50%,
+                  rgba(0, 255, 255, 0.3) 0deg,
+                  rgba(255, 0, 255, 0.2) 120deg,
+                  rgba(255, 255, 0, 0.25) 240deg,
+                  rgba(0, 255, 255, 0.3) 360deg
+                )`,
+                borderRadius: '12px',
+                filter: 'blur(8px)',
+                animation: 'quantumField 5s linear infinite'
               }}
             ></div>
-            <div className="absolute top-1 left-1 w-2 h-2 blur-sm animate-pulse" style={{backgroundColor: 'rgba(220, 200, 150, 0.4)'}}></div>
-          </div>
+          )}
           
-          <div className="absolute -top-2 -right-2 w-6 h-6">
+          {/* Quantum Field Background - Simplified for mobile */}
+          {!isMobile && (
             <div 
-              className="w-full h-full border-t-3 border-r-3 shadow-lg"
+              className="absolute inset-0 opacity-10"
               style={{
-                borderColor: 'rgba(180, 140, 100, 0.8)',
-                boxShadow: '0 0 10px rgba(180, 140, 100, 0.6)',
-                filter: 'drop-shadow(0 0 15px rgba(180, 140, 100, 0.6))',
-                animation: 'holoCorner 4.2s ease-in-out infinite'
+                background: `
+                  repeating-conic-gradient(from ${timeRef.current * 30}deg at 50% 50%,
+                    rgba(220, 200, 150, 0.08) 0deg,
+                    transparent 45deg,
+                    rgba(180, 140, 100, 0.06) 90deg,
+                    transparent 135deg,
+                    rgba(200, 170, 120, 0.07) 180deg,
+                    transparent 225deg,
+                    rgba(190, 150, 110, 0.05) 270deg,
+                    transparent 315deg,
+                    rgba(220, 200, 150, 0.08) 360deg
+                  )
+                `,
+                borderRadius: '12px',
+                filter: 'blur(20px)'
               }}
             ></div>
-            <div className="absolute top-1 right-1 w-2 h-2 blur-sm animate-pulse" style={{backgroundColor: 'rgba(180, 140, 100, 0.4)'}}></div>
-          </div>
-          
-          <div className="absolute -bottom-2 -left-2 w-6 h-6">
-            <div 
-              className="w-full h-full border-b-3 border-l-3 shadow-lg"
-              style={{
-                borderColor: 'rgba(200, 170, 120, 0.8)',
-                boxShadow: '0 0 10px rgba(200, 170, 120, 0.6)',
-                filter: 'drop-shadow(0 0 15px rgba(200, 170, 120, 0.6))',
-                animation: 'holoCorner 3.8s ease-in-out infinite'
-              }}
-            ></div>
-            <div className="absolute bottom-1 left-1 w-2 h-2 blur-sm animate-pulse" style={{backgroundColor: 'rgba(200, 170, 120, 0.4)'}}></div>
-          </div>
-          
-          <div className="absolute -bottom-2 -right-2 w-6 h-6">
-            <div 
-              className="w-full h-full border-b-3 border-r-3 shadow-lg"
-              style={{
-                borderColor: 'rgba(190, 150, 110, 0.8)',
-                boxShadow: '0 0 10px rgba(190, 150, 110, 0.6)',
-                filter: 'drop-shadow(0 0 15px rgba(190, 150, 110, 0.6))',
-                animation: 'holoCorner 4.5s ease-in-out infinite'
-              }}
-            ></div>
-            <div className="absolute bottom-1 right-1 w-2 h-2 blur-sm animate-pulse" style={{backgroundColor: 'rgba(190, 150, 110, 0.4)'}}></div>
-          </div>
-          
-          {/* Quantum Energy Streams */}
-          <div 
-            className="absolute -top-1 left-6 right-6 h-1 blur-sm"
-            style={{
-              background: 'linear-gradient(to right, transparent, rgba(220, 200, 150, 0.7), transparent)',
-              animation: 'quantumStream 2s ease-in-out infinite'
-            }}
-          ></div>
-          
-          <div 
-            className="absolute -bottom-1 left-6 right-6 h-1 blur-sm"
-            style={{
-              background: 'linear-gradient(to right, transparent, rgba(180, 140, 100, 0.7), transparent)',
-              animation: 'quantumStream 2.5s ease-in-out infinite reverse'
-            }}
-          ></div>
-          
-          <div 
-            className="absolute -left-1 top-6 bottom-6 w-1 blur-sm"
-            style={{
-              background: 'linear-gradient(to bottom, transparent, rgba(200, 170, 120, 0.7), transparent)',
-              animation: 'quantumStream 3s ease-in-out infinite'
-            }}
-          ></div>
-          
-          <div 
-            className="absolute -right-1 top-6 bottom-6 w-1 blur-sm"
-            style={{
-              background: 'linear-gradient(to bottom, transparent, rgba(190, 150, 110, 0.7), transparent)',
-              animation: 'quantumStream 2.8s ease-in-out infinite reverse'
-            }}
-          ></div>
-          
-          {/* Central Holographic Field */}
-          <div 
-            className="absolute inset-2 opacity-20 pointer-events-none"
-            style={{
-              background: `conic-gradient(from ${timeRef.current * 90}deg at 50% 50%,
-                rgba(0, 255, 255, 0.3) 0deg,
-                rgba(255, 0, 255, 0.2) 120deg,
-                rgba(255, 255, 0, 0.25) 240deg,
-                rgba(0, 255, 255, 0.3) 360deg
-              )`,
-              borderRadius: '12px',
-              filter: 'blur(8px)',
-              animation: 'quantumField 5s linear infinite'
-            }}
-          ></div>
-          
-          {/* Quantum Field Background */}
-          <div 
-            className="absolute inset-0 opacity-10"
-            style={{
-              background: `
-                repeating-conic-gradient(from ${timeRef.current * 30}deg at 50% 50%,
-                  rgba(220, 200, 150, 0.08) 0deg,
-                  transparent 45deg,
-                  rgba(180, 140, 100, 0.06) 90deg,
-                  transparent 135deg,
-                  rgba(200, 170, 120, 0.07) 180deg,
-                  transparent 225deg,
-                  rgba(190, 150, 110, 0.05) 270deg,
-                  transparent 315deg,
-                  rgba(220, 200, 150, 0.08) 360deg
-                )
-              `,
-              borderRadius: '12px',
-              filter: 'blur(20px)'
-            }}
-          ></div>
+          )}
 
-          {/* ROTATING GEOMETRIC SHAPE - The Beautiful Animation You Loved! */}
-          <div 
-            className="absolute inset-4 opacity-50 pointer-events-none"
-            style={{
-              transform: `rotate(${timeRef.current * 150}deg) scale(${1 + Math.sin(timeRef.current * 20) * 0.1})`,
-              transformOrigin: 'center center',
-              zIndex: 1
-            }}
-          >
+          {/* ROTATING GEOMETRIC SHAPE - Simplified for mobile */}
+          {!isMobile && (
+            <div 
+              className="absolute inset-4 opacity-50 pointer-events-none"
+              style={{
+                transform: `rotate(${timeRef.current * 150}deg) scale(${1 + Math.sin(timeRef.current * 20) * 0.1})`,
+                transformOrigin: 'center center',
+                zIndex: 1
+              }}
+            >
             {/* Main Hexagonal Shape */}
             <div 
               className="absolute inset-0"
@@ -440,7 +475,8 @@ const FloatingDropdown = () => {
                 filter: 'blur(1px)'
               }}
             />
-          </div>
+            </div>
+          )}
 
           {/* BEAUTIFUL Menu Items Container */}
           <div className={`relative ${isMobile ? 'px-3 py-4' : 'px-4 py-6'}`} style={{ zIndex: 10 }}>
@@ -740,7 +776,13 @@ const FloatingDropdown = () => {
                   <div 
                     className={`menu-card relative ${isMobile ? 'px-4 py-3' : 'px-6 py-4'} overflow-hidden cursor-pointer ${isMobile ? 'rounded-lg' : 'rounded-xl'}`}
                     style={{
-                      background: `
+                      background: isMobile ? `
+                        linear-gradient(145deg, 
+                          rgba(${Math.floor(70 + index * 6)}, ${Math.floor(70 + index * 4)}, ${Math.floor(90 + index * 5)}, 0.9) 0%,
+                          rgba(${Math.floor(50 + index * 4)}, ${Math.floor(50 + index * 3)}, ${Math.floor(70 + index * 4)}, 0.95) 50%,
+                          rgba(${Math.floor(30 + index * 3)}, ${Math.floor(30 + index * 3)}, ${Math.floor(50 + index * 3)}, 1) 100%
+                        )
+                      ` : `
                         linear-gradient(145deg, 
                           rgba(${Math.floor(70 + index * 6)}, ${Math.floor(70 + index * 4)}, ${Math.floor(90 + index * 5)}, 0.9) 0%,
                           rgba(${Math.floor(50 + index * 4)}, ${Math.floor(50 + index * 3)}, ${Math.floor(70 + index * 4)}, 0.95) 50%,

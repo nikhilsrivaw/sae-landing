@@ -11,10 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
-<<<<<<< HEAD
     "framer-motion": "^12.23.12",
-=======
->>>>>>> a533c0d0cc7735157139c0fe39f440f9a2eef680
     "gsap": "^3.13.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -31,8 +28,6 @@
     "globals": "^16.3.0",
     "vite": "^7.1.0"
   },
-  "name1": "my-package",
-  "version1": "1.0.0",
-  "description1": "A description of my package",
-  "author1": "Nikhil srivastava nikhilksrivastav190@gmail.com "
+  "description": "A description of my package",
+  "author": "Nikhil Srivastava <nikhilksrivastav190@gmail.com>"
 }

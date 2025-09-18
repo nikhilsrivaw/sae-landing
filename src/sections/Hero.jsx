@@ -1,6 +1,12 @@
 import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { supabaseService } from '../lib/supabase';
+import GTARegistrationForm from '../components/GTARegistrationForm';
+import GTAAuth from '../components/GTAAuth';
+import RegistrationStatus from '../components/RegistrationStatus';
+import GTAEventsPopup from '../components/GTAEventsPopup';
+import { useAuth } from '../contexts/AuthContext';
 
 // Register the ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -9,11 +15,7 @@ gsap.registerPlugin(ScrollTrigger);
 import background1 from '../assets/background (2).webp'; // Trevor with palm trees - MAIN HERO
 // Other backgrounds removed for performance optimization
 
-// Import division logos - COMMENTED OUT FOR SCROLLING PERFORMANCE
-// import bajaLogo from '../../logo/baja (1).webp';
-// import supraLogo from '../../logo/supra.webp';
-// import aeroLogo from '../../logo/aero (1) (1).webp';
-// import discoLogo from '../../logo/disco (1).webp';
+// Division logos removed - images not available
 
 const Hero = ({ onStateChange }) => {
   const heroRef = useRef(null);
@@ -50,6 +52,39 @@ const Hero = ({ onStateChange }) => {
   const smoothScrollRef = useRef(null);
   const [showStartButton, setShowStartButton] = useState(true);
   const [experienceStarted, setExperienceStarted] = useState(false);
+  const [hotEvents, setHotEvents] = useState([]);
+  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [showRegistrationStatus, setShowRegistrationStatus] = useState(false);
+  const [showEventsPopup, setShowEventsPopup] = useState(false);
+  const [userRegistration, setUserRegistration] = useState(null);
+
+  // Use authentication context
+  const { user, isAuthenticated, logout } = useAuth();
+
+  // Handle auth success
+  const handleAuthSuccess = (user) => {
+    setShowAuth(false);
+    console.log('User authenticated:', user);
+  };
+
+  // Check user registration status when user logs in
+  useEffect(() => {
+    const checkUserRegistration = async () => {
+      if (user?.id) {
+        try {
+          const registration = await supabaseService.getUserRegistration(user.id);
+          setUserRegistration(registration);
+        } catch (error) {
+          console.error('Error checking user registration:', error);
+        }
+      } else {
+        setUserRegistration(null);
+      }
+    };
+
+    checkUserRegistration();
+  }, [user]);
 
   // Notify parent about state changes
   useEffect(() => {
@@ -57,7 +92,21 @@ const Hero = ({ onStateChange }) => {
       onStateChange({ experienceStarted, showMainContent });
     }
   }, [experienceStarted, showMainContent, onStateChange]);
-  
+
+  // Fetch hot events from database
+  useEffect(() => {
+    const fetchHotEvents = async () => {
+      try {
+        const events = await supabaseService.getHotEvents();
+        setHotEvents(events || []);
+      } catch (error) {
+        console.error('Error fetching hot events:', error);
+      }
+    };
+
+    fetchHotEvents();
+  }, []);
+
   // Memoized handlers for better performance
   const openIntroPopup = useCallback(() => {
     setShowIntroPopup(true);
@@ -955,8 +1004,48 @@ const Hero = ({ onStateChange }) => {
         {/* Subtle overlay to enhance readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20 z-[5]" />
 
-        {/* GTA 5 Style Audio Control - Center Top */}
-        <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-30">
+        {/* GTA 5 Style Controls - Center Top */}
+        <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-30 flex items-center gap-4">
+          {/* Auth Button */}
+          {!isAuthenticated ? (
+            <button
+              onClick={() => setShowAuth(true)}
+              className="group relative bg-blue-900/90 border border-blue-600/50 text-white px-3 py-2 rounded-full hover:bg-blue-800/95 hover:border-blue-500/70 transition-all duration-300 shadow-xl backdrop-blur-sm"
+            >
+              {/* Corner brackets for GTA 5 feel */}
+              <div className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
+              <div className="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
+              <div className="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
+              <div className="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
+
+              <span className="relative z-10 text-xs font-bold tracking-wider">SIGN IN</span>
+
+              {/* Animated background */}
+              <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-blue-400/5 via-blue-300/10 to-blue-400/5"></div>
+            </button>
+          ) : (
+            <div className="flex items-center gap-1 sm:gap-2">
+              {/* Registration Status Button */}
+              {userRegistration && (
+                <button
+                  onClick={() => setShowRegistrationStatus(true)}
+                  className="group relative bg-yellow-900/90 border border-yellow-600/50 text-white px-2 sm:px-3 py-2 rounded-full hover:bg-yellow-800/95 hover:border-yellow-500/70 transition-all duration-300 shadow-xl backdrop-blur-sm"
+                >
+                  <span className="relative z-10 text-xs font-bold tracking-wider">STATUS</span>
+                </button>
+              )}
+
+              {/* Logout Button */}
+              <button
+                onClick={logout}
+                className="group relative bg-red-900/90 border border-red-600/50 text-white px-2 sm:px-3 py-2 rounded-full hover:bg-red-800/95 hover:border-red-500/70 transition-all duration-300 shadow-xl backdrop-blur-sm"
+              >
+                <span className="relative z-10 text-xs font-bold tracking-wider">OUT</span>
+              </button>
+            </div>
+          )}
+
+          {/* Audio Control */}
           <button
             className="audio-control-button group relative bg-black/90 border border-gray-600/50 text-white px-3 sm:px-5 py-2 rounded-full hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-xl backdrop-blur-sm"
             onClick={(e) => {
@@ -1173,6 +1262,23 @@ const Hero = ({ onStateChange }) => {
         
         {/* Custom keyframes for wave and wheel animations */}
         <style jsx>{`
+          @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rock+Salt&display=swap');
+
+          .notice-board .notice-item {
+            transition: transform 0.3s ease, filter 0.3s ease;
+            cursor: pointer;
+          }
+
+          .notice-board .notice-item:hover {
+            transform: rotate(0deg) scale(1.02) !important;
+            filter: brightness(1.1) contrast(1.1);
+            z-index: 10;
+          }
+
+          .notice-board:hover .notice-item:not(:hover) {
+            filter: brightness(0.95) contrast(0.95);
+          }
+
           @keyframes slideRight {
             0% { transform: translateX(-100%); opacity: 0; }
             50% { opacity: 1; }
@@ -1510,80 +1616,320 @@ const Hero = ({ onStateChange }) => {
           </div>
         </div>
 
+        {/* GTA-Style Hot Events Notice Board */}
+        {showMainContent && (
+          <div className="absolute top-1/2 transform -translate-y-1/2 right-4 sm:right-8 z-20 w-64 sm:w-80 h-48 sm:h-60">
+            {/* Cork Board Background */}
+            <div
+              className="notice-board relative w-full h-full"
+              style={{
+                background: `
+                  radial-gradient(circle at 20% 30%, rgba(139, 69, 19, 0.3) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 70%, rgba(101, 67, 33, 0.2) 0%, transparent 50%),
+                  radial-gradient(circle at 40% 80%, rgba(160, 82, 45, 0.25) 0%, transparent 40%),
+                  linear-gradient(45deg,
+                    rgb(139, 116, 88) 0%,
+                    rgb(160, 136, 108) 15%,
+                    rgb(145, 122, 94) 30%,
+                    rgb(156, 132, 104) 45%,
+                    rgb(139, 116, 88) 60%,
+                    rgb(134, 111, 83) 75%,
+                    rgb(150, 126, 98) 90%,
+                    rgb(144, 120, 92) 100%
+                  )
+                `,
+                boxShadow: `
+                  inset 0 0 50px rgba(0, 0, 0, 0.3),
+                  inset 0 0 20px rgba(101, 67, 33, 0.4),
+                  0 8px 32px rgba(0, 0, 0, 0.6)
+                `,
+                borderRadius: '4px',
+                border: '3px solid #654321',
+                transform: 'rotate(-1deg)',
+                filter: 'contrast(1.1) saturate(0.8)'
+              }}
+            >
+              {/* Title Header */}
+              <div
+                className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-red-800 text-yellow-200 px-3 py-1 text-xs font-bold tracking-wider"
+                style={{
+                  fontFamily: '"Permanent Marker", cursive',
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                  transform: 'translateX(-50%) rotate(1deg)',
+                  border: '1px solid #8B0000',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.5)'
+                }}
+              >
+                HOT EVENTS
+              </div>
 
-        {/* Bottom Right Learn More Button - GTA Style */}
-        <div className="absolute bottom-4 sm:bottom-8 right-4 sm:right-8 z-30">
-          <button
-            onClick={openIntroPopup}
-            className="group relative bg-black/90 border border-gray-600/50 text-white px-4 sm:px-6 py-3 sm:py-3 rounded-lg hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm min-h-[48px] min-w-[48px] flex items-center justify-center"
-          >
-            {/* Corner brackets for GTA 5 feel - Show on all devices */}
-            <div className="absolute -top-1 -left-1 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
-            <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
-            <div className="absolute -bottom-1 -left-1 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
-            <div className="absolute -bottom-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
-            
-            <div className="flex items-center justify-center space-x-2 sm:space-x-3">
-              {/* Mobile: Better styled content */}
-              <div className="block sm:hidden">
-                <div className="flex items-center space-x-2">
-                  {/* Info Icon for mobile */}
-                  <div className="w-4 h-4 transition-transform duration-300 group-hover:scale-110">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-300 group-hover:text-white transition-colors duration-300">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                      <path d="M12 16v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                      <path d="M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
+              {/* Dynamic Hot Events Content */}
+              {hotEvents.length > 0 ? (
+                <>
+                  {/* Main Event Poster */}
+                  {hotEvents[0] && (
+                    <div
+                      className="notice-item absolute top-4 left-3 w-24 h-28 bg-white border-2 border-yellow-800"
+                      style={{
+                        transform: 'rotate(-2deg)',
+                        boxShadow: '2px 2px 6px rgba(0,0,0,0.4)',
+                      }}
+                    >
+                      {/* Pin */}
+                      <div
+                        className="absolute -top-1 left-1/2 w-2 h-2 bg-gray-600 rounded-full transform -translate-x-1/2"
+                        style={{ boxShadow: 'inset 0 0 2px rgba(0,0,0,0.6)' }}
+                      ></div>
+
+                      {hotEvents[0].poster_image_url ? (
+                        <img
+                          src={hotEvents[0].poster_image_url}
+                          alt={hotEvents[0].name}
+                          className="w-full h-full object-cover"
+                          style={{ filter: 'sepia(0.2) contrast(1.1)' }}
+                        />
+                      ) : (
+                        <div className="p-1 text-center h-full flex flex-col justify-center">
+                          <div
+                            className="text-red-800 font-bold mb-1"
+                            style={{ fontFamily: '"Rock Salt", cursive', fontSize: '6px' }}
+                          >
+                            HOT EVENT
+                          </div>
+                          <div className="text-2xl mb-1">🔥</div>
+                          <div
+                            className="text-xs leading-tight"
+                            style={{ fontFamily: '"Courier New", monospace', fontSize: '5px' }}
+                          >
+                            {hotEvents[0].name.substring(0, 20)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Event Description Note */}
+                  {hotEvents[0] && (
+                    <div
+                      className="notice-item absolute top-2 right-3 w-20 h-20 bg-yellow-300 border border-yellow-600"
+                      style={{
+                        transform: 'rotate(3deg)',
+                        boxShadow: '1px 1px 4px rgba(0,0,0,0.3)',
+                        background: 'linear-gradient(135deg, #fef08a 0%, #fde047 100%)'
+                      }}
+                    >
+                      <div
+                        className="p-2 text-black leading-tight overflow-hidden h-full"
+                        style={{
+                          fontFamily: '"Permanent Marker", cursive',
+                          fontSize: '8px',
+                          wordWrap: 'break-word'
+                        }}
+                      >
+                        <div className="font-bold mb-1 text-red-800">{hotEvents[0].name.substring(0, 12)}</div>
+                        <div className="text-gray-800">{hotEvents[0].description.substring(0, 80)}...</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Second Event Photo */}
+                  {hotEvents[1] && (
+                    <div
+                      className="notice-item absolute top-12 left-16 w-14 h-10 bg-white border-2 border-white"
+                      style={{
+                        transform: 'rotate(-1deg)',
+                        boxShadow: '2px 2px 6px rgba(0,0,0,0.4)'
+                      }}
+                    >
+                      {/* Pin */}
+                      <div
+                        className="absolute -top-1 right-1 w-1.5 h-1.5 bg-gray-500 rounded-full"
+                        style={{ boxShadow: 'inset 0 0 1px rgba(0,0,0,0.6)' }}
+                      ></div>
+
+                      {hotEvents[1].poster_image_url ? (
+                        <img
+                          src={hotEvents[1].poster_image_url}
+                          alt={hotEvents[1].name}
+                          className="w-full h-full object-cover"
+                          style={{ filter: 'sepia(0.1)' }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center text-lg">
+                          🏎️
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Event Info Card */}
+                  <div
+                    className="notice-item absolute bottom-8 left-2 w-18 h-8 bg-white border border-gray-400"
+                    style={{
+                      transform: 'rotate(2deg)',
+                      boxShadow: '1px 1px 3px rgba(0,0,0,0.3)',
+                      fontSize: '5px'
+                    }}
+                  >
+                    <div
+                      className="p-1 text-center"
+                      style={{ fontFamily: '"Courier New", monospace' }}
+                    >
+                      <div className="font-bold text-blue-800">SAE INDIA</div>
+                      <div className="text-xs">{hotEvents.length} Hot Events</div>
+                      <div className="text-red-600">LIVE NOW</div>
+                    </div>
                   </div>
-                  
-                  {/* Mobile text */}
-                  <span className="text-white font-bold text-sm tracking-wide group-hover:text-white transition-colors duration-300 font-mono">
-                    INFO
-                  </span>
-                  
-                  {/* Arrow for mobile */}
-                  <div className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-white group-hover:text-gray-200 transition-colors duration-300">
-                      <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+
+                  {/* Third Event Badge */}
+                  {hotEvents[2] && (
+                    <div
+                      className="notice-item absolute bottom-3 right-8 w-12 h-12 bg-green-100 border border-green-600"
+                      style={{
+                        transform: 'rotate(-3deg)',
+                        boxShadow: '1px 1px 4px rgba(0,0,0,0.3)'
+                      }}
+                    >
+                      {/* Pin */}
+                      <div
+                        className="absolute -top-1 left-2 w-1.5 h-1.5 bg-red-600 rounded-full"
+                        style={{ boxShadow: '0 0 3px rgba(255,0,0,0.6)' }}
+                      ></div>
+
+                      <div className="p-1 text-center">
+                        <div
+                          className="text-xs font-bold mb-1"
+                          style={{ fontFamily: '"Rock Salt", cursive', fontSize: '4px' }}
+                        >
+                          {hotEvents[2].name.substring(0, 10)}
+                        </div>
+                        <div className="text-lg">🏆</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Homepage Events Count */}
+                  <div
+                    className="notice-item absolute top-20 right-12 w-10 h-6 bg-pink-200 border border-pink-400"
+                    style={{
+                      transform: 'rotate(4deg)',
+                      boxShadow: '1px 1px 2px rgba(0,0,0,0.2)'
+                    }}
+                  >
+                    <div
+                      className="p-1 text-center"
+                      style={{ fontFamily: '"Permanent Marker", cursive', fontSize: '4px' }}
+                    >
+                      HOMEPAGE:<br/>{hotEvents.filter(e => e.show_on_homepage).length}<br/>EVENTS
+                    </div>
                   </div>
-                </div>
-              </div>
-              
-              {/* Desktop: Full button content */}
-              <div className="hidden sm:flex items-center space-x-3">
-                {/* Info Icon */}
-                <div className="w-5 h-5 transition-transform duration-300 group-hover:scale-110">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-gray-300 group-hover:text-white transition-colors duration-300">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M12 16v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    <path d="M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </div>
-                
-                {/* Button text */}
-                <div className="flex flex-col items-start">
-                  <span className="text-white font-bold text-sm tracking-wider group-hover:text-white transition-colors duration-300 font-mono">
-                    LEARN MORE
-                  </span>
-                  <span className="text-gray-400 text-xs font-mono tracking-wide group-hover:text-gray-300 transition-colors duration-300">
-                    PRESS TO CONTINUE
-                  </span>
-                </div>
-                
-                {/* Animated arrow */}
-                <div className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-400 group-hover:text-white transition-colors duration-300">
-                    <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-              </div>
+
+                  {/* Buttons Container */}
+                  <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 flex space-x-3">
+                    {/* View All Events Button */}
+                    <button
+                      onClick={() => setShowEventsPopup(true)}
+                      className="group relative bg-black/90 border border-gray-600/50 text-white px-3 py-2 rounded-lg hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm flex items-center justify-center"
+                      style={{
+                        minHeight: '40px',
+                        minWidth: '110px'
+                      }}
+                    >
+                      {/* Corner brackets for GTA 5 feel */}
+                      <div className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+                      <div className="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+                      <div className="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+                      <div className="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+
+                      <div className="flex items-center space-x-2">
+                        {/* Icon */}
+                        <div className="w-4 h-4 flex items-center justify-center">
+                          <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-orange-500 rounded-sm flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
+                            <span className="text-black text-xs font-bold">🔥</span>
+                          </div>
+                        </div>
+
+                        {/* Button text */}
+                        <div className="flex flex-col items-start">
+                          <span className="text-white font-bold text-xs tracking-wider group-hover:text-yellow-300 transition-colors duration-300 font-mono">
+                            VIEW ALL
+                          </span>
+                          <span className="text-gray-400 text-xs group-hover:text-yellow-400 transition-colors duration-300 font-mono">
+                            EVENTS
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Subtle glow effect */}
+                      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-gray-400/5 via-gray-300/10 to-gray-400/5"></div>
+                    </button>
+
+
+                    {/* Register Button */}
+                    <button
+                      onClick={() => setShowRegistrationForm(true)}
+                      className="group relative bg-red-900/90 border border-red-600/50 text-white px-3 py-2 rounded-lg hover:bg-red-800/95 hover:border-red-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm flex items-center justify-center"
+                      style={{
+                        minHeight: '40px',
+                        minWidth: '110px'
+                      }}
+                    >
+                      {/* Corner brackets for GTA 5 feel */}
+                      <div className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-red-400/60 group-hover:border-red-300/80 transition-colors duration-300"></div>
+                      <div className="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-red-400/60 group-hover:border-red-300/80 transition-colors duration-300"></div>
+                      <div className="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-red-400/60 group-hover:border-red-300/80 transition-colors duration-300"></div>
+                      <div className="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-red-400/60 group-hover:border-red-300/80 transition-colors duration-300"></div>
+
+                      <div className="flex items-center space-x-2">
+                        {/* Icon */}
+                        <div className="w-4 h-4 flex items-center justify-center">
+                          <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 rounded-sm flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
+                            <span className="text-white text-xs font-bold">✓</span>
+                          </div>
+                        </div>
+
+                        {/* Button text */}
+                        <div className="flex flex-col items-start">
+                          <span className="text-white font-bold text-xs tracking-wider group-hover:text-green-300 transition-colors duration-300 font-mono">
+                            REGISTER
+                          </span>
+                          <span className="text-gray-400 text-xs group-hover:text-green-400 transition-colors duration-300 font-mono">
+                            NOW
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Subtle glow effect */}
+                      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-red-400/5 via-red-300/10 to-red-400/5"></div>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                // Fallback content when no events
+                <>
+                  <div
+                    className="notice-item absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-16 bg-yellow-100 border-2 border-yellow-800"
+                    style={{
+                      transform: 'translate(-50%, -50%) rotate(-2deg)',
+                      boxShadow: '2px 2px 6px rgba(0,0,0,0.4)',
+                    }}
+                  >
+                    <div className="p-2 text-center h-full flex flex-col justify-center">
+                      <div className="text-2xl mb-1">📋</div>
+                      <div
+                        className="text-xs font-bold"
+                        style={{ fontFamily: '"Rock Salt", cursive', fontSize: '6px' }}
+                      >
+                        NO EVENTS<br/>YET
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
-            
-            {/* Subtle glow effect */}
-            <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-gray-400/5 via-gray-300/10 to-gray-400/5"></div>
-          </button>
-        </div>
+          </div>
+        )}
+
 
         {/* Bottom fade to black for smooth transition */}
         <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black to-transparent" />
@@ -1624,234 +1970,118 @@ const Hero = ({ onStateChange }) => {
                   scrollBehavior: 'smooth'
                 }}
               >
-                {/* Inner scrollable content */}
-                <div className="w-full">
-                {/* Hero Section */}
+                {/* SAE Logo and Intro Section */}
                 <div className="relative h-screen flex items-center justify-center px-4 sm:px-6 md:px-12">
-                  {/* Background Pattern */}
-                  <div className="absolute inset-0 opacity-5">
-                    <div className="absolute inset-0" style={{
-                      backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 10px, white 10px, white 11px)`,
-                    }}></div>
-                  </div>
-                  
                   <div className="text-center max-w-4xl relative">
-                    <div className="mb-8">
-                      <div className="text-white/40 text-xs sm:text-sm font-mono tracking-[0.2em] sm:tracking-[0.3em] mb-4">EST. MMMUT CHAPTER</div>
-                      <h1 className="text-white text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-thin tracking-tight mb-6 leading-none px-2 sm:px-0">
-                        SOCIETY OF
-                        <br />
-                        <span className="font-black">AUTOMOTIVE</span>
-                        <br />
-                        ENGINEERS
-                      </h1>
-                      <div className="w-16 sm:w-24 h-px bg-white mx-auto mb-6 sm:mb-8"></div>
-                      <p className="text-white/80 text-sm sm:text-base lg:text-xl leading-relaxed max-w-2xl mx-auto px-4 sm:px-0">
-                        Where engineering vision meets automotive reality. We don't just build machines—
-                        <span className="text-white font-medium"> we craft the future of mobility.</span>
+                    <div className="mb-12">
+                      {/* SAE Logo */}
+                      <div className="mb-8">
+                        <h1 className="text-white text-6xl sm:text-8xl md:text-9xl font-black tracking-widest mb-4">
+                          SAE
+                        </h1>
+                        <div className="w-24 h-px bg-white mx-auto mb-6"></div>
+                        <p className="text-white/80 text-lg sm:text-xl font-light tracking-wide">
+                          SOCIETY OF AUTOMOTIVE ENGINEERS
+                        </p>
+                        <p className="text-white/60 text-sm sm:text-base mt-4">
+                          MADAN MOHAN MALAVIYA UNIVERSITY OF TECHNOLOGY
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SAE Divisions Section */}
+                <div className="px-4 sm:px-8 md:px-12 py-16 bg-black/50">
+                  <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-16">
+                      <h2 className="text-white text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
+                        OUR DIVISIONS
+                      </h2>
+                      <div className="w-24 h-px bg-white mx-auto mb-8"></div>
+                      <p className="text-white/80 text-lg max-w-2xl mx-auto">
+                        Explore our specialized automotive engineering divisions, each pushing the boundaries of innovation.
                       </p>
                     </div>
-                  </div>
-                </div>
 
-                {/* Our Philosophy */}
-                <div className="px-4 sm:px-8 md:px-12 py-12 sm:py-16 md:py-24">
-                  <div className="max-w-5xl mx-auto">
-                    <div className="grid md:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-center">
-                      <div>
-                        <div className="text-white/40 text-xs sm:text-sm font-mono tracking-wider mb-4">OUR PHILOSOPHY</div>
-                        <h2 className="text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl font-thin mb-6 sm:mb-8 leading-tight px-2 sm:px-0">
-                          Engineering Excellence
-                          <br />
-                          <span className="font-black">Through Innovation</span>
-                        </h2>
-                        <p className="text-white/70 text-sm sm:text-base lg:text-lg leading-relaxed mb-6 sm:mb-8 px-2 sm:px-0">
-                          At SAE MMMUT, we believe that true engineering mastery comes from pushing boundaries. 
-                          Every project, every competition, every innovation is a step toward reshaping what's possible 
-                          in automotive and aerospace engineering.
-                        </p>
-                        <div className="space-y-3 sm:space-y-4">
-                          {[
-                            'Hands-on learning that transcends textbooks',
-                            'Competition-driven excellence',
-                            'Industry collaboration and mentorship',
-                            'Innovation through research and development'
-                          ].map((item, i) => (
-                            <div key={i} className="flex items-center space-x-3 sm:space-x-4 px-2 sm:px-0">
-                              <div className="w-1.5 sm:w-2 h-px bg-white"></div>
-                              <span className="text-white/80 text-sm sm:text-base">{item}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="relative px-2 sm:px-0">
-                        <div className="aspect-square bg-gray-900/30 border border-white/10 flex items-center justify-center">
-                          <div className="text-center">
-                            <div className="text-white/20 text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-thin mb-2 sm:mb-4">SAE</div>
-                            <div className="text-white/60 text-xs sm:text-sm tracking-[0.2em]">ENGINEERING LEGACY</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Four Chambers - Cinematic Reveal */}
-                <div className="py-12 sm:py-16 md:py-24 px-4 sm:px-8 md:px-12">
-                  <div className="max-w-6xl mx-auto">
-                    <div className="text-center mb-12 sm:mb-16 md:mb-20">
-                      <div className="text-white/40 text-xs sm:text-sm font-mono tracking-wider mb-4">SPECIALIZED DIVISIONS</div>
-                      <h2 className="text-white text-xl sm:text-2xl md:text-3xl lg:text-5xl font-thin mb-8 leading-tight px-4 sm:px-0">
-                        Four Pillars of
-                        <br />
-                        <span className="font-black">Engineering Excellence</span>
-                      </h2>
-                      <div className="w-32 h-px bg-white mx-auto"></div>
-                    </div>
-
-                    <div className="space-y-12 sm:space-y-16 md:space-y-24">
-                      {[
-                        {
-                          name: 'BAJA',
-                          tagline: 'Conquer Every Terrain',
-                          description: 'Where rugged engineering meets unforgiving landscapes. Our BAJA division masters the art of all-terrain vehicle design, pushing suspension dynamics and engine optimization to their absolute limits.',
-                          expertise: ['Suspension Architecture', 'Powertrain Optimization', 'Durability Engineering', 'Competition Racing'],
-                          number: '01',
-                          // logo: bajaLogo // COMMENTED OUT FOR SCROLLING PERFORMANCE
-                        },
-                        {
-                          name: 'SUPRA',
-                          tagline: 'Speed Redefined',
-                          description: 'Precision engineering at 200+ mph. SUPRA division focuses on formula racing excellence, where aerodynamics, weight distribution, and performance tuning create championship-winning machines.',
-                          expertise: ['Aerodynamic Design', 'Performance Tuning', 'Chassis Engineering', 'Race Strategy'],
-                          number: '02',
-                          // logo: supraLogo // COMMENTED OUT FOR SCROLLING PERFORMANCE
-                        },
-                        {
-                          name: 'AERO',
-                          tagline: 'Mastering Flight',
-                          description: 'Beyond the horizon lies infinite possibility. Our Aerospace division pioneers flight technology, from unmanned systems to advanced propulsion, pushing the boundaries of what can soar.',
-                          expertise: ['Aircraft Design', 'Propulsion Systems', 'Flight Dynamics', 'Autonomous Flight'],
-                          number: '03',
-                          // logo: aeroLogo // COMMENTED OUT FOR SCROLLING PERFORMANCE
-                        },
-                        {
-                          name: 'DISCO',
-                          tagline: 'Digital Revolution',
-                          description: 'The future is intelligent. DISCO division integrates cutting-edge digital solutions, IoT systems, and autonomous technologies that make vehicles smarter than ever imagined.',
-                          expertise: ['IoT Integration', 'Autonomous Systems', 'Smart Manufacturing', 'Digital Innovation'],
-                          number: '04',
-                          // logo: discoLogo // COMMENTED OUT FOR SCROLLING PERFORMANCE
-                        }
-                      ].map((division, i) => (
-                        <div key={i} className="group">
-                          <div className={`grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-16 items-center ${i % 2 === 1 ? 'md:grid-flow-col-dense' : ''}`}>
-                            <div className={`px-2 sm:px-0 ${i % 2 === 1 ? 'md:col-start-2' : ''}`}>
-                              <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 lg:space-x-6 mb-3 sm:mb-4 md:mb-6">
-                                <div className="text-white/20 text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-thin">{division.number}</div>
-                                <div>
-                                  <h3 className="text-white text-base sm:text-lg md:text-xl lg:text-3xl font-black tracking-wide">{division.name}</h3>
-                                  <div className="text-white/60 text-xs sm:text-sm md:text-base lg:text-lg italic">{division.tagline}</div>
-                                </div>
-                              </div>
-                              <p className="text-white/70 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed mb-4 sm:mb-6 md:mb-8">
-                                {division.description}
-                              </p>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
-                                {division.expertise.map((skill, j) => (
-                                  <div key={j} className="text-white/50 text-xs sm:text-sm border-l-2 border-white/20 pl-2 sm:pl-3 md:pl-4">
-                                    {skill}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <div className={i % 2 === 1 ? 'md:col-start-1' : ''}>
-                              <div className="aspect-[4/3] bg-gray-900/20 border border-white/10 overflow-hidden group-hover:border-white/30 transition-all duration-500">
-                                {/* IMAGES COMMENTED OUT FOR SCROLLING PERFORMANCE */}
-                                {/* <img 
-                                  src={division.logo} 
-                                  alt={`${division.name} Division`}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                  loading="lazy"
-                                  decoding="async"
-                                /> */}
-                                <div className="w-full h-full flex items-center justify-center text-white/40 text-4xl font-bold">
-                                  {division.name}
-                                </div>
-                              </div>
+                    {/* Divisions Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                      {/* BAJA Division */}
+                      <div className="group relative bg-white/5 border border-white/10 p-8 hover:bg-white/10 transition-all duration-300">
+                        <div className="text-center">
+                          <div className="mb-6">
+                            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-black text-lg">
+                              BAJA
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* GTA 5 Wanted Level Stars */}
-                <div className="relative px-4 sm:px-6 md:px-12 py-12 sm:py-16 md:py-24 border-t border-white/10 overflow-hidden">
-                  {/* Gritty Background Elements */}
-                  <div className="absolute inset-0">
-                    {Array.from({ length: 15 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="absolute opacity-5"
-                        style={{
-                          left: `${Math.random() * 100}%`,
-                          top: `${Math.random() * 100}%`,
-                          transform: `rotate(${Math.random() * 360}deg)`,
-                        }}
-                      >
-                        <div className="text-white text-xs select-none font-mono">
-                          {['MMMUT', 'SAE', 'AUTO', 'TECH'][Math.floor(Math.random() * 4)]}
+                          <h3 className="text-white text-2xl font-bold mb-4">BAJA SAE</h3>
+                          <p className="text-white/70 text-sm leading-relaxed">
+                            Design and build rugged, single-seat off-road vehicles. Our BAJA team creates all-terrain vehicles that can handle the toughest conditions.
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
 
-                  {/* Slow Drifting Stars - GTA Style */}
-                  <div className="absolute inset-0">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <div
-                        key={`drift-${i}`}
-                        className="absolute text-white/10 select-none"
-                        style={{
-                          left: `${Math.random() * 100}%`,
-                          top: `${Math.random() * 100}%`,
-                          animation: `gtaDrift ${10 + Math.random() * 10}s linear infinite`,
-                          animationDelay: `${Math.random() * 5}s`,
-                          fontSize: `${12 + Math.random() * 8}px`
-                        }}
-                      >
-                        ★
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    <div className="text-center">
-                      {/* GTA 5 Wanted Level Style Stars */}
-                      <div className="flex items-center justify-center space-x-1 sm:space-x-2 md:space-x-4 mb-3 sm:mb-4">
-                        {[...Array(5)].map((_, i) => (
-                          <div
-                            key={i}
-                            className="text-white font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl select-none opacity-60 hover:opacity-100 transition-opacity duration-300"
-                            style={{
-                              fontFamily: 'Impact, Arial Black, sans-serif',
-                              textShadow: '2px 2px 0px #000000, -1px -1px 0px #333333',
-                              animation: `gtaFlicker ${2 + i * 0.5}s ease-in-out infinite alternate`,
-                              animationDelay: `${i * 0.3}s`
-                            }}
-                          >
-                            ★
+                      {/* SUPRA Division */}
+                      <div className="group relative bg-white/5 border border-white/10 p-8 hover:bg-white/10 transition-all duration-300">
+                        <div className="text-center">
+                          <div className="mb-6">
+                            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-black text-sm">
+                              SUPRA
+                            </div>
                           </div>
-                        ))}
+                          <h3 className="text-white text-2xl font-bold mb-4">SUPRA SAE</h3>
+                          <p className="text-white/70 text-sm leading-relaxed">
+                            Formula-style race car engineering. Our SUPRA team develops high-performance single-seater race cars for competitive motorsports.
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-white/40 text-xs sm:text-sm font-mono tracking-widest px-4 sm:px-0">
-                        LOS SANTOS AUTO EMPIRE
+
+                      {/* AERO Division */}
+                      <div className="group relative bg-white/5 border border-white/10 p-8 hover:bg-white/10 transition-all duration-300">
+                        <div className="text-center">
+                          <div className="mb-6">
+                            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white font-black text-lg">
+                              AERO
+                            </div>
+                          </div>
+                          <h3 className="text-white text-2xl font-bold mb-4">AERO DESIGN</h3>
+                          <p className="text-white/70 text-sm leading-relaxed">
+                            Unmanned aerial vehicle design and development. Our AERO team pushes the boundaries of flight technology and aerodynamics.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* DISCO Division */}
+                      <div className="group relative bg-white/5 border border-white/10 p-8 hover:bg-white/10 transition-all duration-300">
+                        <div className="text-center">
+                          <div className="mb-6">
+                            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-black text-sm">
+                              DISCO
+                            </div>
+                          </div>
+                          <h3 className="text-white text-2xl font-bold mb-4">DISCO</h3>
+                          <p className="text-white/70 text-sm leading-relaxed">
+                            Digital innovation and smart vehicle technologies. Our DISCO team focuses on autonomous systems and connected vehicle solutions.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Call to Action */}
+                    <div className="text-center mt-16">
+                      <p className="text-white/80 text-lg mb-8">
+                        Join us in shaping the future of automotive engineering
+                      </p>
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => setShowRegistrationForm(true)}
+                          className="bg-white text-black px-8 py-3 font-bold hover:bg-white/90 transition-colors duration-300"
+                        >
+                          REGISTER NOW
+                        </button>
                       </div>
                     </div>
                   </div>
-                </div>
                 </div>
               </div>
             </div>
@@ -1861,209 +2091,69 @@ const Hero = ({ onStateChange }) => {
       </section>
       )}
 
-      {/* Add CSS animations and styles */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes slideUp {
-          from { transform: translateY(50px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes slideDown {
-          from { transform: translateY(-30px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes slideLeft {
-          from { transform: translateX(-50px); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideRight {
-          from { transform: translateX(50px); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-        
-        /* Force body to never scroll when popup open */
-        body.popup-no-scroll {
-          overflow: hidden !important;
-          position: fixed !important;
-          width: 100% !important;
-          height: 100% !important;
-        }
-        
-        /* Mobile viewport adjustments */
-        @media (max-width: 640px) {
-          body {
-            overflow-x: hidden;
+        {/* Custom keyframes for wave and wheel animations */}
+        <style jsx>{`
+          @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rock+Salt&display=swap');
+
+          .notice-board .notice-item {
+            transition: transform 0.3s ease, filter 0.3s ease;
+            cursor: pointer;
           }
-          
-          /* Prevent horizontal scroll on mobile */
-          * {
-            max-width: 100vw;
-            box-sizing: border-box;
+
+          .notice-board .notice-item:hover {
+            transform: rotate(0deg) scale(1.02) !important;
+            filter: brightness(1.1) contrast(1.1);
+            z-index: 10;
           }
-          
-          /* Better touch targets on mobile */
-          button, a {
-            min-height: 44px;
-            min-width: 44px;
+
+          .notice-board:hover .notice-item:not(:hover) {
+            filter: brightness(0.95) contrast(0.95);
           }
-        }
-        
-        /* Hide all scrollbars globally */
-        * {
-          scrollbar-width: none !important;
-          -ms-overflow-style: none !important;
-        }
-        
-        *::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          background: transparent !important;
-        }
-        
-        /* Enhanced smooth scrolling */
-        html {
-          scroll-behavior: smooth;
-        }
-        
-        /* BUTTER SMOOTH SCROLLING - Optimized */
-        .popup-scroll {
-          transform: translate3d(0,0,0);
-          backface-visibility: hidden;
-          will-change: scroll-position;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-        
-        /* Hide scrollbars but keep functionality */
-        .popup-scroll::-webkit-scrollbar {
-          display: none;
-          width: 0;
-          background: transparent;
-        }
-        
-        .popup-scroll {
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        
-        /* Better touch scrolling momentum */
-        .popup-scroll {
-          -webkit-overflow-scrolling: touch;
-          -ms-overflow-style: -ms-autohiding-scrollbar;
-          overflow-scrolling: touch;
-        }
-        
-        /* New animations for enhanced popup */
-        @keyframes backgroundShift {
-          0% { transform: translate(0, 0); }
-          25% { transform: translate(10px, -10px); }
-          50% { transform: translate(-5px, 10px); }
-          75% { transform: translate(-10px, -5px); }
-          100% { transform: translate(0, 0); }
-        }
-        
-        @keyframes objectivePulse {
-          0%, 100% { 
-            transform: scale(1); 
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+
+          @keyframes slideRight {
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
           }
-          50% { 
-            transform: scale(1.05); 
-            box-shadow: 0 0 30px rgba(6, 182, 212, 0.6);
-          }
-        }
-        
-        @keyframes missionTextReveal {
-          0% { 
-            opacity: 0; 
-            transform: translateY(20px); 
-          }
-          100% { 
-            opacity: 1; 
-            transform: translateY(0); 
-          }
-        }
-        
-        @keyframes missionCardSlide {
-          0% { 
-            opacity: 0; 
-            transform: translateY(30px) rotateX(15deg); 
-          }
-          100% { 
-            opacity: 1; 
-            transform: translateY(0) rotateX(0deg); 
-          }
-        }
-        
-        @keyframes borderGlow {
-          0%, 100% { 
-            background-position: 0% 50%; 
-          }
-          50% { 
-            background-position: 100% 50%; 
-          }
-        }
-        
-        @keyframes missionFadeIn {
-          0% { opacity: 0; }
-          100% { opacity: 1; }
-        }
-        
-        @keyframes missionSlideIn {
-          0% { 
-            opacity: 0; 
-            transform: translateY(50px) scale(0.95); 
-          }
-          100% { 
-            opacity: 1; 
-            transform: translateY(0) scale(1); 
-          }
-        }
-        
-        /* Custom border widths for GTA V style */
-        .border-t-3 { border-top-width: 3px; }
-        .border-l-3 { border-left-width: 3px; }
-        .border-r-3 { border-right-width: 3px; }
-        .border-b-3 { border-bottom-width: 3px; }
-        
-        /* GTA V style gradients */
-        .bg-gradient-radial {
-          background: radial-gradient(circle, var(--tw-gradient-from), var(--tw-gradient-to));
-        }
-        
-        /* GTA 5 Style Animations */
-        @keyframes gtaDrift {
-          0% { 
-            transform: translateX(-10px) translateY(0px); 
-            opacity: 0.1;
-          }
-          50% { 
-            opacity: 0.3;
-          }
-          100% { 
-            transform: translateX(10px) translateY(-5px); 
-            opacity: 0.1;
-          }
-        }
-        
-        @keyframes gtaFlicker {
-          0% { 
-            opacity: 0.6; 
-            text-shadow: 2px 2px 0px #000000, -1px -1px 0px #333333;
-          }
-          50% { 
-            opacity: 0.8; 
-            text-shadow: 2px 2px 0px #000000, -1px -1px 0px #333333, 0px 0px 8px rgba(255,255,255,0.3);
-          }
-          100% { 
-            opacity: 0.6; 
-            text-shadow: 2px 2px 0px #000000, -1px -1px 0px #333333;
-          }
-        }
-      `}</style>
+        `}</style>
+
+      {/* Registration Form Modal */}
+      {showRegistrationForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="relative max-h-[95vh] overflow-y-auto">
+            <button
+              onClick={() => setShowRegistrationForm(false)}
+              className="absolute top-4 right-4 z-10 text-white bg-black/50 hover:bg-black/70 rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold transition-all duration-300"
+            >
+              ×
+            </button>
+            <GTARegistrationForm />
+          </div>
+        </div>
+      )}
+
+      {/* Auth Modal */}
+      {showAuth && (
+        <GTAAuth
+          onClose={() => setShowAuth(false)}
+          onAuthSuccess={handleAuthSuccess}
+        />
+      )}
+
+      {/* Registration Status Modal */}
+      {showRegistrationStatus && (
+        <RegistrationStatus
+          onClose={() => setShowRegistrationStatus(false)}
+        />
+      )}
+
+      {/* Events Popup Modal */}
+      {showEventsPopup && (
+        <GTAEventsPopup
+          onClose={() => setShowEventsPopup(false)}
+        />
+      )}
+
     </>
   );
 };

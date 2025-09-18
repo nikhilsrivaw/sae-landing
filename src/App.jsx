@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // Import components
 import FloatingDropdown from './components/FloatingDropdown';
 import ErrorBoundary from './components/ErrorBoundary';
+import { AuthProvider } from './contexts/AuthContext';
 
 // Import pages
 import Home from './pages/Home';
@@ -13,6 +14,7 @@ import Chambers from './pages/Chambers';
 import Glimpse from './pages/Glimpse';
 import Creators from './pages/Creators';
 import Events from './pages/Events';
+import AdminNew from './pages/AdminNew';
 
 function App() {
   const [heroState, setHeroState] = useState({
@@ -21,23 +23,26 @@ function App() {
   });
 
   return (
-    <Router>
-      <div className="App">
-        <ErrorBoundary>
-          <FloatingDropdown />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/sponsors" element={<Sponsors />} />
-            <Route path="/team" element={<Team />} />
-            <Route path="/chambers" element={<Chambers />} />
-            <Route path="/glimpse" element={<Glimpse />} />
-            <Route path="/creators" element={<Creators />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="*" element={<Home />} />
-          </Routes>
-        </ErrorBoundary>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <ErrorBoundary>
+            <FloatingDropdown />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/sponsors" element={<Sponsors />} />
+              <Route path="/team" element={<Team />} />
+              <Route path="/chambers" element={<Chambers />} />
+              <Route path="/glimpse" element={<Glimpse />} />
+              <Route path="/creators" element={<Creators />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/admin" element={<AdminNew />} />
+              <Route path="*" element={<Home />} />
+            </Routes>
+          </ErrorBoundary>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAE Event Registration</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0a0a0a 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            color: white;
+        }
+
+        /* SAE Style Title */
+        .sae-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .sae-title .subtitle {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .sae-title h1 {
+            color: white;
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            line-height: 1.1;
+        }
+
+        .sae-title .underline {
+            width: 120px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .sae-title h1 {
+                font-size: 32px;
+                letter-spacing: 1px;
+            }
+
+            .sae-title .underline {
+                width: 80px;
+            }
+        }
+
+        /* Form Container */
+        .form-container {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0;
+            max-width: 700px;
+            width: 100%;
+            padding: 50px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+        }
+
+        .form-section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        label {
+            display: block;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 18px 22px;
+            font-size: 16px;
+            font-family: inherit;
+            border-radius: 0;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]::placeholder,
+        input[type="number"]::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        input[type="text"]:invalid:not(:placeholder-shown),
+        input[type="number"]:invalid:not(:placeholder-shown) {
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+
+        .member-group {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .member-title {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            border-left: 2px solid rgba(255, 255, 255, 0.2);
+            padding-left: 15px;
+        }
+
+        .submit-container {
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .submit-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: white;
+            padding: 20px 50px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border-radius: 0;
+            min-width: 250px;
+        }
+
+        .submit-btn:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .required {
+            color: rgba(239, 68, 68, 0.8);
+            margin-left: 4px;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: none;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* Datalist styling */
+        datalist {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- SAE Style Title -->
+    <div class="sae-title">
+        <div class="subtitle">Event Registration</div>
+        <h1>REGISTER FOR<br>THE EVENT</h1>
+        <div class="underline"></div>
+    </div>
+
+    <div class="form-container">
+        <div class="success-message" id="successMessage">
+            Team registered successfully! You will receive a confirmation email shortly.
+        </div>
+
+        <form id="teamRegistrationForm" novalidate>
+            <!-- Team Information Section -->
+            <div class="form-section">
+                <div class="section-title">Team Information</div>
+
+                <div class="form-group">
+                    <label for="teamName">Team Name <span class="required">*</span></label>
+                    <input type="text" id="teamName" name="teamName" placeholder="Enter your team name" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="leaderName">Team Leader Name <span class="required">*</span></label>
+                        <input type="text" id="leaderName" name="leaderName" placeholder="Enter leader's full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="leaderRoll">Leader Roll Number <span class="required">*</span></label>
+                        <input type="text" id="leaderRoll" name="leaderRoll" placeholder="Enter roll number" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="leaderBranch">Leader Branch <span class="required">*</span></label>
+                    <input type="text" id="leaderBranch" name="leaderBranch" list="branch-options" placeholder="Select or type branch" required>
+                    <datalist id="branch-options">
+                        <option value="Computer Science (CSE)">
+                        <option value="Electronics (ECE)">
+                        <option value="Mechanical (ME)">
+                        <option value="Civil (CE)">
+                        <option value="Electrical (EE)">
+                        <option value="Information Technology (IT)">
+                        <option value="Chemical Engineering">
+                        <option value="Biotechnology">
+                        <option value="Business">
+                        <option value="Other">
+                    </datalist>
+                </div>
+            </div>
+
+            <!-- Team Members Section -->
+            <div class="form-section">
+                <div class="section-title">Team Members</div>
+
+                <!-- Member 1 -->
+                <div class="member-group">
+                    <div class="member-title">Member 1</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="member1Name">Full Name</label>
+                            <input type="text" id="member1Name" name="member1Name" placeholder="Enter full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="member1Roll">Roll Number</label>
+                            <input type="text" id="member1Roll" name="member1Roll" placeholder="Enter roll number">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="member1Branch">Branch</label>
+                        <input type="text" id="member1Branch" name="member1Branch" list="branch-options" placeholder="Select or type branch">
+                    </div>
+                </div>
+
+                <!-- Member 2 -->
+                <div class="member-group">
+                    <div class="member-title">Member 2</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="member2Name">Full Name</label>
+                            <input type="text" id="member2Name" name="member2Name" placeholder="Enter full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="member2Roll">Roll Number</label>
+                            <input type="text" id="member2Roll" name="member2Roll" placeholder="Enter roll number">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="member2Branch">Branch</label>
+                        <input type="text" id="member2Branch" name="member2Branch" list="branch-options" placeholder="Select or type branch">
+                    </div>
+                </div>
+
+                <!-- Member 3 -->
+                <div class="member-group">
+                    <div class="member-title">Member 3</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="member3Name">Full Name</label>
+                            <input type="text" id="member3Name" name="member3Name" placeholder="Enter full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="member3Roll">Roll Number</label>
+                            <input type="text" id="member3Roll" name="member3Roll" placeholder="Enter roll number">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="member3Branch">Branch</label>
+                        <input type="text" id="member3Branch" name="member3Branch" list="branch-options" placeholder="Select or type branch">
+                    </div>
+                </div>
+
+                <!-- Member 4 -->
+                <div class="member-group">
+                    <div class="member-title">Member 4</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="member4Name">Full Name</label>
+                            <input type="text" id="member4Name" name="member4Name" placeholder="Enter full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="member4Roll">Roll Number</label>
+                            <input type="text" id="member4Roll" name="member4Roll" placeholder="Enter roll number">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="member4Branch">Branch</label>
+                        <input type="text" id="member4Branch" name="member4Branch" list="branch-options" placeholder="Select or type branch">
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-container">
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span id="submitText">Register Team</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('teamRegistrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Basic validation for required fields
+            const requiredFields = ['teamName', 'leaderName', 'leaderRoll', 'leaderBranch'];
+            let isValid = true;
+
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    field.style.borderColor = 'rgba(239, 68, 68, 0.8)';
+                    isValid = false;
+                } else {
+                    field.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                }
+            });
+
+            if (isValid) {
+                submitForm();
+            } else {
+                alert('Please fill in all required fields.');
+            }
+        });
+
+        function submitForm() {
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const successMessage = document.getElementById('successMessage');
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitText.innerHTML = '<span class="loading"></span>Registering...';
+
+            // Simulate API call
+            setTimeout(() => {
+                // Collect form data
+                const formData = new FormData(document.getElementById('teamRegistrationForm'));
+                const teamData = Object.fromEntries(formData);
+
+                // Filter out empty values
+                const cleanedData = {};
+                Object.keys(teamData).forEach(key => {
+                    if (teamData[key].trim()) {
+                        cleanedData[key] = teamData[key].trim();
+                    }
+                });
+
+                console.log('Team Registration Data:', cleanedData);
+
+                // Show success message
+                successMessage.style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Reset form
+                document.getElementById('teamRegistrationForm').reset();
+
+                // Reset button
+                submitBtn.disabled = false;
+                submitText.textContent = 'Register Team';
+
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 5000);
+
+            }, 2000);
+        }
+
+        // Clear error styling on input
+        document.querySelectorAll('input[required]').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

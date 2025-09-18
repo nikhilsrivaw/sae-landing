@@ -153,22 +153,48 @@ body {
     0 0 20px rgba(57, 255, 20, 0.2);
 }
 
-/* Scrollbar styling */
+/* Hide all scrollbars globally */
 ::-webkit-scrollbar {
-  width: 8px;
+  display: none;
+  width: 0px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a1d;
+  display: none;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #39ff14, #ff10f0);
-  border-radius: 4px;
+  display: none;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #ff10f0, #1b03a3);
+  display: none;
+}
+
+/* Hide scrollbars for all elements */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+/* Ensure all containers can still scroll but without visible scrollbars */
+html, body {
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
 
 /* Loading screen effect */

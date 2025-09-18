@@ -83,3 +83,4 @@ jspm_packages/
 tmp/
 temp/
 EOF < /dev/null
+schema

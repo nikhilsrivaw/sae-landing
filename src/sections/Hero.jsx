@@ -2214,6 +2214,24 @@ const Hero = ({ onStateChange }) => {
         />
       )}
 
+      {/* Deployment Version Indicator */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '10px',
+          right: '10px',
+          background: 'rgba(255, 255, 255, 0.9)',
+          color: 'black',
+          padding: '5px 10px',
+          fontSize: '12px',
+          borderRadius: '4px',
+          zIndex: 9999,
+          fontFamily: 'monospace'
+        }}
+      >
+        v2025.09.19.001 - Commit: 74af85c
+      </div>
+
     </>
   );
 };

@@ -43,9 +43,9 @@ const GTAEventsPopup = ({ onClose }) => {
       maxWidth: '1200px',
       width: '95vw',
       margin: '10px auto',
-      padding: '50px',
+      padding: window.innerWidth < 768 ? '20px' : '50px',
       color: '#222',
-      minHeight: '800px',
+      minHeight: window.innerWidth < 768 ? 'auto' : '800px',
       maxHeight: '90vh',
       overflow: 'hidden'
     },
@@ -120,12 +120,12 @@ const GTAEventsPopup = ({ onClose }) => {
     },
     title: {
       fontFamily: '"Impact", "Arial Black", sans-serif',
-      fontSize: '32px',
+      fontSize: window.innerWidth < 768 ? '20px' : '32px',
       fontWeight: '900',
       color: '#1a1a1a',
       textTransform: 'uppercase',
-      letterSpacing: '2px',
-      margin: '20px 0',
+      letterSpacing: window.innerWidth < 768 ? '1px' : '2px',
+      margin: window.innerWidth < 768 ? '10px 0' : '20px 0',
       textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
       lineHeight: '1.1'
     },
@@ -159,33 +159,34 @@ const GTAEventsPopup = ({ onClose }) => {
     eventCard: {
       background: 'rgba(255, 255, 255, 0.9)',
       border: '4px solid #444',
-      margin: '25px 0',
-      padding: '30px',
+      margin: window.innerWidth < 768 ? '15px 0' : '25px 0',
+      padding: window.innerWidth < 768 ? '15px' : '30px',
       position: 'relative',
       boxShadow: '0 6px 15px rgba(0,0,0,0.3)',
-      display: 'grid',
-      gridTemplateColumns: '1fr 300px',
-      gap: '25px',
+      display: window.innerWidth < 768 ? 'flex' : 'grid',
+      flexDirection: window.innerWidth < 768 ? 'column' : undefined,
+      gridTemplateColumns: window.innerWidth < 768 ? undefined : '1fr 300px',
+      gap: window.innerWidth < 768 ? '15px' : '25px',
       alignItems: 'start'
     },
     eventCardSingle: {
       background: 'rgba(255, 255, 255, 0.9)',
       border: '4px solid #444',
-      margin: '25px 0',
-      padding: '30px',
+      margin: window.innerWidth < 768 ? '15px 0' : '25px 0',
+      padding: window.innerWidth < 768 ? '15px' : '30px',
       position: 'relative',
       boxShadow: '0 6px 15px rgba(0,0,0,0.3)'
     },
     eventTitle: {
       fontFamily: '"Impact", sans-serif',
-      fontSize: '24px',
+      fontSize: window.innerWidth < 768 ? '18px' : '24px',
       fontWeight: 'bold',
       color: '#1a1a1a',
       textTransform: 'uppercase',
-      letterSpacing: '2px',
-      marginBottom: '15px',
+      letterSpacing: window.innerWidth < 768 ? '1px' : '2px',
+      marginBottom: window.innerWidth < 768 ? '10px' : '15px',
       textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-      gridColumn: '1 / -1'
+      gridColumn: window.innerWidth < 768 ? undefined : '1 / -1'
     },
     eventContent: {
       display: 'flex',
@@ -201,7 +202,7 @@ const GTAEventsPopup = ({ onClose }) => {
     },
     eventImage: {
       width: '100%',
-      height: '250px',
+      height: window.innerWidth < 768 ? '200px' : '250px',
       objectFit: 'cover',
       border: '3px solid #666',
       marginBottom: '15px',

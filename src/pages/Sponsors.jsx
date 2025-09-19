@@ -14,7 +14,7 @@ import sponsorLogo1 from "../assets/sponsorLogo1.png";
 import sponsorLogo2 from "../assets/logoSAE.png";
 import sponsorLogo3 from "../assets/sponsorLogo3.png";
 import sponsorLogo4 from "../assets/loading.png";
-import sponsorLogo5 from "../assets/Loadingpage.png";
+import sponsorLogo5 from "../assets/loadingPage.png";
 import sponsorLogo6 from "../assets/discoLogo.png";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -97,38 +97,103 @@ const sponsorsData = [
 const Sponsors = () => {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [error, setError] = useState(null);
 
   const containerRef = useRef(null);
 
+  // Debug logging
+  console.log('🔍 Sponsors component mounted');
+
+  // Add error handler for component-specific issues
+  React.useEffect(() => {
+    const handleError = (event) => {
+      console.group('🚨 Sponsors Component Error');
+      console.error('Event:', event);
+      console.error('Error:', event.error);
+      console.groupEnd();
+      setError(event.error);
+    };
+
+    window.addEventListener('error', handleError);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
+
+  // Error boundary for this component
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-white text-4xl font-bold mb-4">Unable to Load Sponsors</h1>
+          <p className="text-gray-300 mb-8">Please try refreshing the page</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded font-bold"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
-    // ... (Loading animation logic remains the same)
-    let interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => setLoading(false), 500);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 150);
-    return () => clearInterval(interval);
+    console.log('🔍 Starting loading animation useEffect');
+    try {
+      // Loading animation logic
+      let interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            console.log('🔍 Loading complete, setting loading to false');
+            setTimeout(() => setLoading(false), 500);
+            return 100;
+          }
+          return prev + 10;
+        });
+      }, 150);
+      return () => {
+        console.log('🔍 Cleaning up loading animation');
+        clearInterval(interval);
+      };
+    } catch (err) {
+      console.group('🚨 Error in Sponsors loading useEffect');
+      console.error('Error:', err);
+      console.error('Stack:', err.stack);
+      console.groupEnd();
+      setError(err);
+    }
   }, []);
 
   useEffect(() => {
-    // ... (Page load animation logic remains the same)
-    if (!loading && containerRef.current) {
-      gsap.fromTo(
-        containerRef.current,
-        { opacity: 0, filter: "blur(10px)", scale: 0.98 },
-        {
-          opacity: 1,
-          filter: "blur(0px)",
-          scale: 1,
-          duration: 1.2,
-          ease: "power3.out",
-        }
-      );
+    console.log('🔍 Starting GSAP animation useEffect, loading:', loading);
+    try {
+      // Page load animation logic
+      if (!loading && containerRef.current) {
+        console.log('🔍 Running GSAP animation');
+        gsap.fromTo(
+          containerRef.current,
+          { opacity: 0, filter: "blur(10px)", scale: 0.98 },
+          {
+            opacity: 1,
+            filter: "blur(0px)",
+            scale: 1,
+            duration: 1.2,
+            ease: "power3.out",
+            onComplete: () => console.log('🔍 GSAP animation completed')
+          }
+        );
+      }
+    } catch (err) {
+      console.group('🚨 Error in Sponsors GSAP animation useEffect');
+      console.error('Error:', err);
+      console.error('Stack:', err.stack);
+      console.error('GSAP available:', typeof gsap);
+      console.error('Container ref:', containerRef.current);
+      console.groupEnd();
+      setError(err);
     }
   }, [loading]);
 
@@ -137,8 +202,11 @@ const Sponsors = () => {
   const smallSponsors = sponsorsData.filter(sponsor => sponsor.type === 'small');
 
   if (loading) {
+    console.log('🔍 Sponsors showing loading screen, progress:', progress);
     return <LoadingScreen progress={progress} isLoading={loading} />;
   }
+
+  console.log('🔍 Sponsors about to render main content');
 
   const fancyTextStyle = {
     fontFamily: 'Impact, "Arial Black", sans-serif',
@@ -388,8 +456,7 @@ const Sponsors = () => {
 
       {/* The rest of the styles remain the same */}
       <style jsx>{`
-        /* ... (Existing styles from the previous response) */
-        @import url("https://fonts.googleapis.com/css2?family=Chalet+Comprime&display=swap");
+        /* Font will be imported in index.html or CSS file instead */
 
         .main-container {
           background: url(${chamberBackground}) no-repeat center center fixed;

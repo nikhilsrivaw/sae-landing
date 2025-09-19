@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Custom GTA-style CSS */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Teko:wght@300;400;500;600;700&family=Bebas+Neue&display=swap');
+/* Fonts imported in index.html */
 
 * {
   margin: 0;

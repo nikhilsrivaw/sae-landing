@@ -1262,7 +1262,7 @@ const Hero = ({ onStateChange }) => {
         
         {/* Custom keyframes for wave and wheel animations */}
         <style jsx>{`
-          @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rock+Salt&display=swap');
+          /* Fonts imported in index.html */
 
           .notice-board .notice-item {
             transition: transform 0.3s ease, filter 0.3s ease;
@@ -1616,9 +1616,9 @@ const Hero = ({ onStateChange }) => {
           </div>
         </div>
 
-        {/* GTA-Style Hot Events Notice Board */}
+        {/* GTA-Style Hot Events Notice Board - Desktop Only */}
         {showMainContent && (
-          <div className="absolute top-1/2 transform -translate-y-1/2 right-4 sm:right-8 z-20 w-64 sm:w-80 h-48 sm:h-60">
+          <div className="absolute top-1/2 transform -translate-y-1/2 right-4 sm:right-8 z-20 w-64 sm:w-80 h-48 sm:h-60 hidden lg:block">
             {/* Cork Board Background */}
             <div
               className="notice-board relative w-full h-full"
@@ -1930,6 +1930,107 @@ const Hero = ({ onStateChange }) => {
           </div>
         )}
 
+        {/* Mobile Notice Board - Desktop Login Message */}
+        {showMainContent && (
+          <div className="absolute top-24 right-4 z-20 w-56 h-40 block lg:hidden">
+            {/* Cork Board Background */}
+            <div
+              className="notice-board relative w-full h-full"
+              style={{
+                background: `
+                  radial-gradient(circle at 20% 30%, rgba(139, 69, 19, 0.3) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 70%, rgba(101, 67, 33, 0.2) 0%, transparent 50%),
+                  radial-gradient(circle at 40% 80%, rgba(160, 82, 45, 0.25) 0%, transparent 40%),
+                  linear-gradient(45deg,
+                    rgb(139, 116, 88) 0%,
+                    rgb(160, 136, 108) 15%,
+                    rgb(145, 122, 94) 30%,
+                    rgb(156, 132, 104) 45%,
+                    rgb(139, 116, 88) 60%,
+                    rgb(134, 111, 83) 75%,
+                    rgb(150, 126, 98) 90%,
+                    rgb(144, 120, 92) 100%
+                  )
+                `,
+                boxShadow: `
+                  inset 0 0 50px rgba(0, 0, 0, 0.3),
+                  inset 0 0 20px rgba(101, 67, 33, 0.4),
+                  0 8px 32px rgba(0, 0, 0, 0.6)
+                `,
+                borderRadius: '4px',
+                border: '3px solid #654321',
+                transform: 'rotate(-1deg)',
+                filter: 'contrast(1.1) saturate(0.8)'
+              }}
+            >
+              {/* Title Header */}
+              <div
+                className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-red-800 text-yellow-200 px-2 py-1 text-xs font-bold tracking-wider"
+                style={{
+                  fontFamily: '"Permanent Marker", cursive',
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                  transform: 'translateX(-50%) rotate(1deg)',
+                  border: '1px solid #8B0000',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.5)'
+                }}
+              >
+                NOTICE
+              </div>
+
+              {/* Desktop Login Message */}
+              <div
+                className="notice-item absolute top-4 left-3 right-3 bottom-12 bg-yellow-100 border-2 border-red-600 p-3 flex flex-col items-center justify-center text-center"
+                style={{
+                  transform: 'rotate(-1deg)',
+                  boxShadow: '2px 2px 6px rgba(0,0,0,0.4)',
+                  background: 'linear-gradient(135deg, #fef3c7 0%, #fde047 100%)'
+                }}
+              >
+                {/* Pin */}
+                <div
+                  className="absolute -top-1 left-1/2 w-2 h-2 bg-gray-600 rounded-full transform -translate-x-1/2"
+                  style={{ boxShadow: 'inset 0 0 2px rgba(0,0,0,0.6)' }}
+                ></div>
+
+                <div className="text-center space-y-2">
+                  <div className="text-lg">💻</div>
+                  <div
+                    className="text-red-800 font-bold text-xs leading-tight"
+                    style={{ fontFamily: '"Permanent Marker", cursive' }}
+                  >
+                    PLEASE LOGIN WITH DESKTOP
+                  </div>
+                  <div
+                    className="text-gray-800 text-xs leading-tight"
+                    style={{ fontFamily: '"Courier New", monospace' }}
+                  >
+                    To register for events & view full details
+                  </div>
+                  <div className="text-xs text-red-600 font-bold">
+                    📱 ➡️ 🖥️
+                  </div>
+                </div>
+              </div>
+
+              {/* Small SAE Logo */}
+              <div
+                className="notice-item absolute bottom-2 right-3 w-12 h-8 bg-white border border-gray-400 flex items-center justify-center"
+                style={{
+                  transform: 'rotate(2deg)',
+                  boxShadow: '1px 1px 3px rgba(0,0,0,0.3)'
+                }}
+              >
+                <div
+                  className="text-center"
+                  style={{ fontFamily: '"Impact", sans-serif', fontSize: '6px' }}
+                >
+                  <div className="text-blue-800 font-bold">SAE</div>
+                  <div className="text-red-600">INDIA</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Bottom fade to black for smooth transition */}
         <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black to-transparent" />
@@ -2093,7 +2194,7 @@ const Hero = ({ onStateChange }) => {
 
         {/* Custom keyframes for wave and wheel animations */}
         <style jsx>{`
-          @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rock+Salt&display=swap');
+          /* Fonts imported in index.html */
 
           .notice-board .notice-item {
             transition: transform 0.3s ease, filter 0.3s ease;

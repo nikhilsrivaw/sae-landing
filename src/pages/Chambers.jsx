@@ -222,7 +222,7 @@ const Chambers = () => {
 
       {/* Styles */}
       <style jsx>{`
-        @import url("https://fonts.googleapis.com/css2?family=Chalet+Comprime&display=swap");
+        /* Font imported in index.html */
 
         .main-container {
           background: url(${chamberBackground}) no-repeat center center fixed;

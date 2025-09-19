@@ -47,13 +47,10 @@ const MiniMap = () => {
         </div>
 
         {/* Animated "S" Marker */}
-        <motion.div
-          className="absolute top-[62%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-          animate={{ y: [0, -8, 0] }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            ease: "easeInOut",
+        <div
+          className="absolute top-[62%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer animate-bounce"
+          style={{
+            animationDuration: '1.5s'
           }}
         >
           <div className="w-3 h-3 bg-yellow-400 rounded-full border border-black relative shadow-[0_0_0_1px_rgba(255,255,255,0.8)]">
@@ -61,7 +58,7 @@ const MiniMap = () => {
               S
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Other markers */}
         <div

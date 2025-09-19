@@ -14,7 +14,7 @@ import sponsorLogo1 from "../assets/sponsorLogo1.png";
 import sponsorLogo2 from "../assets/logoSAE.png";
 import sponsorLogo3 from "../assets/sponsorLogo3.png";
 import sponsorLogo4 from "../assets/loading.png";
-import sponsorLogo5 from "../assets/loadingPage.png";
+import sponsorLogo5 from "../assets/Loadingpage.png";
 import sponsorLogo6 from "../assets/discoLogo.png";
 
 gsap.registerPlugin(ScrollTrigger);

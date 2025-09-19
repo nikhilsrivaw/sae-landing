@@ -179,13 +179,7 @@ const Sponsors = () => {
               </h2> */}
               {/* <p>{sponsor.tagline}</p> */}
              </div>
-            {/* <div className="flex-1 flex justify-center items-center">
-              <img
-                src={sponsor.logo}
-                alt={`${sponsor.name} Logo`}
-                className="sponsor-logo"
-              />
-            </div> */}
+            
             <button className="learn-more-btn group relative">
               <div className="corner top-left"></div>
               <div className="corner top-right"></div>

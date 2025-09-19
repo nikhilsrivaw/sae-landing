@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import HomeButton from '../components/HomeButton';
-import loadingImage from "../assets/loadingPage.png";
+import loadingImage from "../assets/loading.png";
 
 const LoadingScreen = () => {
   const [loading, setLoading] = useState(true);

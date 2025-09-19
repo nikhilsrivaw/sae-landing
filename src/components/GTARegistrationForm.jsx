@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabaseService } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -33,6 +33,10 @@ const GTARegistrationForm = () => {
   const [registrationStatus, setRegistrationStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
 
+  // QR & UPI settings state
+  const [qrUpiSettings, setQrUpiSettings] = useState(null);
+  const [qrUpiLoading, setQrUpiLoading] = useState(true);
+
   const branches = [
     'Computer Science (CSE)',
     'Electronics (ECE)',
@@ -45,6 +49,23 @@ const GTARegistrationForm = () => {
     'B.Pharma',
     'Other'
   ];
+
+  // Load QR & UPI settings on component mount
+  useEffect(() => {
+    const loadQrUpiSettings = async () => {
+      try {
+        const settings = await supabaseService.getQrUpiSettings();
+        setQrUpiSettings(settings);
+      } catch (err) {
+        console.error('Error loading QR & UPI settings:', err);
+        // Don't show error to user, just log it - form will show fallback message
+      } finally {
+        setQrUpiLoading(false);
+      }
+    };
+
+    loadQrUpiSettings();
+  }, []);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -919,11 +940,104 @@ const GTARegistrationForm = () => {
         <div style={styles.paymentSection}>
           <div style={styles.paymentTitle}>REGISTRATION FEE PAYMENT</div>
 
-          <div style={styles.paymentAmount}>₹4,000</div>
+          <div style={styles.paymentAmount}>₹3,000</div>
 
           <div style={styles.paymentInfo}>
             PAYMENT MUST BE MADE BEFORE REGISTRATION COMPLETION.<br/>
             UPI ID: sae@losantos
+          </div>
+
+          {/* QR Code Section */}
+          <div style={{
+            margin: '20px 0',
+            padding: '15px',
+            background: 'rgba(255, 255, 255, 0.9)',
+            border: '2px solid #8B0000',
+            borderRadius: '8px',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              fontFamily: '"Impact", sans-serif',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              color: '#8B0000',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              marginBottom: '10px'
+            }}>
+              🏧 QR CODE FOR PAYMENT
+            </div>
+            {qrUpiLoading ? (
+              <div style={{
+                width: '200px',
+                height: '200px',
+                border: '3px solid #2a2a2a',
+                margin: '0 auto',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: '#f5f5f5',
+                fontSize: '14px',
+                color: '#666',
+                fontFamily: '"Courier New", monospace',
+                textAlign: 'center',
+                lineHeight: '1.4'
+              }}>
+                ⏳ LOADING QR CODE...
+              </div>
+            ) : qrUpiSettings?.qr_code_url ? (
+              <div style={{ textAlign: 'center' }}>
+                <img
+                  src={qrUpiSettings.qr_code_url}
+                  alt="Payment QR Code"
+                  style={{
+                    width: '200px',
+                    height: '200px',
+                    border: '3px solid #2a2a2a',
+                    borderRadius: '8px',
+                    objectFit: 'cover'
+                  }}
+                />
+                {qrUpiSettings.upi_id && (
+                  <div style={{
+                    fontFamily: '"Courier New", monospace',
+                    fontSize: '12px',
+                    color: '#444',
+                    marginTop: '10px',
+                    fontWeight: 'bold'
+                  }}>
+                    UPI ID: {qrUpiSettings.upi_id}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{
+                width: '200px',
+                height: '200px',
+                border: '3px solid #2a2a2a',
+                margin: '0 auto',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: '#f5f5f5',
+                fontSize: '14px',
+                color: '#666',
+                fontFamily: '"Courier New", monospace',
+                textAlign: 'center',
+                lineHeight: '1.4'
+              }}>
+                ❌ QR CODE NOT AVAILABLE<br/>CONTACT ADMIN
+              </div>
+            )}
+            <div style={{
+              fontFamily: '"Courier New", monospace',
+              fontSize: '12px',
+              color: '#444',
+              marginTop: '10px',
+              fontWeight: 'bold'
+            }}>
+              Scan QR code with any UPI app to pay ₹3,000
+            </div>
           </div>
 
           <div style={styles.inputGroup}>

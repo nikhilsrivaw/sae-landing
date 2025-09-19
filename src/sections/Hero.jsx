@@ -1363,7 +1363,7 @@ const Hero = ({ onStateChange }) => {
                     textShadow: '2px 2px 0px #000000, -1px -1px 0px #333333, 0px 0px 8px rgba(255,255,255,0.4)',
                     letterSpacing: '0.1em',
                   }}>
-                SOCIETY OF AUTOMOTIVE ENGINEERS
+                S.A.E COLLEGIATE CLUB MMMUT
               </h3>
             </div>
 
@@ -1628,7 +1628,7 @@ const Hero = ({ onStateChange }) => {
                   {/* Main Event Poster */}
                   {hotEvents[0] && (
                     <div
-                      className="notice-item absolute top-4 left-3 w-24 h-28 bg-white border-2 border-yellow-800"
+                      className="notice-item absolute top-4 left-3 w-32 h-40 bg-white border-2 border-yellow-800"
                       style={{
                         transform: 'rotate(-2deg)',
                         boxShadow: '2px 2px 6px rgba(0,0,0,0.4)',
@@ -2041,7 +2041,7 @@ const Hero = ({ onStateChange }) => {
                         </h1>
                         <div className="w-24 h-px bg-white mx-auto mb-6"></div>
                         <p className="text-white/80 text-lg sm:text-xl font-light tracking-wide">
-                          SOCIETY OF AUTOMOTIVE ENGINEERS
+                          S.A.E COLLEGIATE CLUB MMMUT
                         </p>
                         <p className="text-white/60 text-sm sm:text-base mt-4">
                           MADAN MOHAN MALAVIYA UNIVERSITY OF TECHNOLOGY

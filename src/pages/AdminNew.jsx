@@ -21,6 +21,13 @@ const AdminNew = () => {
   const [registrationFilter, setRegistrationFilter] = useState('all');
   const [searchRollNumber, setSearchRollNumber] = useState('');
 
+  // QR & UPI Settings state
+  const [qrCodeFile, setQrCodeFile] = useState(null);
+  const [qrCodePreview, setQrCodePreview] = useState(null);
+  const [upiId, setUpiId] = useState('');
+  const [currentQrCodeUrl, setCurrentQrCodeUrl] = useState(null);
+  const [currentUpiId, setCurrentUpiId] = useState('');
+
   // Helper function to filter registrations
   const getFilteredRegistrations = () => {
     return teamRegistrations.filter(registration => {
@@ -63,6 +70,105 @@ const AdminNew = () => {
     }
   };
 
+  // Load QR & UPI settings from database
+  const loadQrUpiSettings = async () => {
+    try {
+      const settings = await supabaseService.getQrUpiSettings();
+      if (settings) {
+        setCurrentQrCodeUrl(settings.qr_code_url);
+        setCurrentUpiId(settings.upi_id || '');
+        setUpiId(settings.upi_id || '');
+      }
+    } catch (err) {
+      console.error('Error loading QR & UPI settings:', err);
+    }
+  };
+
+  // Validate UPI ID format
+  const validateUpiId = (upiId) => {
+    if (!upiId.trim()) {
+      return 'UPI ID is required';
+    }
+
+    // Basic UPI ID format validation
+    const upiPattern = /^[a-zA-Z0-9.-]{2,256}@[a-zA-Z][a-zA-Z0-9.-]{2,64}$/;
+    if (!upiPattern.test(upiId)) {
+      return 'Please enter a valid UPI ID (e.g., user@paytm, user@phonepe)';
+    }
+
+    return null;
+  };
+
+  // Save QR & UPI settings with validation
+  const handleSaveQrUpiSettings = async (e) => {
+    e.preventDefault();
+
+    // Validate UPI ID
+    const upiError = validateUpiId(upiId);
+    if (upiError) {
+      setError(upiError);
+      return;
+    }
+
+    // Check if we have either a new QR code or existing one
+    if (!qrCodeFile && !currentQrCodeUrl) {
+      setError('Please upload a QR code image');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      let qrCodeUrl = currentQrCodeUrl;
+
+      if (qrCodeFile) {
+        const uploadResult = await supabaseService.uploadQrCodeImage(qrCodeFile);
+        qrCodeUrl = uploadResult.url;
+      }
+
+      await supabaseService.saveQrUpiSettings({
+        qr_code_url: qrCodeUrl,
+        upi_id: upiId.trim()
+      });
+
+      setCurrentQrCodeUrl(qrCodeUrl);
+      setCurrentUpiId(upiId.trim());
+      setQrCodeFile(null);
+      setQrCodePreview(null);
+      setError(null);
+
+      // Show success message
+      const successMsg = qrCodeFile ? 'QR code uploaded and UPI settings saved successfully!' : 'UPI settings updated successfully!';
+      alert(successMsg);
+    } catch (err) {
+      setError(`Failed to save QR & UPI settings: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete QR & UPI settings
+  const handleDeleteQrUpiSettings = async () => {
+    if (!confirm('Are you sure you want to delete the current QR code and UPI ID? This action cannot be undone.')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await supabaseService.deleteQrUpiSettings();
+      setCurrentQrCodeUrl(null);
+      setCurrentUpiId('');
+      setUpiId('');
+      setQrCodeFile(null);
+      setQrCodePreview(null);
+      setError(null);
+      alert('QR & UPI settings deleted successfully!');
+    } catch (err) {
+      setError(`Failed to delete QR & UPI settings: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Update registration status
   const updateRegistrationStatus = async (id, status) => {
     try {
@@ -84,6 +190,49 @@ const AdminNew = () => {
       const reader = new FileReader();
       reader.onload = (e) => setPosterPreview(e.target.result);
       reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle QR code file selection with validation
+  const handleQrCodeChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file (PNG, JPG, JPEG, etc.)');
+        e.target.value = '';
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image file size must be less than 5MB');
+        e.target.value = '';
+        return;
+      }
+
+      // Validate image dimensions (optional - QR codes should be square)
+      const img = new Image();
+      img.onload = () => {
+        if (img.width < 100 || img.height < 100) {
+          setError('QR code image should be at least 100x100 pixels');
+          e.target.value = '';
+          return;
+        }
+
+        setQrCodeFile(file);
+        const reader = new FileReader();
+        reader.onload = (e) => setQrCodePreview(e.target.result);
+        reader.readAsDataURL(file);
+        setError(null); // Clear any previous errors
+      };
+
+      img.onerror = () => {
+        setError('Invalid image file. Please select a valid QR code image.');
+        e.target.value = '';
+      };
+
+      img.src = URL.createObjectURL(file);
     }
   };
 
@@ -156,6 +305,7 @@ const AdminNew = () => {
   useEffect(() => {
     loadHotEvents();
     loadTeamRegistrations();
+    loadQrUpiSettings();
   }, []);
 
   const stats = [
@@ -980,6 +1130,14 @@ const AdminNew = () => {
             </a>
             <a
               href="#"
+              className={`nav-item ${activeSection === 'qr-upi' ? 'active' : ''}`}
+              onClick={() => setActiveSection('qr-upi')}
+            >
+              <span>💳</span>
+              <span>QR & UPI Settings</span>
+            </a>
+            <a
+              href="#"
               className={`nav-item ${activeSection === 'analytics' ? 'active' : ''}`}
               onClick={() => setActiveSection('analytics')}
             >
@@ -1012,6 +1170,7 @@ const AdminNew = () => {
                 {activeSection === 'dashboard' ? 'Dashboard' :
                  activeSection === 'events' ? 'Hot Events Management' :
                  activeSection === 'registrations' ? 'Team Registrations Management' :
+                 activeSection === 'qr-upi' ? 'QR & UPI Settings' :
                  activeSection === 'analytics' ? 'Analytics' : 'Settings'}
               </h1>
             </div>
@@ -1443,6 +1602,111 @@ const AdminNew = () => {
                             }
                           </div>
                         )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* QR & UPI Settings View */}
+            {activeSection === 'qr-upi' && (
+              <div className="dashboard-grid">
+                <div className="dashboard-card">
+                  <div className="card-header">
+                    <h3 className="card-title">💳 QR Code & UPI Settings</h3>
+                  </div>
+
+                  <form onSubmit={handleSaveQrUpiSettings}>
+                    <div className="form-group">
+                      <label className="form-label">QR Code Image *</label>
+                      <input
+                        type="file"
+                        className="file-input"
+                        accept="image/*"
+                        onChange={handleQrCodeChange}
+                        disabled={loading}
+                      />
+                      <p style={{ color: '#aaa', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                        Supported formats: PNG, JPG, JPEG. Max size: 5MB. Min dimensions: 100x100px
+                      </p>
+                      {qrCodePreview && (
+                        <img src={qrCodePreview} alt="QR Code Preview" className="preview-image" />
+                      )}
+                      {currentQrCodeUrl && !qrCodePreview && (
+                        <div style={{ marginTop: '0.5rem' }}>
+                          <p style={{ color: '#aaa', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Current QR Code:</p>
+                          <img src={currentQrCodeUrl} alt="Current QR Code" className="preview-image" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">UPI ID *</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={upiId}
+                        onChange={(e) => setUpiId(e.target.value)}
+                        placeholder="e.g., example@paytm, example@phonepe"
+                        required
+                        disabled={loading}
+                        pattern="[a-zA-Z0-9.-]+@[a-zA-Z][a-zA-Z0-9.-]+"
+                        title="Please enter a valid UPI ID format (e.g., user@paytm)"
+                      />
+                      <p style={{ color: '#aaa', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                        Enter the UPI ID for payment collection (format: user@bank)
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                      <button type="submit" className="btn btn-primary" disabled={loading} style={{ flex: 1 }}>
+                        {loading ? '⏳ Saving...' : '💾 Save QR & UPI Settings'}
+                      </button>
+                      {currentQrCodeUrl && (
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          disabled={loading}
+                          onClick={handleDeleteQrUpiSettings}
+                          style={{ flexShrink: 0 }}
+                        >
+                          {loading ? '⏳ Deleting...' : '🗑️ Delete'}
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </div>
+
+                <div className="dashboard-card">
+                  <div className="card-header">
+                    <h3 className="card-title">📱 Current Settings Preview</h3>
+                  </div>
+
+                  <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+                    {currentQrCodeUrl ? (
+                      <div>
+                        <img
+                          src={currentQrCodeUrl}
+                          alt="Current QR Code"
+                          style={{
+                            maxWidth: '200px',
+                            maxHeight: '200px',
+                            borderRadius: '8px',
+                            marginBottom: '1rem'
+                          }}
+                        />
+                        <p style={{ color: '#f0f0f0', fontWeight: '600' }}>
+                          UPI ID: {currentUpiId || 'Not set'}
+                        </p>
+                        <p style={{ color: '#aaa', fontSize: '0.875rem' }}>
+                          This will be displayed on the registration form
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📱</div>
+                        <p style={{ color: '#aaa' }}>No QR code uploaded yet</p>
                       </div>
                     )}
                   </div>

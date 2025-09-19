@@ -26,7 +26,7 @@ const GTAEventsPopup = ({ onClose }) => {
 
   const styles = {
     container: {
-      fontFamily: '"Courier New", "American Typewriter", monospace',
+      fontFamily: '"Inter", "Segoe UI", "Arial", sans-serif',
       background: `
         linear-gradient(145deg, #f4f1e8 0%, #ede8d8 25%, #f0ebe0 50%, #e8e3d3 75%, #f2ede5 100%),
         radial-gradient(circle at 20% 30%, rgba(139, 125, 107, 0.1) 0%, transparent 50%),
@@ -119,35 +119,42 @@ const GTAEventsPopup = ({ onClose }) => {
       zIndex: 2
     },
     title: {
-      fontFamily: '"Impact", "Arial Black", sans-serif',
-      fontSize: window.innerWidth < 768 ? '20px' : '32px',
-      fontWeight: '900',
+      fontFamily: '"Poppins", "Inter", sans-serif',
+      fontSize: window.innerWidth < 768 ? '24px' : '36px',
+      fontWeight: '700',
       color: '#1a1a1a',
       textTransform: 'uppercase',
-      letterSpacing: window.innerWidth < 768 ? '1px' : '2px',
-      margin: window.innerWidth < 768 ? '10px 0' : '20px 0',
-      textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-      lineHeight: '1.1'
+      letterSpacing: window.innerWidth < 768 ? '1.5px' : '3px',
+      margin: window.innerWidth < 768 ? '15px 0' : '25px 0',
+      textShadow: '3px 3px 6px rgba(0,0,0,0.4)',
+      lineHeight: '1.2',
+      background: 'linear-gradient(135deg, #1a1a1a 0%, #333 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text'
     },
     logoSection: {
-      background: 'linear-gradient(90deg, #2a2a2a 0%, #444 50%, #2a2a2a 100%)',
+      background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e40af 100%)',
       color: '#fff',
-      padding: '8px 20px',
-      margin: '0 auto 20px',
+      padding: '12px 24px',
+      margin: '0 auto 25px',
       width: 'fit-content',
-      fontFamily: '"Impact", sans-serif',
-      fontSize: '16px',
-      fontWeight: 'bold',
-      letterSpacing: '2px',
-      border: '3px solid #1a1a1a',
-      textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
+      fontFamily: '"Poppins", sans-serif',
+      fontSize: '14px',
+      fontWeight: '600',
+      letterSpacing: '1.5px',
+      border: '2px solid #1e40af',
+      borderRadius: '8px',
+      textShadow: '1px 1px 3px rgba(0,0,0,0.5)',
+      boxShadow: '0 4px 12px rgba(30, 64, 175, 0.3)'
     },
     subtitle: {
-      fontFamily: '"Courier New", monospace',
-      fontSize: '14px',
-      color: '#444',
-      margin: '10px 0',
-      fontWeight: 'bold'
+      fontFamily: '"Inter", sans-serif',
+      fontSize: '15px',
+      color: '#555',
+      margin: '12px 0',
+      fontWeight: '500',
+      fontStyle: 'italic'
     },
     eventsContainer: {
       position: 'relative',
@@ -178,31 +185,34 @@ const GTAEventsPopup = ({ onClose }) => {
       boxShadow: '0 6px 15px rgba(0,0,0,0.3)'
     },
     eventTitle: {
-      fontFamily: '"Impact", sans-serif',
-      fontSize: window.innerWidth < 768 ? '18px' : '24px',
-      fontWeight: 'bold',
-      color: '#1a1a1a',
+      fontFamily: '"Poppins", sans-serif',
+      fontSize: window.innerWidth < 768 ? '20px' : '28px',
+      fontWeight: '700',
+      color: '#1e40af',
       textTransform: 'uppercase',
       letterSpacing: window.innerWidth < 768 ? '1px' : '2px',
-      marginBottom: window.innerWidth < 768 ? '10px' : '15px',
-      textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-      gridColumn: window.innerWidth < 768 ? undefined : '1 / -1'
+      marginBottom: window.innerWidth < 768 ? '12px' : '18px',
+      textShadow: '2px 2px 8px rgba(30, 64, 175, 0.3)',
+      gridColumn: window.innerWidth < 768 ? undefined : '1 / -1',
+      borderBottom: '3px solid #3b82f6',
+      paddingBottom: '8px'
     },
     eventContent: {
       display: 'flex',
       flexDirection: 'column'
     },
     eventDescription: {
-      fontFamily: '"Courier New", monospace',
-      fontSize: '14px',
-      color: '#333',
-      lineHeight: '1.7',
-      marginBottom: '20px',
-      textAlign: 'justify'
+      fontFamily: '"Inter", "Segoe UI", sans-serif',
+      fontSize: '16px',
+      color: '#374151',
+      lineHeight: '1.8',
+      marginBottom: '24px',
+      textAlign: 'justify',
+      fontWeight: '400'
     },
     eventImage: {
       width: '100%',
-      height: window.innerWidth < 768 ? '200px' : '250px',
+      height: window.innerWidth < 768 ? '300px' : '400px',
       objectFit: 'cover',
       border: '3px solid #666',
       marginBottom: '15px',
@@ -213,73 +223,82 @@ const GTAEventsPopup = ({ onClose }) => {
       flexDirection: 'column'
     },
     eventMeta: {
-      fontFamily: '"Courier New", monospace',
-      fontSize: '12px',
-      color: '#666',
-      fontWeight: 'bold',
-      marginTop: '10px'
+      fontFamily: '"Inter", sans-serif',
+      fontSize: '13px',
+      color: '#6b7280',
+      fontWeight: '500',
+      marginTop: '12px',
+      fontStyle: 'italic'
     },
     eventDetail: {
-      fontFamily: '"Courier New", monospace',
-      fontSize: '13px',
-      color: '#444',
-      margin: '8px 0',
-      padding: '8px',
-      background: 'rgba(0,0,0,0.05)',
-      border: '1px solid #ccc'
+      fontFamily: '"Poppins", sans-serif',
+      fontSize: '14px',
+      color: '#1f2937',
+      margin: '12px 0',
+      padding: '12px 16px',
+      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(30, 64, 175, 0.12) 100%)',
+      border: '2px solid #e5e7eb',
+      borderRadius: '8px',
+      fontWeight: '600',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
     },
     reelLink: {
-      fontFamily: '"Courier New", monospace',
-      fontSize: '13px',
-      color: '#0066cc',
-      textDecoration: 'underline',
-      wordBreak: 'break-all'
+      fontFamily: '"Inter", sans-serif',
+      fontSize: '14px',
+      color: '#3b82f6',
+      textDecoration: 'none',
+      wordBreak: 'break-all',
+      fontWeight: '500',
+      borderBottom: '2px solid transparent',
+      transition: 'all 0.3s ease',
+      cursor: 'pointer'
     },
     closeButton: {
-      fontFamily: '"Impact", sans-serif',
+      fontFamily: '"Poppins", sans-serif',
       fontSize: '16px',
-      fontWeight: 'bold',
+      fontWeight: '600',
       color: '#fff',
-      background: 'linear-gradient(45deg, #666 0%, #888 50%, #666 100%)',
-      border: '3px solid #2a2a2a',
-      padding: '12px 30px',
+      background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)',
+      border: '2px solid #dc2626',
+      borderRadius: '12px',
+      padding: '14px 32px',
       cursor: 'pointer',
       textTransform: 'uppercase',
       letterSpacing: '1px',
       display: 'block',
       margin: '30px auto 0',
       transition: 'all 0.3s ease',
-      boxShadow: '0 4px 8px rgba(0,0,0,0.4)',
-      textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+      boxShadow: '0 6px 20px rgba(239, 68, 68, 0.4)',
+      textShadow: '1px 1px 3px rgba(0,0,0,0.6)',
       position: 'relative',
       zIndex: 2
     },
     loadingText: {
       textAlign: 'center',
-      fontFamily: '"Courier New", monospace',
-      fontSize: '16px',
-      color: '#666',
-      fontWeight: 'bold',
+      fontFamily: '"Poppins", sans-serif',
+      fontSize: '18px',
+      color: '#6b7280',
+      fontWeight: '500',
       margin: '40px 0',
       position: 'relative',
       zIndex: 2
     },
     errorText: {
       textAlign: 'center',
-      fontFamily: '"Courier New", monospace',
-      fontSize: '14px',
-      color: '#cc0000',
-      fontWeight: 'bold',
-      margin: '20px 0',
+      fontFamily: '"Poppins", sans-serif',
+      fontSize: '16px',
+      color: '#ef4444',
+      fontWeight: '600',
+      margin: '24px 0',
       position: 'relative',
       zIndex: 2
     },
     noEventsText: {
       textAlign: 'center',
-      fontFamily: '"Courier New", monospace',
-      fontSize: '16px',
-      color: '#666',
-      fontWeight: 'bold',
+      fontFamily: '"Poppins", sans-serif',
+      fontSize: '18px',
+      color: '#6b7280',
+      fontWeight: '500',
       margin: '40px 0',
       position: 'relative',
       zIndex: 2
@@ -361,6 +380,14 @@ const GTAEventsPopup = ({ onClose }) => {
                             target="_blank"
                             rel="noopener noreferrer"
                             style={styles.reelLink}
+                            onMouseEnter={(e) => {
+                              e.target.style.color = '#1d4ed8';
+                              e.target.style.borderBottom = '2px solid #1d4ed8';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.color = '#3b82f6';
+                              e.target.style.borderBottom = '2px solid transparent';
+                            }}
                           >
                             {event.instagram_reel}
                           </a>
@@ -426,7 +453,20 @@ const GTAEventsPopup = ({ onClose }) => {
                         ❌ POSTER IMAGE FAILED TO LOAD
                       </div>
                       <div style={styles.eventMeta}>
-                        🔗 <a href={event.poster_image_url} target="_blank" rel="noopener noreferrer" style={styles.reelLink}>
+                        🔗 <a
+                          href={event.poster_image_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={styles.reelLink}
+                          onMouseEnter={(e) => {
+                            e.target.style.color = '#1d4ed8';
+                            e.target.style.borderBottom = '2px solid #1d4ed8';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.color = '#3b82f6';
+                            e.target.style.borderBottom = '2px solid transparent';
+                          }}
+                        >
                           View Full Size Image
                         </a>
                       </div>

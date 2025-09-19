@@ -570,5 +570,118 @@ export const supabaseService = {
       throw error
     }
     return data[0]
+  },
+
+  // QR & UPI Settings operations
+  async uploadQrCodeImage(file) {
+    // Create a unique filename
+    const fileExt = file.name.split('.').pop()
+    const fileName = `qr_code_${Date.now()}.${fileExt}`
+    const filePath = `qr-codes/${fileName}`
+
+    const { data, error } = await supabase.storage
+      .from('hot-events')
+      .upload(filePath, file)
+
+    if (error) {
+      console.error('QR code upload error:', error);
+      throw new Error(`QR code upload failed: ${error.message}`);
+    }
+
+    // Get the public URL
+    const { data: urlData } = supabase.storage
+      .from('hot-events')
+      .getPublicUrl(filePath)
+
+    return {
+      path: filePath,
+      url: urlData.publicUrl
+    }
+  },
+
+  async saveQrUpiSettings(settings) {
+    // First, check if settings already exist
+    const { data: existingSettings } = await supabase
+      .from('qr_upi_settings')
+      .select('*')
+      .limit(1)
+      .single()
+
+    const settingsData = {
+      qr_code_url: settings.qr_code_url,
+      upi_id: settings.upi_id,
+      updated_at: new Date().toISOString()
+    }
+
+    if (existingSettings) {
+      // Update existing settings
+      const { data, error } = await supabase
+        .from('qr_upi_settings')
+        .update(settingsData)
+        .eq('id', existingSettings.id)
+        .select()
+
+      if (error) {
+        console.error('Error updating QR & UPI settings:', error)
+        throw error
+      }
+      return data[0]
+    } else {
+      // Create new settings
+      settingsData.created_at = new Date().toISOString()
+      const { data, error } = await supabase
+        .from('qr_upi_settings')
+        .insert([settingsData])
+        .select()
+
+      if (error) {
+        console.error('Error creating QR & UPI settings:', error)
+        throw error
+      }
+      return data[0]
+    }
+  },
+
+  async getQrUpiSettings() {
+    const { data, error } = await supabase
+      .from('qr_upi_settings')
+      .select('*')
+      .limit(1)
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No settings found
+        return null;
+      }
+      console.error('Error fetching QR & UPI settings:', error)
+      throw error
+    }
+    return data
+  },
+
+  async deleteQrUpiSettings() {
+    // First get the settings to find QR code path for storage cleanup
+    const { data: settings } = await supabase
+      .from('qr_upi_settings')
+      .select('*')
+      .limit(1)
+      .single()
+
+    // Delete all records from the table
+    const { error } = await supabase
+      .from('qr_upi_settings')
+      .delete()
+      .gte('id', 0) // Delete all rows
+
+    if (error) {
+      console.error('Error deleting QR & UPI settings:', error)
+      throw error
+    }
+
+    // Optionally delete QR code image from storage
+    // Note: We could add QR code path tracking for cleanup, but keeping it simple for now
+
+    return true
   }
 }

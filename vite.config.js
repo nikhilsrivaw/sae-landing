@@ -27,7 +27,7 @@ export default defineConfig({
     cssMinify: true,
     assetsInlineLimit: 4096,
   },
-  base: './',
+  base: '/',
   assetsInclude: ['**/*.jpg', '**/*.jpeg', '**/*.png', '**/*.gif', '**/*.svg', '**/*.webp'],
   server: {
     fs: {

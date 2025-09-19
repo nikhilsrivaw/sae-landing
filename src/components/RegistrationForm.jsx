@@ -34,7 +34,8 @@ const RegistrationForm = ({ isOpen, onClose }) => {
     'Electrical (EE)',
     'Information Technology (IT)',
     'Chemical Engineering',
-    'Biotechnology',
+    'BBA',
+    'B.Pharma',
     'Other'
   ];
 

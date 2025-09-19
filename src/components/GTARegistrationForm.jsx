@@ -41,7 +41,8 @@ const GTARegistrationForm = () => {
     'Electrical (EE)',
     'Information Technology (IT)',
     'Chemical Engineering',
-    'Biotechnology',
+    'BBA',
+    'B.Pharma',
     'Other'
   ];
 

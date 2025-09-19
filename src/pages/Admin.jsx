@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import { supabaseService } from '../lib/supabase';
 
 const Admin = () => {
-  const [activeSection, setActiveSection] = useState('add-events');
+  // const [activeSection, setActiveSection] = useState('add-events');
   const [showAddEventForm, setShowAddEventForm] = useState(false);
   const [eventForm, setEventForm] = useState({
     name: '',
@@ -47,14 +47,14 @@ const Admin = () => {
   };
 
   // Convert file to base64
-  const fileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-    });
-  };
+  // const fileToBase64 = (file) => {
+  //   return new Promise((resolve, reject) => {
+  //     const reader = new FileReader();
+  //     reader.readAsDataURL(file);
+  //     reader.onload = () => resolve(reader.result);
+  //     reader.onerror = error => reject(error);
+  //   });
+  // };
 
   // Handle adding new hot event
   const handleAddEvent = async (e) => {

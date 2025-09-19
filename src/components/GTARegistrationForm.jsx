@@ -98,7 +98,8 @@ const GTARegistrationForm = () => {
         setSubmissionError('No registration found for your account');
         setRegistrationStatus(null);
       }
-    } catch (error) {
+    } catch (err) {
+      console.error('Registration status error:', err);
       setSubmissionError('Error checking registration status');
       setRegistrationStatus(null);
     } finally {

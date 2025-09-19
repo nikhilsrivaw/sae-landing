@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabaseService } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -12,9 +12,9 @@ const RegistrationStatus = ({ onClose }) => {
     if (user?.id) {
       fetchRegistrationStatus();
     }
-  }, [user]);
+  }, [user, fetchRegistrationStatus]);
 
-  const fetchRegistrationStatus = async () => {
+  const fetchRegistrationStatus = useCallback(async () => {
     try {
       setIsLoading(true);
       setError('');
@@ -26,7 +26,7 @@ const RegistrationStatus = ({ onClose }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user.id]);
 
   const getStatusDisplay = () => {
     if (!registration) {

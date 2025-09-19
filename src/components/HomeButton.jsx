@@ -31,7 +31,7 @@ const HomeButton = () => {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, []);
+  }, [isMobile]);
 
   const handleClick = () => {
     navigate('/');

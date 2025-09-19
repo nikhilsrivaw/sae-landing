@@ -108,9 +108,9 @@ const Hero = ({ onStateChange }) => {
   }, []);
 
   // Memoized handlers for better performance
-  const openIntroPopup = useCallback(() => {
-    setShowIntroPopup(true);
-  }, []);
+  // const openIntroPopup = useCallback(() => {
+  //   setShowIntroPopup(true);
+  // }, []);
   
   const closeIntroPopup = useCallback(() => {
     setShowIntroPopup(false);

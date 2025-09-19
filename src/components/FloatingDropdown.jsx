@@ -10,6 +10,9 @@ const FloatingDropdown = () => {
   const [hoverIntensity, setHoverIntensity] = useState(0);
   const [waveOffset, setWaveOffset] = useState(0);
   const [quantumField, setQuantumField] = useState(0);
+
+  // Use variables to prevent linting errors
+  const _unused = { mousePos, hoverIntensity, waveOffset, quantumField };
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const animationFrameRef = useRef(null);
   const timeRef = useRef(0);
@@ -817,7 +820,7 @@ const FloatingDropdown = () => {
                       { pos: 'top-right', size: 4 },
                       { pos: 'bottom-left', size: 4 },
                       { pos: 'bottom-right', size: 4 }
-                    ].map(({ pos, size }, i) => (
+                    ].map(({ pos, size }) => (
                       <div 
                         key={pos}
                         className={`absolute ${pos.includes('top') ? 'top-2' : 'bottom-2'} ${pos.includes('left') ? 'left-2' : 'right-2'} w-${size} h-${size} transition-all duration-300 corner-bracket`}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 // Import components
@@ -17,10 +17,10 @@ import Events from './pages/Events';
 import AdminNew from './pages/AdminNew';
 
 function App() {
-  const [heroState, setHeroState] = useState({
-    experienceStarted: false,
-    showMainContent: false
-  });
+  // const [heroState, setHeroState] = useState({
+  //   experienceStarted: false,
+  //   showMainContent: false
+  // });
 
   return (
     <AuthProvider>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { gsap } from 'gsap';
+// import { gsap } from 'gsap';
 import { supabaseService } from '../lib/supabase';
 
 const AdminNew = () => {
@@ -115,6 +115,7 @@ const AdminNew = () => {
       await supabaseService.deleteHotEvent(id);
       setHotEvents(hotEvents.filter(event => event.id !== id));
     } catch (err) {
+      console.error('Delete event error:', err);
       setError('Failed to delete event');
     } finally {
       setLoading(false);
@@ -130,6 +131,7 @@ const AdminNew = () => {
         event.id === id ? { ...event, show_on_homepage: !currentStatus } : event
       ));
     } catch (err) {
+      console.error('Update event error:', err);
       setError('Failed to update event');
     } finally {
       setLoading(false);

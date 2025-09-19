@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const RegistrationForm = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
@@ -104,11 +104,11 @@ const RegistrationForm = ({ isOpen, onClose }) => {
     setTimeout(() => setShowSuccess(false), 5000);
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setShowSuccess(false);
     setErrors({});
     onClose();
-  };
+  }, [onClose]);
 
   useEffect(() => {
     const handleEscape = (e) => {
@@ -118,7 +118,7 @@ const RegistrationForm = ({ isOpen, onClose }) => {
     };
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   if (!isOpen) return null;
 

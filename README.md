@@ -144,4 +144,4 @@ src/
 
 **Built with ❤️ for the Society of Automotive Engineers - MMMUT Chapter**
 
-*Experience the intersection of automotive engineering and street racing culture in this immersive GTA V-inspired journey.*
+*Experience the intersection of automotive engineering and street racing culture in this immersive GTA V-inspired journey.*# Force Vercel redeploy

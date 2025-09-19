@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
+// Force fresh build - 2025-09-19
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {

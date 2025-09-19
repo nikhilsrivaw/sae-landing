@@ -19,6 +19,21 @@ const AdminNew = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [registrationFilter, setRegistrationFilter] = useState('all');
+  const [searchRollNumber, setSearchRollNumber] = useState('');
+
+  // Helper function to filter registrations
+  const getFilteredRegistrations = () => {
+    return teamRegistrations.filter(registration => {
+      // Filter by status
+      const statusMatch = registrationFilter === 'all' || registration.registration_status === registrationFilter;
+
+      // Filter by roll number search
+      const rollNumberMatch = !searchRollNumber ||
+        registration.leader_roll?.toLowerCase().includes(searchRollNumber.toLowerCase());
+
+      return statusMatch && rollNumberMatch;
+    });
+  };
 
   // Load hot events from database
   const loadHotEvents = async () => {
@@ -1275,6 +1290,23 @@ const AdminNew = () => {
                   <div className="card-header">
                     <h3 className="card-title">👥 Team Registrations</h3>
                     <div className="filter-controls">
+                      <input
+                        type="text"
+                        placeholder="Search by team leader roll number..."
+                        value={searchRollNumber}
+                        onChange={(e) => setSearchRollNumber(e.target.value)}
+                        className="search-input"
+                        style={{
+                          padding: '8px 12px',
+                          border: '2px solid #374151',
+                          borderRadius: '8px',
+                          backgroundColor: '#1f2937',
+                          color: '#fff',
+                          marginRight: '12px',
+                          minWidth: '250px',
+                          fontSize: '14px'
+                        }}
+                      />
                       <select
                         value={registrationFilter}
                         onChange={(e) => setRegistrationFilter(e.target.value)}
@@ -1294,8 +1326,7 @@ const AdminNew = () => {
                   <div className="card-header">
                     <h3 className="card-title">
                       📋 Registration Details
-                      ({registrationFilter === 'all' ? teamRegistrations.length :
-                        teamRegistrations.filter(r => r.registration_status === registrationFilter).length} entries)
+                      ({getFilteredRegistrations().length} entries)
                     </h3>
                   </div>
                   <div className="card-content">
@@ -1303,8 +1334,7 @@ const AdminNew = () => {
                       <div className="loading-spinner">Loading registrations...</div>
                     ) : (
                       <div className="registrations-grid">
-                        {teamRegistrations
-                          .filter(registration => registrationFilter === 'all' || registration.registration_status === registrationFilter)
+                        {getFilteredRegistrations()
                           .map(registration => (
                             <div key={registration.id} className="registration-card">
                               {/* Registration Header */}
@@ -1405,9 +1435,12 @@ const AdminNew = () => {
                             </div>
                           ))}
 
-                        {teamRegistrations.filter(r => registrationFilter === 'all' || r.registration_status === registrationFilter).length === 0 && (
+                        {getFilteredRegistrations().length === 0 && (
                           <div className="no-registrations">
-                            No {registrationFilter === 'all' ? '' : registrationFilter} registrations found.
+                            {searchRollNumber
+                              ? `No registrations found for roll number "${searchRollNumber}"`
+                              : `No ${registrationFilter === 'all' ? '' : registrationFilter} registrations found.`
+                            }
                           </div>
                         )}
                       </div>

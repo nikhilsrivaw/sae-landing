@@ -18,7 +18,7 @@ const Events = React.lazy(() => import('./pages/Events'));
 const AdminNew = React.lazy(() => import('./pages/AdminNew'));
 
 // Loading component
-const PageLoading = () => (
+const Loading = () => (
   <div className="min-h-screen bg-black flex items-center justify-center">
     <div className="text-center">
       <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -39,7 +39,7 @@ function App() {
         <div className="App">
           <ErrorBoundary>
             <FloatingDropdown />
-            <Suspense fallback={<PageLoading />}>
+            <Suspense fallback={<Loading />}>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/sponsors" element={<Sponsors />} />

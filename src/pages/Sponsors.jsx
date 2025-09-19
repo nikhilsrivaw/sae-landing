@@ -115,24 +115,6 @@ const Sponsors = () => {
     };
   }, []);
 
-  // Error boundary for this component
-  if (error) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-white text-4xl font-bold mb-4">Unable to Load Sponsors</h1>
-          <p className="text-gray-300 mb-8">Please try refreshing the page</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded font-bold"
-          >
-            Refresh Page
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   useEffect(() => {
     try {
       // Loading animation logic
@@ -174,6 +156,24 @@ const Sponsors = () => {
       setError(err);
     }
   }, [loading]);
+
+  // Error boundary for this component
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-white text-4xl font-bold mb-4">Unable to Load Sponsors</h1>
+          <p className="text-gray-300 mb-8">Please try refreshing the page</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded font-bold"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Filter the sponsors into two groups
   const bigSponsors = sponsorsData.filter(sponsor => sponsor.type === 'big');

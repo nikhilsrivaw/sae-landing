@@ -63,7 +63,7 @@ const Hero = ({ onStateChange }) => {
   const { user, isAuthenticated, logout } = useAuth();
 
   // Handle auth success
-  const handleAuthSuccess = (user) => {
+  const handleAuthSuccess = () => {
     setShowAuth(false);
   };
 

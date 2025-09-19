@@ -1,4 +1,5 @@
 {
+  "_comment": "Force fresh deployment - 2025-09-19",
   "rewrites": [
     {
       "source": "/(.*)",

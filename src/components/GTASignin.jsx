@@ -45,7 +45,6 @@ const GTASignin = ({ onSwitchToSignup, onSigninSuccess }) => {
     setSubmissionError('');
 
     try {
-      console.log('🚀 Signing in user...', formData);
 
       // Authenticate user with database
       const authenticatedUser = await supabaseService.authenticateUser(
@@ -53,7 +52,6 @@ const GTASignin = ({ onSwitchToSignup, onSigninSuccess }) => {
         formData.password
       );
 
-      console.log('✅ User authenticated successfully:', authenticatedUser);
 
       // Reset form
       setFormData({
@@ -68,7 +66,7 @@ const GTASignin = ({ onSwitchToSignup, onSigninSuccess }) => {
       }
 
     } catch (error) {
-      console.error('❌ Signin failed:', error);
+      console.error('Signin failed:', error);
       setSubmissionError(`Login failed: ${error.message}`);
     } finally {
       setIsSubmitting(false);

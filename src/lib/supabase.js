@@ -10,37 +10,28 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 export const supabaseService = {
   // Upload image to Supabase Storage
   async uploadPosterImage(file, eventName) {
-    console.log('🗂️ Starting image upload:', { fileName: file.name, size: file.size, type: file.type });
 
     // Create a unique filename
     const fileExt = file.name.split('.').pop()
     const fileName = `${eventName.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.${fileExt}`
     const filePath = `posters/${fileName}`
 
-    console.log('📁 Upload path:', filePath);
 
     const { data, error } = await supabase.storage
       .from('hot-events')
       .upload(filePath, file)
 
     if (error) {
-      console.error('❌ Storage upload error:', {
-        message: error.message,
-        details: error,
-        filePath,
-        bucketName: 'hot-events'
-      });
+      console.error('Storage upload error:', error);
       throw new Error(`Image upload failed: ${error.message}`);
     }
 
-    console.log('📤 Upload successful:', data);
 
     // Get the public URL
     const { data: urlData } = supabase.storage
       .from('hot-events')
       .getPublicUrl(filePath)
 
-    console.log('🔗 Public URL generated:', urlData.publicUrl);
 
     return {
       path: filePath,
@@ -77,7 +68,6 @@ export const supabaseService = {
   },
 
   async createHotEvent(eventData) {
-    console.log('💾 Inserting event data:', eventData);
 
     const insertData = {
       name: eventData.name,
@@ -89,7 +79,6 @@ export const supabaseService = {
       created_at: new Date().toISOString()
     };
 
-    console.log('📝 Final insert data:', insertData);
 
     const { data, error } = await supabase
       .from('hot_events')
@@ -97,17 +86,10 @@ export const supabaseService = {
       .select()
 
     if (error) {
-      console.error('❌ Database insert error:', {
-        message: error.message,
-        details: error,
-        hint: error.hint,
-        code: error.code,
-        insertData
-      });
+      console.error('Database insert error:', error);
       throw new Error(`Database error: ${error.message}`);
     }
 
-    console.log('✅ Event created in database:', data);
     return data[0]
   },
 
@@ -314,37 +296,28 @@ export const supabaseService = {
 
   // Team Registrations operations
   async uploadPaymentScreenshot(file, teamName) {
-    console.log('📸 Starting payment screenshot upload:', { fileName: file.name, size: file.size, type: file.type });
 
     // Create a unique filename
     const fileExt = file.name.split('.').pop()
     const fileName = `${teamName.replace(/[^a-zA-Z0-9]/g, '_')}_payment_${Date.now()}.${fileExt}`
     const filePath = `payments/${fileName}`
 
-    console.log('📁 Upload path:', filePath);
 
     const { data, error } = await supabase.storage
       .from('hot-events')
       .upload(filePath, file)
 
     if (error) {
-      console.error('❌ Payment screenshot upload error:', {
-        message: error.message,
-        details: error,
-        filePath,
-        bucketName: 'team-registrations'
-      });
+      console.error('Payment screenshot upload error:', error);
       throw new Error(`Payment screenshot upload failed: ${error.message}`);
     }
 
-    console.log('📤 Payment screenshot upload successful:', data);
 
     // Get the public URL
     const { data: urlData } = supabase.storage
       .from('hot-events')
       .getPublicUrl(filePath)
 
-    console.log('🔗 Payment screenshot URL generated:', urlData.publicUrl);
 
     return {
       path: filePath,
@@ -353,7 +326,6 @@ export const supabaseService = {
   },
 
   async createTeamRegistration(registrationData) {
-    console.log('💾 Inserting team registration data:', registrationData);
 
     const insertData = {
       user_id: registrationData.userId, // Link to authenticated user
@@ -379,7 +351,6 @@ export const supabaseService = {
       created_at: new Date().toISOString()
     };
 
-    console.log('📝 Final registration insert data:', insertData);
 
     const { data, error } = await supabase
       .from('team_registrations')
@@ -387,17 +358,10 @@ export const supabaseService = {
       .select()
 
     if (error) {
-      console.error('❌ Team registration database insert error:', {
-        message: error.message,
-        details: error,
-        hint: error.hint,
-        code: error.code,
-        insertData
-      });
+      console.error('Team registration database insert error:', error);
       throw new Error(`Registration database error: ${error.message}`);
     }
 
-    console.log('✅ Team registration created in database:', data);
     return data[0]
   },
 
@@ -470,7 +434,6 @@ export const supabaseService = {
   },
 
   async getUserRegistration(userId) {
-    console.log('🔍 Fetching registration for user:', userId);
 
     const { data, error } = await supabase
       .from('team_registrations')
@@ -481,14 +444,12 @@ export const supabaseService = {
     if (error) {
       if (error.code === 'PGRST116') {
         // No registration found
-        console.log('📋 No registration found for user:', userId);
         return null;
       }
       console.error('Error fetching user registration:', error)
       throw error
     }
 
-    console.log('✅ Registration found for user:', data);
     return data
   },
 
@@ -503,7 +464,6 @@ export const supabaseService = {
   },
 
   async createUser(userData) {
-    console.log('👤 Creating new user account:', { email: userData.email, fullName: userData.fullName });
 
     try {
       // Hash the password
@@ -517,7 +477,6 @@ export const supabaseService = {
         created_at: new Date().toISOString()
       };
 
-      console.log('📝 Inserting user data:', { ...insertData, password_hash: '[HIDDEN]' });
 
       const { data, error } = await supabase
         .from('app_users')
@@ -525,23 +484,21 @@ export const supabaseService = {
         .select('id, email, full_name, created_at')
 
       if (error) {
-        console.error('❌ User creation error:', error);
+        console.error('User creation error:', error);
         if (error.code === '23505') { // Unique constraint violation
           throw new Error('Email already exists');
         }
         throw new Error(`Account creation failed: ${error.message}`);
       }
 
-      console.log('✅ User created successfully:', data[0]);
       return data[0];
     } catch (error) {
-      console.error('❌ Create user failed:', error);
+      console.error('Create user failed:', error);
       throw error;
     }
   },
 
   async authenticateUser(email, password) {
-    console.log('🔐 Authenticating user:', { email });
 
     try {
       // Hash the provided password
@@ -556,7 +513,7 @@ export const supabaseService = {
         .single()
 
       if (error) {
-        console.error('❌ Authentication error:', error);
+        console.error('Authentication error:', error);
         throw new Error('Invalid email or password');
       }
 
@@ -570,10 +527,9 @@ export const supabaseService = {
         .update({ last_login: new Date().toISOString() })
         .eq('id', data.id);
 
-      console.log('✅ User authenticated successfully:', { id: data.id, email: data.email });
       return data;
     } catch (error) {
-      console.error('❌ Authentication failed:', error);
+      console.error('Authentication failed:', error);
       throw error;
     }
   },

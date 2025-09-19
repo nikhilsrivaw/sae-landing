@@ -142,11 +142,9 @@ const GTARegistrationForm = () => {
 
     try {
       // First, upload the payment screenshot
-      console.log('🚀 Starting team registration process...');
       let paymentData = {};
 
       if (formData.paymentScreenshot) {
-        console.log('📸 Uploading payment screenshot...');
         const uploadResult = await supabaseService.uploadPaymentScreenshot(
           formData.paymentScreenshot,
           formData.teamName
@@ -156,7 +154,6 @@ const GTARegistrationForm = () => {
           payment_screenshot_url: uploadResult.url,
           payment_screenshot_path: uploadResult.path
         };
-        console.log('✅ Payment screenshot uploaded successfully');
       }
 
       // Prepare registration data
@@ -169,12 +166,10 @@ const GTARegistrationForm = () => {
       // Remove the file object as it's not needed for database storage
       delete registrationData.paymentScreenshot;
 
-      console.log('💾 Saving registration to database...');
 
       // Save to database
       const result = await supabaseService.createTeamRegistration(registrationData);
 
-      console.log('✅ Registration saved successfully:', result);
 
       // Show success message
       setShowSuccess(true);
@@ -195,7 +190,7 @@ const GTARegistrationForm = () => {
       setTimeout(() => setShowSuccess(false), 5000);
 
     } catch (error) {
-      console.error('❌ Registration submission failed:', error);
+      console.error('Registration submission failed:', error);
       setSubmissionError(`Registration failed: ${error.message}`);
     } finally {
       setIsSubmitting(false);

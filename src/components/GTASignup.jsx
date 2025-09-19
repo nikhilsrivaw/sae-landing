@@ -58,7 +58,6 @@ const GTASignup = ({ onSwitchToSignin }) => {
     setSubmissionError('');
 
     try {
-      console.log('🚀 Creating user account...', formData);
 
       // Create user account in database
       const userData = {
@@ -68,7 +67,6 @@ const GTASignup = ({ onSwitchToSignin }) => {
       };
 
       const newUser = await supabaseService.createUser(userData);
-      console.log('✅ User account created:', newUser);
 
       setShowSuccess(true);
 
@@ -88,7 +86,7 @@ const GTASignup = ({ onSwitchToSignin }) => {
       }, 3000);
 
     } catch (error) {
-      console.error('❌ Signup failed:', error);
+      console.error('Signup failed:', error);
       setSubmissionError(`Account creation failed: ${error.message}`);
     } finally {
       setIsSubmitting(false);

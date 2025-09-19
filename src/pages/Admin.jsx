@@ -59,17 +59,13 @@ const Admin = () => {
   // Handle adding new hot event
   const handleAddEvent = async (e) => {
     e.preventDefault();
-    console.log('🚀 Form submitted!');
 
     if (!eventForm.name || !eventForm.description) {
-      console.log('❌ Missing required fields:', { name: eventForm.name, description: eventForm.description });
       setError('Please fill in all required fields');
       return;
     }
 
     setLoading(true);
-    console.log('📝 Event form data:', eventForm);
-    console.log('🖼️ Poster file:', posterFile);
 
     try {
       let posterImageUrl = null;
@@ -77,11 +73,9 @@ const Admin = () => {
 
       // Upload poster image if provided
       if (posterFile) {
-        console.log('📤 Uploading poster image...');
         const uploadResult = await supabaseService.uploadPosterImage(posterFile, eventForm.name);
         posterImageUrl = uploadResult.url;
         posterImagePath = uploadResult.path;
-        console.log('✅ Image uploaded:', { url: posterImageUrl, path: posterImagePath });
       }
 
       const eventData = {
@@ -90,9 +84,7 @@ const Admin = () => {
         poster_image_path: posterImagePath
       };
 
-      console.log('💾 Creating event with data:', eventData);
       const newEvent = await supabaseService.createHotEvent(eventData);
-      console.log('✅ Event created successfully:', newEvent);
 
       setHotEvents([newEvent, ...hotEvents]);
       setEventForm({
@@ -111,11 +103,7 @@ const Admin = () => {
         { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }
       );
     } catch (err) {
-      console.error('❌ Detailed error creating event:', {
-        message: err.message,
-        error: err,
-        stack: err.stack
-      });
+      console.error('Error creating event:', err);
       setError(`Failed to create event: ${err.message}`);
     } finally {
       setLoading(false);

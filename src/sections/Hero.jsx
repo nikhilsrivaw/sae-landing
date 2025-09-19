@@ -65,7 +65,6 @@ const Hero = ({ onStateChange }) => {
   // Handle auth success
   const handleAuthSuccess = (user) => {
     setShowAuth(false);
-    console.log('User authenticated:', user);
   };
 
   // Check user registration status when user logs in
@@ -118,13 +117,11 @@ const Hero = ({ onStateChange }) => {
 
   // Start the experience - NO AUDIO RESTART
   const startExperience = useCallback(async () => {
-    console.log("🚀 CONTINUE BUTTON CLICKED!");
     
     // NO AUDIO RESTART - just proceed with experience
     setShowStartButton(false);
     setUserHasInteracted(true);
     setExperienceStarted(true);
-    console.log("✅ Experience started! Audio continues seamlessly.");
   }, []);
   
   // SIMPLIFIED SMOOTH SCROLLING - Performance First
@@ -172,15 +169,12 @@ const Hero = ({ onStateChange }) => {
     const startAudioSeamlessly = async () => {
       if (audioRef.current && audioReady && !isAudioPlaying) {
         try {
-          console.log("🎵 Starting audio seamlessly...");
           audioRef.current.muted = false;
           audioRef.current.volume = 0.8;
           await audioRef.current.play();
-          console.log("🎵 Audio playing seamlessly!");
           setIsAudioPlaying(true);
           setUserHasInteracted(true);
         } catch (e) {
-          console.log("⚠️ Auto-play blocked, will start on first interaction:", e.message);
           
           // Set up ONE interaction listener if autoplay fails
           const startOnInteraction = async () => {
@@ -189,12 +183,10 @@ const Hero = ({ onStateChange }) => {
                 audioRef.current.muted = false;
                 audioRef.current.volume = 0.8;
                 await audioRef.current.play();
-                console.log("🎵 Audio started on first interaction");
                 setIsAudioPlaying(true);
                 setUserHasInteracted(true);
               }
             } catch (err) {
-              console.log("Audio blocked:", err.message);
             }
           };
           
@@ -292,14 +284,12 @@ const Hero = ({ onStateChange }) => {
           })
           // Animation starts - NO AUDIO RESTART
           .call(() => {
-            console.log("🎭 Mask animation starting - audio continues playing");
           })
           .to(".sae-mask-group", {
             rotation: window.innerWidth < 640 ? 3 : 5, // Less rotation on mobile
             duration: window.innerWidth < 640 ? 2.0 : 2.5, // Faster on mobile
             ease: "power1.easeIn", // Slow start
             onComplete: function() {
-              console.log("🔄 First rotation complete");
               // Audio control enabled after animation completes
             }
           })
@@ -314,7 +304,6 @@ const Hero = ({ onStateChange }) => {
               }
             },
             onComplete: function() {
-              console.log("📈 Scale animation complete");
             }
           }, "-=0.5") // Minimal overlap for seamless transition
           // Add final massive expansion that fills entire screen including mobile
@@ -324,7 +313,6 @@ const Hero = ({ onStateChange }) => {
             ease: "power2.easeIn",
             transformOrigin: "center center",
             onComplete: function() {
-              console.log("🎯 Final massive expansion complete - full screen covered");
             }
           }, "-=0.2")
           .to(".sae-mask-group", {
@@ -332,7 +320,6 @@ const Hero = ({ onStateChange }) => {
             duration: 0.4,
             ease: "power2.easeOut",
             onComplete: function() {
-              console.log("✅ Mask animation fully complete");
               setShowMainContent(true);
             }
           }, "-=0.2");
@@ -658,7 +645,6 @@ const Hero = ({ onStateChange }) => {
         className="hidden"
         volume={0.8}
         onCanPlay={async () => {
-          console.log("✅ Audio can play - attempting seamless start");
           setAudioReady(true);
           // Try to start audio immediately when ready
           try {
@@ -666,15 +652,12 @@ const Hero = ({ onStateChange }) => {
               audioRef.current.muted = false;
               audioRef.current.volume = 0.8;
               await audioRef.current.play();
-              console.log("🎵 Audio started seamlessly on canPlay");
               setIsAudioPlaying(true);
             }
           } catch (e) {
-            console.log("Auto-play blocked on canPlay:", e.message);
           }
         }}
         onCanPlayThrough={async () => {
-          console.log("✅ Audio can play through - attempting seamless start");
           setAudioReady(true);
           // Try to start audio when fully ready
           try {
@@ -682,46 +665,34 @@ const Hero = ({ onStateChange }) => {
               audioRef.current.muted = false;
               audioRef.current.volume = 0.8;
               await audioRef.current.play();
-              console.log("🎵 Audio started seamlessly on canPlayThrough");
               setIsAudioPlaying(true);
             }
           } catch (e) {
-            console.log("Auto-play blocked on canPlayThrough:", e.message);
           }
         }}
         onLoadedData={() => {
-          console.log("✅ Audio loaded - ready for user interaction");
           setAudioReady(true);
           // NO AUTO-PLAY - wait for user to click continue
         }}
         onLoadedMetadata={() => {
-          console.log("✅ Audio metadata loaded - ready for user interaction");
           setAudioReady(true);
           // NO AUTO-PLAY - wait for user to click continue
         }}
         onPlay={() => {
-          console.log("▶️ Audio event: playing - SUCCESS!");
           setIsAudioPlaying(true);
         }}
         onPause={() => {
-          console.log("⏸️ Audio event: paused");
           setIsAudioPlaying(false);
         }}
         onVolumeChange={() => {
-          console.log("🔊 Audio volume/mute changed:", {
-            muted: audioRef.current?.muted,
-            volume: audioRef.current?.volume
-          });
           if (audioRef.current) {
             setIsAudioMuted(audioRef.current.muted);
             forceUpdate({}); // Force re-render to update UI
           }
         }}
         onEnded={() => {
-          console.log("🔄 Audio ended, will loop");
         }}
         onError={(e) => {
-          console.log("❌ Audio error:", e);
         }}
       >
         <source src="/GTA-V-Welcome-to-Los-Santosx.mp3" type="audio/mpeg" />
@@ -830,7 +801,6 @@ const Hero = ({ onStateChange }) => {
             <div className="space-y-6 mt-20">
               <button
                 onClick={(e) => {
-                  console.log("Button clicked!");
                   e.preventDefault();
                   startExperience();
                 }}
@@ -1052,16 +1022,8 @@ const Hero = ({ onStateChange }) => {
               e.preventDefault();
               e.stopPropagation();
               
-              console.log("🎵 BUTTON CLICKED! Current state:", {
-                isAudioPlaying,
-                isAudioMuted,
-                actualMuted: audioRef.current?.muted,
-                actualPaused: audioRef.current?.paused,
-                actualVolume: audioRef.current?.volume
-              });
               
               if (!audioRef.current) {
-                console.log("❌ No audio element found");
                 return;
               }
 
@@ -1069,15 +1031,12 @@ const Hero = ({ onStateChange }) => {
 
               // Simple mute toggle - let onVolumeChange event handle state updates
               if (audioRef.current.muted) {
-                console.log("🔊 UNMUTING audio...");
                 audioRef.current.muted = false;
                 audioRef.current.volume = 0.8;
               } else {
-                console.log("🔇 MUTING audio...");
                 audioRef.current.muted = true;
               }
               
-              console.log("🔄 Audio muted property set to:", audioRef.current.muted);
             }}
           >
             {/* Corner brackets for GTA 5 feel */}

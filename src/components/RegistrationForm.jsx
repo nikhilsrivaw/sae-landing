@@ -89,7 +89,6 @@ const RegistrationForm = ({ isOpen, onClose }) => {
       }
     });
 
-    console.log('Team Registration Data:', cleanedData);
     setShowSuccess(true);
     setIsSubmitting(false);
 

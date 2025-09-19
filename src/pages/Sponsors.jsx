@@ -101,16 +101,10 @@ const Sponsors = () => {
 
   const containerRef = useRef(null);
 
-  // Debug logging
-  console.log('🔍 Sponsors component mounted');
 
   // Add error handler for component-specific issues
   React.useEffect(() => {
     const handleError = (event) => {
-      console.group('🚨 Sponsors Component Error');
-      console.error('Event:', event);
-      console.error('Error:', event.error);
-      console.groupEnd();
       setError(event.error);
     };
 
@@ -140,14 +134,12 @@ const Sponsors = () => {
   }
 
   useEffect(() => {
-    console.log('🔍 Starting loading animation useEffect');
     try {
       // Loading animation logic
       let interval = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 100) {
             clearInterval(interval);
-            console.log('🔍 Loading complete, setting loading to false');
             setTimeout(() => setLoading(false), 500);
             return 100;
           }
@@ -155,24 +147,17 @@ const Sponsors = () => {
         });
       }, 150);
       return () => {
-        console.log('🔍 Cleaning up loading animation');
         clearInterval(interval);
       };
     } catch (err) {
-      console.group('🚨 Error in Sponsors loading useEffect');
-      console.error('Error:', err);
-      console.error('Stack:', err.stack);
-      console.groupEnd();
       setError(err);
     }
   }, []);
 
   useEffect(() => {
-    console.log('🔍 Starting GSAP animation useEffect, loading:', loading);
     try {
       // Page load animation logic
       if (!loading && containerRef.current) {
-        console.log('🔍 Running GSAP animation');
         gsap.fromTo(
           containerRef.current,
           { opacity: 0, filter: "blur(10px)", scale: 0.98 },
@@ -181,18 +166,11 @@ const Sponsors = () => {
             filter: "blur(0px)",
             scale: 1,
             duration: 1.2,
-            ease: "power3.out",
-            onComplete: () => console.log('🔍 GSAP animation completed')
+            ease: "power3.out"
           }
         );
       }
     } catch (err) {
-      console.group('🚨 Error in Sponsors GSAP animation useEffect');
-      console.error('Error:', err);
-      console.error('Stack:', err.stack);
-      console.error('GSAP available:', typeof gsap);
-      console.error('Container ref:', containerRef.current);
-      console.groupEnd();
       setError(err);
     }
   }, [loading]);
@@ -202,11 +180,9 @@ const Sponsors = () => {
   const smallSponsors = sponsorsData.filter(sponsor => sponsor.type === 'small');
 
   if (loading) {
-    console.log('🔍 Sponsors showing loading screen, progress:', progress);
     return <LoadingScreen progress={progress} isLoading={loading} />;
   }
 
-  console.log('🔍 Sponsors about to render main content');
 
   const fancyTextStyle = {
     fontFamily: 'Impact, "Arial Black", sans-serif',

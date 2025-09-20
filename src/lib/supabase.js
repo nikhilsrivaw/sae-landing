@@ -473,6 +473,7 @@ export const supabaseService = {
         email: userData.email.toLowerCase(),
         password_hash: passwordHash,
         full_name: userData.fullName,
+        date_of_birth: userData.dateOfBirth,
         is_active: true,
         created_at: new Date().toISOString()
       };
@@ -481,7 +482,7 @@ export const supabaseService = {
       const { data, error } = await supabase
         .from('app_users')
         .insert([insertData])
-        .select('id, email, full_name, created_at')
+        .select('id, email, full_name, date_of_birth, created_at')
 
       if (error) {
         console.error('User creation error:', error);
@@ -506,7 +507,7 @@ export const supabaseService = {
 
       const { data, error } = await supabase
         .from('app_users')
-        .select('id, email, full_name, is_active, last_login')
+        .select('id, email, full_name, date_of_birth, is_active, last_login')
         .eq('email', email.toLowerCase())
         .eq('password_hash', passwordHash)
         .eq('is_active', true)
@@ -537,7 +538,7 @@ export const supabaseService = {
   async getUserById(userId) {
     const { data, error } = await supabase
       .from('app_users')
-      .select('id, email, full_name, last_login, created_at')
+      .select('id, email, full_name, date_of_birth, last_login, created_at')
       .eq('id', userId)
       .eq('is_active', true)
       .single()
@@ -563,13 +564,71 @@ export const supabaseService = {
       .from('app_users')
       .update(filteredUpdates)
       .eq('id', userId)
-      .select('id, email, full_name, last_login, created_at')
+      .select('id, email, full_name, date_of_birth, last_login, created_at')
 
     if (error) {
       console.error('Error updating user profile:', error)
       throw error
     }
     return data[0]
+  },
+
+  // Password Reset operations
+  async verifyUserForPasswordReset(email, dateOfBirth) {
+    try {
+      const { data, error } = await supabase
+        .from('app_users')
+        .select('id')
+        .eq('email', email.toLowerCase())
+        .eq('date_of_birth', dateOfBirth)
+        .eq('is_active', true)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No user found with matching email and DOB
+          return false;
+        }
+        console.error('Error verifying user for password reset:', error);
+        throw error;
+      }
+
+      return !!data; // Return true if user found
+    } catch (error) {
+      console.error('Verify user for password reset failed:', error);
+      throw error;
+    }
+  },
+
+  async resetPassword(email, newPassword) {
+    try {
+      // Hash the new password
+      const passwordHash = await this.hashPassword(newPassword);
+
+      const { data, error } = await supabase
+        .from('app_users')
+        .update({
+          password_hash: passwordHash,
+          updated_at: new Date().toISOString()
+        })
+        .eq('email', email.toLowerCase())
+        .eq('is_active', true)
+        .select('id, email')
+
+      if (error) {
+        console.error('Error resetting password:', error);
+        throw new Error(`Password reset failed: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('User not found or password reset failed');
+      }
+
+      return data[0];
+    } catch (error) {
+      console.error('Reset password failed:', error);
+      throw error;
+    }
   },
 
   // QR & UPI Settings operations

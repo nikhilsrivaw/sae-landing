@@ -6,7 +6,8 @@ const GTASignup = ({ onSwitchToSignin }) => {
     email: '',
     password: '',
     confirmPassword: '',
-    fullName: ''
+    fullName: '',
+    dateOfBirth: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,7 +24,7 @@ const GTASignup = ({ onSwitchToSignin }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    const requiredFields = ['email', 'password', 'confirmPassword', 'fullName'];
+    const requiredFields = ['email', 'password', 'confirmPassword', 'fullName', 'dateOfBirth'];
 
     requiredFields.forEach(field => {
       if (!formData[field].trim()) {
@@ -46,6 +47,21 @@ const GTASignup = ({ onSwitchToSignin }) => {
       newErrors.confirmPassword = 'PASSWORDS DO NOT MATCH';
     }
 
+    // Date of birth validation
+    if (formData.dateOfBirth) {
+      const dobDate = new Date(formData.dateOfBirth);
+      const today = new Date();
+      const age = today.getFullYear() - dobDate.getFullYear();
+
+      if (dobDate >= today) {
+        newErrors.dateOfBirth = 'INVALID DATE OF BIRTH';
+      } else if (age < 13) {
+        newErrors.dateOfBirth = 'MUST BE AT LEAST 13 YEARS OLD';
+      } else if (age > 100) {
+        newErrors.dateOfBirth = 'INVALID DATE OF BIRTH';
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -63,10 +79,11 @@ const GTASignup = ({ onSwitchToSignin }) => {
       const userData = {
         email: formData.email,
         password: formData.password,
-        fullName: formData.fullName
+        fullName: formData.fullName,
+        dateOfBirth: formData.dateOfBirth
       };
 
-      const newUser = await supabaseService.createUser(userData);
+      await supabaseService.createUser(userData);
 
       setShowSuccess(true);
 
@@ -75,7 +92,8 @@ const GTASignup = ({ onSwitchToSignin }) => {
         email: '',
         password: '',
         confirmPassword: '',
-        fullName: ''
+        fullName: '',
+        dateOfBirth: ''
       });
       setErrors({});
 
@@ -393,6 +411,23 @@ const GTASignup = ({ onSwitchToSignin }) => {
             required
           />
           {errors.email && <div style={styles.errorText}>{errors.email}</div>}
+        </div>
+
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Date of Birth *</label>
+          <input
+            type="date"
+            value={formData.dateOfBirth}
+            onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+            style={{
+              ...styles.input,
+              ...(errors.dateOfBirth && { borderBottom: '2px wavy #cc0000', background: 'rgba(204, 0, 0, 0.05)' })
+            }}
+            onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
+            onBlur={(e) => e.target.style.borderBottom = errors.dateOfBirth ? '2px wavy #cc0000' : '2px dotted #444'}
+            required
+          />
+          {errors.dateOfBirth && <div style={styles.errorText}>{errors.dateOfBirth}</div>}
         </div>
 
         <div style={styles.inputGroup}>

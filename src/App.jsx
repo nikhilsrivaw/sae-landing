@@ -11,10 +11,10 @@ const Home = React.lazy(() => import('./pages/Home'));
 const Sponsors = React.lazy(() => import('./pages/Sponsors'));
 const SponsorsTest = React.lazy(() => import('./pages/SponsorsTest'));
 const Team = React.lazy(() => import('./pages/Team'));
-const Chambers = React.lazy(() => import('./pages/Chambers'));
+// const Chambers = React.lazy(() => import('./pages/Chambers'));
 // const Glimpse = React.lazy(() => import('./pages/Glimpse'));
 const Creators = React.lazy(() => import('./pages/Creators'));
-const Events = React.lazy(() => import('./pages/Events'));
+// const Events = React.lazy(() => import('./pages/Events'));
 const AdminNew = React.lazy(() => import('./pages/AdminNew'));
 
 // Loading component
@@ -45,10 +45,10 @@ function App() {
                 <Route path="/sponsors" element={<Sponsors />} />
                 <Route path="/sponsors-test" element={<SponsorsTest />} />
                 <Route path="/team" element={<Team />} />
-                <Route path="/chambers" element={<Chambers />} />
+                {/* <Route path="/chambers" element={<Chambers />} /> */}
                 {/* <Route path="/glimpse" element={<Glimpse />} /> */}
                 <Route path="/creators" element={<Creators />} />
-                <Route path="/events" element={<Events />} />
+                {/* <Route path="/events" element={<Events />} /> */}
                 <Route path="/admin" element={<AdminNew />} />
                 <Route path="*" element={<Home />} />
               </Routes>

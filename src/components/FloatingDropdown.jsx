@@ -115,10 +115,10 @@ const FloatingDropdown = () => {
   const menuItems = [
     { name: 'SPONSORS', href: '/sponsors' },
     { name: 'TEAM', href: '/team' },
-    { name: '4 CHAMBERS', href: '/chambers' },
+    // { name: '4 CHAMBERS', href: '/chambers' },
     // { name: 'GLIMPSE', href: '/glimpse' },
     { name: 'CREATORS', href: '/creators' },
-    { name: 'EVENTS', href: '/events' },
+    // { name: 'EVENTS', href: '/events' },
   ];
 
   return (

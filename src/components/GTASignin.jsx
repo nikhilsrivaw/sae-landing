@@ -10,6 +10,16 @@ const GTASignin = ({ onSwitchToSignup, onSigninSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [submissionError, setSubmissionError] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordData, setForgotPasswordData] = useState({
+    email: '',
+    dateOfBirth: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [forgotPasswordErrors, setForgotPasswordErrors] = useState({});
+  const [forgotPasswordStep, setForgotPasswordStep] = useState(1); // 1: verify, 2: reset
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -71,6 +81,106 @@ const GTASignin = ({ onSwitchToSignup, onSigninSuccess }) => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleForgotPasswordInputChange = (field, value) => {
+    setForgotPasswordData(prev => ({ ...prev, [field]: value }));
+    if (forgotPasswordErrors[field]) {
+      setForgotPasswordErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const validateForgotPasswordStep1 = () => {
+    const newErrors = {};
+    if (!forgotPasswordData.email.trim()) {
+      newErrors.email = 'REQUIRED FIELD';
+    } else if (!/\S+@\S+\.\S+/.test(forgotPasswordData.email)) {
+      newErrors.email = 'INVALID EMAIL FORMAT';
+    }
+    if (!forgotPasswordData.dateOfBirth.trim()) {
+      newErrors.dateOfBirth = 'REQUIRED FIELD';
+    }
+    setForgotPasswordErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateForgotPasswordStep2 = () => {
+    const newErrors = {};
+    if (!forgotPasswordData.newPassword.trim()) {
+      newErrors.newPassword = 'REQUIRED FIELD';
+    } else if (forgotPasswordData.newPassword.length < 6) {
+      newErrors.newPassword = 'PASSWORD TOO SHORT (MIN 6 CHARS)';
+    }
+    if (forgotPasswordData.newPassword !== forgotPasswordData.confirmPassword) {
+      newErrors.confirmPassword = 'PASSWORDS DO NOT MATCH';
+    }
+    setForgotPasswordErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleVerifyUser = async () => {
+    if (!validateForgotPasswordStep1()) return;
+
+    setIsResettingPassword(true);
+    try {
+      const isVerified = await supabaseService.verifyUserForPasswordReset(
+        forgotPasswordData.email,
+        forgotPasswordData.dateOfBirth
+      );
+
+      if (isVerified) {
+        setForgotPasswordStep(2);
+        setForgotPasswordErrors({});
+      } else {
+        setForgotPasswordErrors({ verify: 'EMAIL AND DATE OF BIRTH DO NOT MATCH' });
+      }
+    } catch (error) {
+      console.error('User verification failed:', error);
+      setForgotPasswordErrors({ verify: 'VERIFICATION FAILED. PLEASE TRY AGAIN.' });
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!validateForgotPasswordStep2()) return;
+
+    setIsResettingPassword(true);
+    try {
+      await supabaseService.resetPassword(
+        forgotPasswordData.email,
+        forgotPasswordData.newPassword
+      );
+
+      // Success - close modal and show success message
+      setShowForgotPassword(false);
+      setForgotPasswordStep(1);
+      setForgotPasswordData({
+        email: '',
+        dateOfBirth: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      setForgotPasswordErrors({});
+      setSubmissionError('Password reset successful! Please sign in with your new password.');
+    } catch (error) {
+      console.error('Password reset failed:', error);
+      setForgotPasswordErrors({ reset: 'PASSWORD RESET FAILED. PLEASE TRY AGAIN.' });
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
+  const closeForgotPasswordModal = () => {
+    setShowForgotPassword(false);
+    setForgotPasswordStep(1);
+    setForgotPasswordData({
+      email: '',
+      dateOfBirth: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+    setForgotPasswordErrors({});
   };
 
   const styles = {
@@ -360,7 +470,22 @@ const GTASignin = ({ onSwitchToSignup, onSigninSuccess }) => {
         </div>
 
         <div style={styles.forgotPassword}>
-          Password forgotten? Visit Legion Square Community Center with ID.
+          <button
+            type="button"
+            onClick={() => setShowForgotPassword(true)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#666',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+              fontFamily: '"Courier New", monospace',
+              fontSize: '11px',
+              fontStyle: 'italic'
+            }}
+          >
+            Forgot Password? Click here to reset
+          </button>
         </div>
 
         {/* Submit Button */}
@@ -395,6 +520,177 @@ const GTASignin = ({ onSwitchToSignup, onSigninSuccess }) => {
           Don't have an account? CREATE ACCOUNT
         </button>
       </form>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            ...styles.container,
+            maxWidth: '500px',
+            minHeight: 'auto',
+            position: 'relative'
+          }}>
+            {/* Close button */}
+            <button
+              onClick={closeForgotPasswordModal}
+              style={{
+                position: 'absolute',
+                top: '15px',
+                right: '15px',
+                background: '#cc0000',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '50%',
+                width: '30px',
+                height: '30px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 'bold'
+              }}
+            >
+              ×
+            </button>
+
+            {/* Paper texture overlay */}
+            <div style={styles.paperTexture}></div>
+            <div style={styles.stains}></div>
+            <div style={styles.stains2}></div>
+            <div style={styles.stapleLeft}></div>
+            <div style={styles.stapleRight}></div>
+
+            <div style={styles.header}>
+              <div style={styles.logoSection}>
+                LOS SANTOS COUNTY SHERIFF'S DEPARTMENT
+              </div>
+              <h1 style={{...styles.title, fontSize: '28px'}}>PASSWORD RESET</h1>
+              <div style={styles.subtitle}>
+                {forgotPasswordStep === 1 ? 'VERIFY IDENTITY' : 'SET NEW PASSWORD'}
+              </div>
+            </div>
+
+            {forgotPasswordStep === 1 ? (
+              <div>
+                {/* Error Messages */}
+                {forgotPasswordErrors.verify && (
+                  <div style={styles.errorMessage}>
+                    ❌ {forgotPasswordErrors.verify}
+                  </div>
+                )}
+
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Email Address *</label>
+                  <input
+                    type="email"
+                    value={forgotPasswordData.email}
+                    onChange={(e) => handleForgotPasswordInputChange('email', e.target.value)}
+                    style={{
+                      ...styles.input,
+                      ...(forgotPasswordErrors.email && { borderBottom: '2px wavy #cc0000', background: 'rgba(204, 0, 0, 0.05)' })
+                    }}
+                    onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
+                    onBlur={(e) => e.target.style.borderBottom = forgotPasswordErrors.email ? '2px wavy #cc0000' : '2px dotted #444'}
+                    required
+                  />
+                  {forgotPasswordErrors.email && <div style={styles.errorText}>{forgotPasswordErrors.email}</div>}
+                </div>
+
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Date of Birth *</label>
+                  <input
+                    type="date"
+                    value={forgotPasswordData.dateOfBirth}
+                    onChange={(e) => handleForgotPasswordInputChange('dateOfBirth', e.target.value)}
+                    style={{
+                      ...styles.input,
+                      ...(forgotPasswordErrors.dateOfBirth && { borderBottom: '2px wavy #cc0000', background: 'rgba(204, 0, 0, 0.05)' })
+                    }}
+                    onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
+                    onBlur={(e) => e.target.style.borderBottom = forgotPasswordErrors.dateOfBirth ? '2px wavy #cc0000' : '2px dotted #444'}
+                    required
+                  />
+                  {forgotPasswordErrors.dateOfBirth && <div style={styles.errorText}>{forgotPasswordErrors.dateOfBirth}</div>}
+                </div>
+
+                <button
+                  onClick={handleVerifyUser}
+                  disabled={isResettingPassword}
+                  style={{
+                    ...styles.submitButton,
+                    background: 'linear-gradient(45deg, #8B0000 0%, #A0522D 50%, #8B0000 100%)'
+                  }}
+                >
+                  {isResettingPassword ? 'VERIFYING...' : 'VERIFY IDENTITY'}
+                </button>
+              </div>
+            ) : (
+              <div>
+                {/* Error Messages */}
+                {forgotPasswordErrors.reset && (
+                  <div style={styles.errorMessage}>
+                    ❌ {forgotPasswordErrors.reset}
+                  </div>
+                )}
+
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>New Password *</label>
+                  <input
+                    type="password"
+                    value={forgotPasswordData.newPassword}
+                    onChange={(e) => handleForgotPasswordInputChange('newPassword', e.target.value)}
+                    style={{
+                      ...styles.input,
+                      ...(forgotPasswordErrors.newPassword && { borderBottom: '2px wavy #cc0000', background: 'rgba(204, 0, 0, 0.05)' })
+                    }}
+                    onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
+                    onBlur={(e) => e.target.style.borderBottom = forgotPasswordErrors.newPassword ? '2px wavy #cc0000' : '2px dotted #444'}
+                    required
+                  />
+                  {forgotPasswordErrors.newPassword && <div style={styles.errorText}>{forgotPasswordErrors.newPassword}</div>}
+                </div>
+
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Confirm New Password *</label>
+                  <input
+                    type="password"
+                    value={forgotPasswordData.confirmPassword}
+                    onChange={(e) => handleForgotPasswordInputChange('confirmPassword', e.target.value)}
+                    style={{
+                      ...styles.input,
+                      ...(forgotPasswordErrors.confirmPassword && { borderBottom: '2px wavy #cc0000', background: 'rgba(204, 0, 0, 0.05)' })
+                    }}
+                    onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
+                    onBlur={(e) => e.target.style.borderBottom = forgotPasswordErrors.confirmPassword ? '2px wavy #cc0000' : '2px dotted #444'}
+                    required
+                  />
+                  {forgotPasswordErrors.confirmPassword && <div style={styles.errorText}>{forgotPasswordErrors.confirmPassword}</div>}
+                </div>
+
+                <button
+                  onClick={handleResetPassword}
+                  disabled={isResettingPassword}
+                  style={{
+                    ...styles.submitButton,
+                    background: 'linear-gradient(45deg, #006400 0%, #228B22 50%, #006400 100%)'
+                  }}
+                >
+                  {isResettingPassword ? 'RESETTING...' : 'RESET PASSWORD'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

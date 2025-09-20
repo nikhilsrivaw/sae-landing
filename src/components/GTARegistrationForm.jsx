@@ -969,8 +969,8 @@ const GTARegistrationForm = () => {
             </div>
             {qrUpiLoading ? (
               <div style={{
-                width: '200px',
-                height: '200px',
+                width: '300px',
+                height: '300px',
                 border: '3px solid #2a2a2a',
                 margin: '0 auto',
                 display: 'flex',
@@ -991,11 +991,12 @@ const GTARegistrationForm = () => {
                   src={qrUpiSettings.qr_code_url}
                   alt="Payment QR Code"
                   style={{
-                    width: '200px',
-                    height: '200px',
+                    width: '300px',
+                    height: '300px',
                     border: '3px solid #2a2a2a',
                     borderRadius: '8px',
-                    objectFit: 'cover'
+                    objectFit: 'contain',
+                    background: '#fff'
                   }}
                 />
                 {qrUpiSettings.upi_id && (
@@ -1012,8 +1013,8 @@ const GTARegistrationForm = () => {
               </div>
             ) : (
               <div style={{
-                width: '200px',
-                height: '200px',
+                width: '300px',
+                height: '300px',
                 border: '3px solid #2a2a2a',
                 margin: '0 auto',
                 display: 'flex',

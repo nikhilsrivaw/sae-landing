@@ -8,13 +8,9 @@ const RegistrationStatus = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchRegistrationStatus();
-    }
-  }, [user, fetchRegistrationStatus]);
-
   const fetchRegistrationStatus = useCallback(async () => {
+    if (!user?.id) return;
+
     try {
       setIsLoading(true);
       setError('');
@@ -26,7 +22,11 @@ const RegistrationStatus = ({ onClose }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [user.id]);
+  }, [user?.id]);
+
+  useEffect(() => {
+    fetchRegistrationStatus();
+  }, [fetchRegistrationStatus]);
 
   const getStatusDisplay = () => {
     if (!registration) {

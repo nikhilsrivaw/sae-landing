@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 // import { gsap } from 'gsap';
 import { supabaseService } from '../lib/supabase';
+import { adminAuthService } from '../lib/adminAuth';
+import AdminLogin from '../components/AdminLogin';
 
 const AdminNew = () => {
+  console.log('🎯 AdminNew component is loading...');
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [showAddEventForm, setShowAddEventForm] = useState(false);
@@ -27,6 +31,58 @@ const AdminNew = () => {
   const [upiId, setUpiId] = useState('');
   const [currentQrCodeUrl, setCurrentQrCodeUrl] = useState(null);
   const [currentUpiId, setCurrentUpiId] = useState('');
+
+  // Admin Authentication state
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [adminData, setAdminData] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Authentication functions
+  const checkAdminAuthentication = async () => {
+    console.log('🔍 Checking admin authentication...');
+    setAuthLoading(true);
+    try {
+      const result = await adminAuthService.verifySession();
+      console.log('🔐 Auth verification result:', result);
+      if (result.success) {
+        console.log('✅ User is authenticated');
+        setIsAdminAuthenticated(true);
+        setAdminData(result.adminData);
+      } else {
+        console.log('❌ User not authenticated, showing login modal');
+        setIsAdminAuthenticated(false);
+        setAdminData(null);
+        setShowLoginModal(true);
+      }
+    } catch (error) {
+      console.error('🚨 Auth check error:', error);
+      setIsAdminAuthenticated(false);
+      setShowLoginModal(true);
+    } finally {
+      setAuthLoading(false);
+      console.log('🏁 Auth loading completed');
+    }
+  };
+
+  const handleLoginSuccess = (adminUserData) => {
+    setIsAdminAuthenticated(true);
+    setAdminData(adminUserData);
+    setShowLoginModal(false);
+    setError(null);
+  };
+
+  const handleLoginCancel = () => {
+    // Redirect to home page or show access denied
+    window.location.href = '/';
+  };
+
+  const handleAdminLogout = () => {
+    adminAuthService.logout();
+    setIsAdminAuthenticated(false);
+    setAdminData(null);
+    setShowLoginModal(true);
+  };
 
   // Helper function to filter registrations
   const getFilteredRegistrations = () => {
@@ -303,10 +359,19 @@ const AdminNew = () => {
   };
 
   useEffect(() => {
-    loadHotEvents();
-    loadTeamRegistrations();
-    loadQrUpiSettings();
+    console.log('🚀 AdminNew component mounted, starting auth check');
+    // Check admin authentication first
+    checkAdminAuthentication();
   }, []);
+
+  useEffect(() => {
+    // Load data only if authenticated
+    if (isAdminAuthenticated) {
+      loadHotEvents();
+      loadTeamRegistrations();
+      loadQrUpiSettings();
+    }
+  }, [isAdminAuthenticated]);
 
   const stats = [
     { title: 'Total Events', value: hotEvents.length.toString(), icon: '🔥', color: 'from-blue-400 to-cyan-400' },
@@ -316,6 +381,64 @@ const AdminNew = () => {
     { title: 'With Instagram', value: hotEvents.filter(e => e.instagram_reel).length.toString(), icon: '📱', color: 'from-green-400 to-emerald-400' },
     { title: 'With Posters', value: hotEvents.filter(e => e.poster_image_url).length.toString(), icon: '🖼️', color: 'from-orange-400 to-red-400' }
   ];
+
+  // Debug logging
+  console.log('🎯 AdminNew render state:', {
+    authLoading,
+    isAdminAuthenticated,
+    showLoginModal,
+    adminData
+  });
+
+  // Show loading screen while checking authentication
+  if (authLoading) {
+    console.log('⏳ Showing loading screen');
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: '#0f0f0f',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            border: '4px solid #333',
+            borderTop: '4px solid #4facfe',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 1rem'
+          }}></div>
+          <p style={{ color: '#f0f0f0', fontSize: '1.125rem' }}>
+            Checking admin access...
+          </p>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login modal if not authenticated
+  if (!isAdminAuthenticated || showLoginModal) {
+    console.log('🔐 Showing login modal');
+    return (
+      <div>
+        <AdminLogin
+          onLoginSuccess={handleLoginSuccess}
+          onCancel={handleLoginCancel}
+        />
+      </div>
+    );
+  }
+
+  console.log('✅ Showing admin dashboard');
 
   return (
     <>
@@ -1180,18 +1303,40 @@ const AdminNew = () => {
                 placeholder="Search events..."
                 className="search-input"
               />
-              <div style={{
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, #a960ee 0%, #ff333d 100%)',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 'bold'
-              }}>
-                A
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <span style={{ color: '#aaa', fontSize: '0.875rem' }}>
+                  Welcome, {adminData?.username || 'Admin'}
+                </span>
+                <button
+                  onClick={handleAdminLogout}
+                  style={{
+                    background: 'linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    transition: 'all 0.3s ease'
+                  }}
+                  title="Logout"
+                >
+                  🚪 Logout
+                </button>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  background: 'linear-gradient(135deg, #a960ee 0%, #ff333d 100%)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontWeight: 'bold'
+                }}>
+                  {adminData?.username?.charAt(0).toUpperCase() || 'A'}
+                </div>
               </div>
             </div>
           </header>

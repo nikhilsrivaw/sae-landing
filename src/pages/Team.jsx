@@ -17,7 +17,8 @@ const MemberCard = ({
   branch = "Technology",
   instagram = "@johndoe",
   linkedin = "linkedin.com/in/johndoe",
-  email = "john.doe@company.com"
+  email = "john.doe@company.com",
+  disableHover = false
 }) => {
   return (
     <div className="w-72 h-100 cursor-pointer my-6" style={{ perspective: '1000px' }}>
@@ -28,10 +29,14 @@ const MemberCard = ({
           transform: 'rotateY(0deg)',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'rotateY(180deg)';
+          if (!disableHover) {
+            e.currentTarget.style.transform = 'rotateY(180deg)';
+          }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'rotateY(0deg)';
+          if (!disableHover) {
+            e.currentTarget.style.transform = 'rotateY(0deg)';
+          }
         }}
       >
         {/* Front Side */}
@@ -120,9 +125,7 @@ const Team = () => {
           </>
         ),
         branch: "Mechanical Engineering Dept.",
-        instagram: "@faculty1",
-        linkedin: "linkedin.com/in/faculty1",
-        email: "faculty1@mmmut.ac.in"
+        
       },
       {
         photo: "https://github.com/adityatrymail/images/blob/main/faculty.JPG?raw=true",
@@ -133,9 +136,8 @@ const Team = () => {
           </>
         ),
         branch: "Mechanical Engineering Dept.",
-        instagram: "@faculty2",
-        linkedin: "linkedin.com/in/faculty2",
-        email: "faculty2@mmmut.ac.in"
+        
+        
       },
       {
         photo: "https://github.com/adityatrymail/images/blob/main/IMGFaculty467.jpeg?raw=true",
@@ -146,9 +148,7 @@ const Team = () => {
           </>
         ),
         branch: "Mechanical Engineering Dept.",
-        instagram: "@faculty2",
-        linkedin: "linkedin.com/in/faculty2",
-        email: "faculty2@mmmut.ac.in"
+        
       }
     ],
     "PostHolders": [
@@ -447,7 +447,7 @@ const Team = () => {
           </div>
           <div className="flex flex-wrap justify-center" style={{ gap: '2rem' }}>
             {teamMembers[activeTab].map((member, index) => (
-              <MemberCard key={index} {...member} />
+              <MemberCard key={index} {...member} disableHover={activeTab === "Faculty"} />
             ))}
           </div>
           {/* Bottom spacing */}

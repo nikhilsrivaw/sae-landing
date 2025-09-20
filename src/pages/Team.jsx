@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Linkedin, Mail } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
+//import LoadingScreen from "../components/LoadingScreen";
 
 // --- Member Card Component ---
 const MemberCard = ({

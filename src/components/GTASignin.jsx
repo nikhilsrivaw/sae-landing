@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabaseService } from '../lib/supabase';
+import { gsap } from 'gsap';
 
 const GTASignin = ({ onSwitchToSignup, onSigninSuccess }) => {
   const [formData, setFormData] = useState({
@@ -20,6 +21,27 @@ const GTASignin = ({ onSwitchToSignup, onSigninSuccess }) => {
   const [forgotPasswordErrors, setForgotPasswordErrors] = useState({});
   const [forgotPasswordStep, setForgotPasswordStep] = useState(1); // 1: verify, 2: reset
   const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const marqueeRef = useRef(null);
+
+  useEffect(() => {
+    if (marqueeRef.current) {
+      const marqueeText = marqueeRef.current;
+      const containerWidth = marqueeText.parentElement.offsetWidth;
+      const textWidth = marqueeText.scrollWidth;
+
+      gsap.fromTo(marqueeText,
+        {
+          x: containerWidth
+        },
+        {
+          x: -textWidth,
+          duration: 12,
+          ease: "none",
+          repeat: -1
+        }
+      );
+    }
+  }, []);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -510,6 +532,77 @@ const GTASignin = ({ onSwitchToSignup, onSigninSuccess }) => {
         >
           {isSubmitting ? 'ACCESSING ACCOUNT...' : 'SIGN IN'}
         </button>
+
+        {/* Marquee Text */}
+        <div style={{
+          background: 'linear-gradient(45deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%)',
+          color: '#fff',
+          padding: '12px 15px',
+          margin: '25px 0',
+          border: '3px solid #444',
+          borderRadius: '8px',
+          fontFamily: '"Courier New", monospace',
+          fontSize: '13px',
+          fontWeight: 'bold',
+          textTransform: 'uppercase',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          position: 'relative',
+          height: '45px',
+          display: 'flex',
+          alignItems: 'center',
+          boxShadow: `
+            inset 0 0 20px rgba(0,0,0,0.3),
+            0 4px 12px rgba(0,0,0,0.4),
+            0 0 0 1px rgba(255,255,255,0.1)
+          `,
+          background: `
+            linear-gradient(45deg, #1a1a1a 0%, #2a2a2a 25%, #333 50%, #2a2a2a 75%, #1a1a1a 100%),
+            linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)
+          `
+        }}>
+          {/* Animated border effect */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '2px',
+            background: 'linear-gradient(90deg, transparent 0%, #ff9900 50%, transparent 100%)',
+            animation: 'borderGlow 3s ease-in-out infinite alternate'
+          }}></div>
+          <div style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '2px',
+            background: 'linear-gradient(90deg, transparent 0%, #4a90e2 50%, transparent 100%)',
+            animation: 'borderGlow 3s ease-in-out infinite alternate-reverse'
+          }}></div>
+
+          <div
+            ref={marqueeRef}
+            style={{
+              display: 'inline-block',
+              whiteSpace: 'nowrap',
+              color: '#fff',
+              textShadow: '0 0 10px rgba(255,255,255,0.3), 0 0 20px rgba(74,144,226,0.2)',
+              letterSpacing: '1px'
+            }}
+          >
+            🎯 Mark your attendance in the first technical event of your college journey 🎯
+          </div>
+
+          <style>
+            {`
+              @keyframes borderGlow {
+                0% { opacity: 0.5; transform: translateX(-100%); }
+                100% { opacity: 1; transform: translateX(100%); }
+              }
+            `}
+          </style>
+        </div>
 
         {/* Switch to Sign Up */}
         <button

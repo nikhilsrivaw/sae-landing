@@ -34,8 +34,9 @@ const Hero = ({ onStateChange }) => {
   const starLineRef = useRef(null);
   const fullTextRef = useRef(null);
   const descriptionRef = useRef(null);
-  
-  
+  const marqueeRef = useRef(null);
+
+
   const [isLoading, setIsLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -313,6 +314,25 @@ const Hero = ({ onStateChange }) => {
     if (hud) gsap.set(hud, { opacity: 0, x: -100 });
     if (mapRef.current) gsap.set(mapRef.current, { opacity: 0, scale: 0.8, y: 100 });
     if (descriptionRef.current) gsap.set(descriptionRef.current, { opacity: 0, y: 30 });
+
+    // Set up marquee animation
+    if (marqueeRef.current) {
+      const marqueeText = marqueeRef.current;
+      const containerWidth = marqueeText.parentElement.offsetWidth;
+      const textWidth = marqueeText.scrollWidth;
+
+      gsap.fromTo(marqueeText,
+        {
+          x: containerWidth
+        },
+        {
+          x: -textWidth,
+          duration: 12,
+          ease: "none",
+          repeat: -1
+        }
+      );
+    }
     // Hide bottom fade with more specific targeting
     gsap.set('.absolute.bottom-0.left-0.w-full.h-32', { opacity: 0 }); // Bottom fade
     
@@ -908,6 +928,36 @@ const Hero = ({ onStateChange }) => {
             </div>
           )}
 
+        </div>
+
+        {/* Marquee Text Below Auth Controls */}
+        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-25 w-full max-w-lg px-4">
+          <div className="relative bg-gradient-to-r from-black/90 via-gray-900/90 to-black/90 border-2 border-blue-500/30 text-white px-5 py-3 overflow-hidden whitespace-nowrap backdrop-blur-md rounded-lg shadow-2xl">
+            {/* Animated background glow */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 opacity-50"></div>
+
+            {/* Top animated border */}
+            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-pulse"></div>
+
+            {/* Bottom animated border */}
+            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-yellow-400 to-transparent animate-pulse" style={{animationDelay: '1s'}}></div>
+
+            {/* Corner accents */}
+            <div className="absolute top-1 left-1 w-3 h-3 border-t-2 border-l-2 border-blue-400/60"></div>
+            <div className="absolute top-1 right-1 w-3 h-3 border-t-2 border-r-2 border-blue-400/60"></div>
+            <div className="absolute bottom-1 left-1 w-3 h-3 border-b-2 border-l-2 border-yellow-400/60"></div>
+            <div className="absolute bottom-1 right-1 w-3 h-3 border-b-2 border-r-2 border-yellow-400/60"></div>
+
+            <div
+              ref={marqueeRef}
+              className="relative z-10 inline-block whitespace-nowrap text-sm font-bold tracking-wider uppercase text-white"
+              style={{
+                textShadow: '0 0 10px rgba(255,255,255,0.5), 0 0 20px rgba(59,130,246,0.3), 0 0 30px rgba(59,130,246,0.1)'
+              }}
+            >
+              🎯 Mark your attendance in the first technical event of your college journey 🎯
+            </div>
+          </div>
         </div>
 
         {/* SAE Engineering HUD */}

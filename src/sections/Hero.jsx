@@ -41,11 +41,6 @@ const Hero = ({ onStateChange }) => {
   const [imageError, setImageError] = useState(false);
   const [showMainContent, setShowMainContent] = useState(false);
   const saeMaskRef = useRef(null);
-  const audioRef = useRef(null);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false); // Will be set to true once audio starts
-  const [isAudioMuted, setIsAudioMuted] = useState(false); // Track mute state separately
-  const [, forceUpdate] = useState({}); // For forcing re-renders when audio state changes
-  const [audioReady, setAudioReady] = useState(false);
   const [, setUserHasInteracted] = useState(false);
   const [showIntroPopup, setShowIntroPopup] = useState(false);
   const popupRef = useRef(null);
@@ -115,10 +110,10 @@ const Hero = ({ onStateChange }) => {
     setShowIntroPopup(false);
   }, []);
 
-  // Start the experience - NO AUDIO RESTART
+  // Start the experience
   const startExperience = useCallback(async () => {
     
-    // NO AUDIO RESTART - just proceed with experience
+    // Just proceed with experience
     setShowStartButton(false);
     setUserHasInteracted(true);
     setExperienceStarted(true);
@@ -164,42 +159,6 @@ const Hero = ({ onStateChange }) => {
   // Debug: Log background imports on component mount
 
 
-  // Auto-start audio when ready - seamless experience
-  useEffect(() => {
-    const startAudioSeamlessly = async () => {
-      if (audioRef.current && audioReady && !isAudioPlaying) {
-        try {
-          audioRef.current.muted = false;
-          audioRef.current.volume = 0.8;
-          await audioRef.current.play();
-          setIsAudioPlaying(true);
-          setUserHasInteracted(true);
-        } catch (e) {
-          
-          // Set up ONE interaction listener if autoplay fails
-          const startOnInteraction = async () => {
-            try {
-              if (audioRef.current && !isAudioPlaying) {
-                audioRef.current.muted = false;
-                audioRef.current.volume = 0.8;
-                await audioRef.current.play();
-                setIsAudioPlaying(true);
-                setUserHasInteracted(true);
-              }
-            } catch (err) {
-            }
-          };
-          
-          // Add one-time listener
-          document.addEventListener('click', startOnInteraction, { once: true });
-        }
-      }
-    };
-
-    if (audioReady && !isAudioPlaying) {
-      startAudioSeamlessly();
-    }
-  }, [audioReady, isAudioPlaying]);
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -282,7 +241,7 @@ const Hero = ({ onStateChange }) => {
             opacity: 1,
             transformOrigin: "center center"
           })
-          // Animation starts - NO AUDIO RESTART
+          // Animation starts
           .call(() => {
           })
           .to(".sae-mask-group", {
@@ -290,7 +249,7 @@ const Hero = ({ onStateChange }) => {
             duration: window.innerWidth < 640 ? 2.0 : 2.5, // Faster on mobile
             ease: "power1.easeIn", // Slow start
             onComplete: function() {
-              // Audio control enabled after animation completes
+              // Animation completed
             }
           })
           .to(".sae-mask-group", {
@@ -623,7 +582,6 @@ const Hero = ({ onStateChange }) => {
         }
         
         
-        // No cleanup needed for simplified audio
       } catch {
         // Error cleanup
       }
@@ -633,71 +591,6 @@ const Hero = ({ onStateChange }) => {
 
   return (
     <>
-      {/* GTA V Audio - FORCE UNMUTED AUTOPLAY */}
-      <audio 
-        ref={audioRef} 
-        autoPlay
-        loop
-        preload="auto"
-        muted={false}
-        playsInline
-        controls={false}
-        className="hidden"
-        volume={0.8}
-        onCanPlay={async () => {
-          setAudioReady(true);
-          // Try to start audio immediately when ready
-          try {
-            if (audioRef.current) {
-              audioRef.current.muted = false;
-              audioRef.current.volume = 0.8;
-              await audioRef.current.play();
-              setIsAudioPlaying(true);
-            }
-          } catch (e) {
-          }
-        }}
-        onCanPlayThrough={async () => {
-          setAudioReady(true);
-          // Try to start audio when fully ready
-          try {
-            if (audioRef.current && !isAudioPlaying) {
-              audioRef.current.muted = false;
-              audioRef.current.volume = 0.8;
-              await audioRef.current.play();
-              setIsAudioPlaying(true);
-            }
-          } catch (e) {
-          }
-        }}
-        onLoadedData={() => {
-          setAudioReady(true);
-          // NO AUTO-PLAY - wait for user to click continue
-        }}
-        onLoadedMetadata={() => {
-          setAudioReady(true);
-          // NO AUTO-PLAY - wait for user to click continue
-        }}
-        onPlay={() => {
-          setIsAudioPlaying(true);
-        }}
-        onPause={() => {
-          setIsAudioPlaying(false);
-        }}
-        onVolumeChange={() => {
-          if (audioRef.current) {
-            setIsAudioMuted(audioRef.current.muted);
-            forceUpdate({}); // Force re-render to update UI
-          }
-        }}
-        onEnded={() => {
-        }}
-        onError={(e) => {
-        }}
-      >
-        <source src="/GTA-V-Welcome-to-Los-Santosx.mp3" type="audio/mpeg" />
-        Your browser does not support the audio element.
-      </audio>
       
 
       {/* Authentic GTA V Loading Screen */}
@@ -1015,69 +908,6 @@ const Hero = ({ onStateChange }) => {
             </div>
           )}
 
-          {/* Audio Control */}
-          <button
-            className="audio-control-button group relative bg-black/90 border border-gray-600/50 text-white px-3 sm:px-5 py-2 rounded-full hover:bg-gray-900/95 hover:border-gray-500/70 transition-all duration-300 shadow-xl backdrop-blur-sm"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              
-              
-              if (!audioRef.current) {
-                return;
-              }
-
-              setUserHasInteracted(true);
-
-              // Simple mute toggle - let onVolumeChange event handle state updates
-              if (audioRef.current.muted) {
-                audioRef.current.muted = false;
-                audioRef.current.volume = 0.8;
-              } else {
-                audioRef.current.muted = true;
-              }
-              
-            }}
-          >
-            {/* Corner brackets for GTA 5 feel */}
-            <div className="absolute -top-1 -left-1 w-2 h-2 border-t border-l border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
-            <div className="absolute -top-1 -right-1 w-2 h-2 border-t border-r border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
-            <div className="absolute -bottom-1 -left-1 w-2 h-2 border-b border-l border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
-            <div className="absolute -bottom-1 -right-1 w-2 h-2 border-b border-r border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
-            
-            <div className="flex items-center space-x-3">
-              {/* Audio icon with SVG */}
-              <div className="w-4 h-4 transition-transform duration-300 group-hover:scale-110">
-                {!isAudioMuted && isAudioPlaying ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-300 group-hover:text-white transition-colors duration-300">
-                    <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse"/>
-                  </svg>
-                ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-300 group-hover:text-white transition-colors duration-300">
-                    <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <line x1="23" y1="9" x2="17" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    <line x1="17" y1="9" x2="23" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                )}
-              </div>
-              
-              {/* Button text */}
-              <span className="text-gray-200 font-bold text-sm tracking-wider group-hover:text-white transition-colors duration-300 font-mono">
-                {isAudioMuted ? 'UNMUTE' : 'MUTE'}
-              </span>
-              
-              {/* Status indicator */}
-              <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                !isAudioMuted && isAudioPlaying
-                  ? 'bg-green-500/80 animate-pulse' 
-                  : 'bg-red-500/80'
-              }`}></div>
-            </div>
-            
-            {/* Subtle glow effect */}
-            <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-gray-400/5 via-gray-300/10 to-gray-400/5"></div>
-          </button>
         </div>
 
         {/* SAE Engineering HUD */}

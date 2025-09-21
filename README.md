@@ -1,13 +1,11 @@
 # SAE Auto Empire - GTA V Inspired Landing Page
 
-A cinematic, GTA V-inspired landing page for the Society of Automotive Engineers (SAE) - MMMUT Chapter. Experience the ultimate automotive engineering journey with immersive audio and stunning animations.
+A cinematic, GTA V-inspired landing page for the Society of Automotive Engineers (SAE) - MMMUT Chapter. Experience the ultimate automotive engineering journey with stunning animations.
 
 ## 🎮 Features
 
 ### **Immersive Experience**
 - **GTA V-Style Interface**: Authentic GTA V-inspired design elements, animations, and aesthetics
-- **Cinematic Audio**: High-quality background music that creates an immersive gaming experience
-- **Seamless Audio Integration**: Audio plays smoothly without interruptions throughout the experience
 - **Interactive Start Screen**: "Let's Begin" button to enter the next level experience
 
 ### **Advanced Animations**
@@ -39,7 +37,6 @@ A cinematic, GTA V-inspired landing page for the Society of Automotive Engineers
 - **Hero Section**: Large SAE branding with "AUTO EMPIRE" subtitle
 - **Description**: "Welcome to Los Santos' most elite automotive engineering crew. Where cutting-edge technology meets street racing culture in the neon-soaked nights of Vice City."
 - **Interactive Minimap**: GTA V-style map with SAE HQ and automotive locations
-- **Audio Controls**: Mute/unmute functionality with visual indicators
 
 ### **Brand Story**
 - **Four Divisions**: BAJA, SUPRA, AERO, and DISCO with detailed descriptions
@@ -54,12 +51,6 @@ A cinematic, GTA V-inspired landing page for the Society of Automotive Engineers
 - **Tailwind CSS**: Utility-first CSS framework for responsive design
 - **Modern JavaScript**: ES6+ features and async/await patterns
 
-## 🎵 Audio Experience
-
-- **Seamless Playback**: Audio starts when ready and continues without interruption
-- **Browser Compatibility**: Handles autoplay policies across different browsers
-- **User Interaction**: Falls back to user interaction if autoplay is blocked
-- **Volume Control**: Built-in mute/unmute functionality with visual feedback
 
 ## 📱 Responsive Features
 
@@ -106,7 +97,7 @@ src/
 ## 🌟 Key Highlights
 
 - **Cinematic Experience**: Movie-quality animations and transitions
-- **Audio-Visual Sync**: Perfect synchronization between audio and visual elements  
+  
 - **Professional Polish**: Production-ready code with error handling
 - **Authentic GTA V Feel**: Genuine gaming experience recreation
 - **Educational Content**: Real information about SAE and automotive engineering
@@ -137,8 +128,7 @@ src/
 ## 📋 Requirements
 
 - Node.js 18+
-- Modern browser with audio support
-- Good internet connection for audio assets
+- Modern browser
 
 ---
 

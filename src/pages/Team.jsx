@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import HomeButton from '../components/HomeButton';
 import LoadingScreen from "../components/LoadingScreen";
 import logo from "../assets/logoSAE.png";
+import backgroundImg from "../assets/background (3).jpg";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Linkedin, Mail } from 'lucide-react';
@@ -361,7 +362,17 @@ const Team = () => {
 
   return (
     
-    <div className="main-container fixed top-0 left-0 w-full h-full bg-cover bg-center z-10" ref={containerRef}>
+    <div
+      className="main-container fixed top-0 left-0 w-full h-full bg-cover bg-center z-10"
+      ref={containerRef}
+      style={{
+        backgroundImage: `url(${backgroundImg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center center',
+        backgroundAttachment: 'fixed',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
       {/* Header Section */}
       <div className="header-section">
         <div className="header-top">
@@ -461,9 +472,6 @@ const Team = () => {
         @import url("https://fonts.googleapis.com/css2?family=Chalet+Comprime&display=swap");
 
         .main-container {
-          background: url("https://github.com/adityatrymail/images/blob/main/Untitled-1.webp?raw=true") no-repeat center center fixed;
-          background-size: cover;
-          background-attachment: fixed;
           color: #fff;
           font-family: "Chalet Comprime", Arial, sans-serif;
           min-height: 100vh;

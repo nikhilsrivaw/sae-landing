@@ -933,8 +933,8 @@ const Hero = ({ onStateChange }) => {
         </div>
 
         {/* Marquee Text Below Auth Controls */}
-        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-25 w-full max-w-lg px-4">
-          <div className="relative bg-gradient-to-r from-black/90 via-gray-900/90 to-black/90 border-2 border-blue-500/30 text-white px-5 py-3 overflow-hidden whitespace-nowrap backdrop-blur-md rounded-lg shadow-2xl">
+        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-25 w-full max-w-xs sm:max-w-lg px-2 sm:px-4 lg:max-w-lg">
+          <div className="relative bg-gradient-to-r from-black/90 via-gray-900/90 to-black/90 border-2 border-blue-500/30 text-white px-3 sm:px-5 py-2 sm:py-3 overflow-hidden whitespace-nowrap backdrop-blur-md rounded-lg shadow-2xl">
             {/* Animated background glow */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 opacity-50"></div>
 
@@ -952,7 +952,7 @@ const Hero = ({ onStateChange }) => {
 
             <div
               ref={marqueeRef}
-              className="relative z-10 inline-block whitespace-nowrap text-sm font-bold tracking-wider uppercase text-white"
+              className="relative z-10 inline-block whitespace-nowrap text-xs sm:text-sm font-bold tracking-wide sm:tracking-wider uppercase text-white"
               style={{
                 textShadow: '0 0 10px rgba(255,255,255,0.5), 0 0 20px rgba(59,130,246,0.3), 0 0 30px rgba(59,130,246,0.1)'
               }}
@@ -960,14 +960,14 @@ const Hero = ({ onStateChange }) => {
               🎯 Mark your attendance in the first technical event of your college journey 🎯
             </div>
           </div>
+        </div>
 
-          {/* Event Date below marquee */}
-          <div className="mt-6 text-center">
-            <div className="text-white text-2xl font-bold tracking-wider" style={{
-              textShadow: '0 0 15px rgba(255,255,255,0.8), 0 0 25px rgba(59,130,246,0.4), 0 0 35px rgba(59,130,246,0.2)'
-            }}>
-              Date of Event: 4th & 5th October
-            </div>
+        {/* Event Date - Desktop only */}
+        <div className="absolute top-32 left-1/2 transform -translate-x-1/2 z-20 hidden lg:block">
+          <div className="text-white text-2xl font-bold tracking-wider" style={{
+            textShadow: '0 0 15px rgba(255,255,255,0.8), 0 0 25px rgba(59,130,246,0.4), 0 0 35px rgba(59,130,246,0.2)'
+          }}>
+            Date of Event: 4th & 5th October
           </div>
         </div>
 
@@ -1818,9 +1818,43 @@ const Hero = ({ onStateChange }) => {
           </div>
         )}
 
+        {/* Mobile View Events Button - Aligned with Map */}
+        {showMainContent && (
+          <div className="absolute bottom-20 sm:bottom-6 right-2 sm:right-6 z-30 block lg:hidden">
+            <button
+              onClick={() => setShowEventsPopup(true)}
+              className="group relative bg-black/95 border-2 border-gray-500/70 text-white p-3 rounded-full hover:bg-gray-900/95 hover:border-gray-400/80 transition-all duration-300 shadow-2xl backdrop-blur-sm flex items-center justify-center"
+              style={{
+                width: '70px',
+                height: '70px'
+              }}
+            >
+              {/* Corner brackets for GTA feel */}
+              <div className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+              <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-gray-400/60 group-hover:border-gray-300/80 transition-colors duration-300"></div>
+
+              {/* Button content */}
+              <div className="flex flex-col items-center justify-center text-center">
+                <div className="text-yellow-400 text-xl mb-1">🔥</div>
+                <div className="text-white text-xs font-bold tracking-wide leading-tight" style={{
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
+                }}>
+                  <div className="text-white font-mono">VIEW</div>
+                  <div className="text-gray-200 font-mono">EVENT</div>
+                </div>
+              </div>
+
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-gray-400/5 via-gray-300/10 to-gray-400/5"></div>
+            </button>
+          </div>
+        )}
+
         {/* Mobile Notice Board - Desktop Login Message */}
         {showMainContent && (
-          <div className="absolute top-24 right-4 z-20 w-56 h-40 block lg:hidden">
+          <div className="absolute top-24 right-2 sm:right-4 z-20 w-52 sm:w-56 h-36 sm:h-40 block lg:hidden">
             {/* Cork Board Background */}
             <div
               className="notice-board relative w-full h-full"
@@ -1922,7 +1956,7 @@ const Hero = ({ onStateChange }) => {
 
         {/* Mobile Download Rule Book Button */}
         {showMainContent && (
-          <div className="absolute top-68 right-4 z-20 w-56 block lg:hidden">
+          <div className="absolute top-68 right-2 sm:right-4 z-20 w-52 sm:w-56 block lg:hidden">
             <button
               onClick={() => {
                 const link = document.createElement('a');
@@ -1932,7 +1966,7 @@ const Hero = ({ onStateChange }) => {
                 link.click();
                 document.body.removeChild(link);
               }}
-              className="w-full group relative bg-blue-900/90 border-2 border-blue-600/60 text-white px-4 py-3 rounded-lg hover:bg-blue-800/95 hover:border-blue-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm flex items-center justify-center"
+              className="w-full group relative bg-blue-900/90 border-2 border-blue-600/60 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg hover:bg-blue-800/95 hover:border-blue-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm flex items-center justify-center"
               style={{
                 transform: 'rotate(-0.5deg)',
                 fontFamily: '"Poppins", sans-serif',

@@ -34,7 +34,7 @@ const GTAEventsPopup = ({ onClose }) => {
         radial-gradient(circle at 20% 30%, rgba(139, 125, 107, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 80% 70%, rgba(160, 145, 125, 0.08) 0%, transparent 50%)
       `,
-      border: '8px solid #2a2a2a',
+      border: window.innerWidth < 768 ? '4px solid #2a2a2a' : '8px solid #2a2a2a',
       borderRadius: '0',
       boxShadow: `
         inset 0 0 50px rgba(0,0,0,0.1),
@@ -42,11 +42,11 @@ const GTAEventsPopup = ({ onClose }) => {
         0 8px 32px rgba(0,0,0,0.3)
       `,
       position: 'relative',
-      maxWidth: window.innerWidth < 768 ? '95vw' : '1400px',
+      maxWidth: window.innerWidth < 768 ? '98vw' : '1400px',
       width: '100%',
       margin: '0 auto',
-      padding: window.innerWidth < 768 ? '20px' : '40px',
-      paddingBottom: window.innerWidth < 768 ? '60px' : '80px',
+      padding: window.innerWidth < 768 ? '15px' : '40px',
+      paddingBottom: window.innerWidth < 768 ? '50px' : '80px',
       color: '#222',
       minHeight: 'auto',
       maxHeight: 'none',
@@ -370,13 +370,27 @@ const GTAEventsPopup = ({ onClose }) => {
               transform: scale(1.2);
             }
           }
+
+          /* Mobile scrollbar styling */
+          @media (max-width: 768px) {
+            .mobile-scroll::-webkit-scrollbar {
+              width: 6px;
+            }
+            .mobile-scroll::-webkit-scrollbar-track {
+              background: rgba(0,0,0,0.1);
+            }
+            .mobile-scroll::-webkit-scrollbar-thumb {
+              background: rgba(59, 130, 246, 0.5);
+              border-radius: 3px;
+            }
+          }
         `}
       </style>
-      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="min-h-screen flex items-start justify-center py-4 px-4">
+      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto mobile-scroll">
+      <div className="min-h-screen flex items-start justify-center py-2 md:py-4 px-2 md:px-4">
         <button
           onClick={onClose}
-          className="fixed top-4 right-4 z-[10000] text-white bg-black/50 hover:bg-black/70 rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold transition-all duration-300"
+          className="fixed top-2 right-2 md:top-4 md:right-4 z-[10000] text-white bg-black/50 hover:bg-black/70 rounded-full w-10 h-10 md:w-8 md:h-8 flex items-center justify-center text-xl font-bold transition-all duration-300"
         >
           ×
         </button>
@@ -556,9 +570,11 @@ const GTAEventsPopup = ({ onClose }) => {
           <div style={{
             display: 'flex',
             justifyContent: 'center',
-            gap: '20px',
-            marginTop: '30px',
-            flexWrap: 'wrap'
+            gap: window.innerWidth < 768 ? '15px' : '20px',
+            marginTop: window.innerWidth < 768 ? '20px' : '30px',
+            flexWrap: 'wrap',
+            flexDirection: window.innerWidth < 768 ? 'column' : 'row',
+            alignItems: 'center'
           }}>
             {/* Rule Book Button */}
             <button
@@ -567,7 +583,10 @@ const GTAEventsPopup = ({ onClose }) => {
                 ...styles.closeButton,
                 background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e40af 100%)',
                 border: '2px solid #3b82f6',
-                boxShadow: '0 6px 20px rgba(59, 130, 246, 0.4)'
+                boxShadow: '0 6px 20px rgba(59, 130, 246, 0.4)',
+                width: window.innerWidth < 768 ? '100%' : 'auto',
+                padding: window.innerWidth < 768 ? '16px 32px' : '14px 32px',
+                fontSize: window.innerWidth < 768 ? '14px' : '16px'
               }}
               onMouseEnter={(e) => {
                 e.target.style.background = 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #1e40af 100%)';
@@ -584,7 +603,12 @@ const GTAEventsPopup = ({ onClose }) => {
             {/* Close Button */}
             <button
               onClick={onClose}
-              style={styles.closeButton}
+              style={{
+                ...styles.closeButton,
+                width: window.innerWidth < 768 ? '100%' : 'auto',
+                padding: window.innerWidth < 768 ? '16px 32px' : '14px 32px',
+                fontSize: window.innerWidth < 768 ? '14px' : '16px'
+              }}
               onMouseEnter={(e) => {
                 e.target.style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%)';
                 e.target.style.transform = 'translateY(-2px)';

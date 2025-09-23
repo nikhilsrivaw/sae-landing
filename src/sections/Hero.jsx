@@ -56,6 +56,7 @@ const Hero = ({ onStateChange }) => {
   const [showEventsPopup, setShowEventsPopup] = useState(false);
   const [userRegistration, setUserRegistration] = useState(null);
   const [showPDFViewer, setShowPDFViewer] = useState(false);
+  const [showMobileRegistrationDisclaimer, setShowMobileRegistrationDisclaimer] = useState(false);
 
   // Use authentication context
   const { user, isAuthenticated, logout } = useAuth();
@@ -1854,7 +1855,7 @@ const Hero = ({ onStateChange }) => {
 
         {/* Mobile Notice Board - Desktop Login Message */}
         {showMainContent && (
-          <div className="absolute top-24 right-2 sm:right-4 z-20 w-52 sm:w-56 h-36 sm:h-40 block lg:hidden">
+          <div className="absolute top-20 right-2 sm:right-4 z-20 w-56 sm:w-64 h-44 sm:h-48 block lg:hidden">
             {/* Cork Board Background */}
             <div
               className="notice-board relative w-full h-full"
@@ -1887,7 +1888,7 @@ const Hero = ({ onStateChange }) => {
             >
               {/* Title Header */}
               <div
-                className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-red-800 text-yellow-200 px-2 py-1 text-xs font-bold tracking-wider"
+                className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-red-800 text-yellow-200 px-3 py-1 text-sm font-bold tracking-wider"
                 style={{
                   fontFamily: '"Permanent Marker", cursive',
                   textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
@@ -1896,55 +1897,132 @@ const Hero = ({ onStateChange }) => {
                   boxShadow: '0 2px 8px rgba(0,0,0,0.5)'
                 }}
               >
-                NOTICE
+                HOT EVENTS
               </div>
 
-              {/* Desktop Login Message */}
-              <div
-                className="notice-item absolute top-4 left-3 right-3 bottom-12 bg-yellow-100 border-2 border-red-600 p-3 flex flex-col items-center justify-center text-center"
-                style={{
-                  transform: 'rotate(-1deg)',
-                  boxShadow: '2px 2px 6px rgba(0,0,0,0.4)',
-                  background: 'linear-gradient(135deg, #fef3c7 0%, #fde047 100%)'
-                }}
-              >
-                {/* Pin */}
-                <div
-                  className="absolute -top-1 left-1/2 w-2 h-2 bg-gray-600 rounded-full transform -translate-x-1/2"
-                  style={{ boxShadow: 'inset 0 0 2px rgba(0,0,0,0.6)' }}
-                ></div>
+              {/* Mobile Hot Events Content */}
+              {hotEvents.length > 0 ? (
+                <>
+                  {/* Event Poster */}
+                  {hotEvents[0] && hotEvents[0].poster_image_url && (
+                    <div
+                      className="notice-item absolute top-4 left-2 w-24 h-28 bg-white border-2 border-yellow-800"
+                      style={{
+                        transform: 'rotate(-2deg)',
+                        boxShadow: '2px 2px 6px rgba(0,0,0,0.4)',
+                      }}
+                    >
+                      {/* Pin */}
+                      <div
+                        className="absolute -top-1 left-1/2 w-2 h-2 bg-gray-600 rounded-full transform -translate-x-1/2"
+                        style={{ boxShadow: 'inset 0 0 2px rgba(0,0,0,0.6)' }}
+                      ></div>
 
-                <div className="text-center space-y-2">
-                  <div className="text-lg">💻</div>
-                  <div
-                    className="text-red-800 font-bold text-xs leading-tight"
-                    style={{ fontFamily: '"Permanent Marker", cursive' }}
-                  >
-                    PLEASE LOGIN WITH DESKTOP
+                      <img
+                        src={hotEvents[0].poster_image_url}
+                        alt={hotEvents[0].name}
+                        className="w-full h-full object-cover"
+                        style={{ filter: 'sepia(0.2) contrast(1.1)' }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Event Info Card */}
+                  {hotEvents[0] && (
+                    <div
+                      className="notice-item absolute top-4 bg-white border-2 border-yellow-800 p-2 flex items-center"
+                      style={{
+                        left: hotEvents[0].poster_image_url ? '105px' : '8px',
+                        right: '8px',
+                        height: hotEvents[0].poster_image_url ? '50px' : '80px',
+                        transform: 'rotate(-1deg)',
+                        boxShadow: '2px 2px 6px rgba(0,0,0,0.4)',
+                      }}
+                    >
+                      {/* Pin */}
+                      <div
+                        className="absolute -top-1 left-1/2 w-2 h-2 bg-gray-600 rounded-full transform -translate-x-1/2"
+                        style={{ boxShadow: 'inset 0 0 2px rgba(0,0,0,0.6)' }}
+                      ></div>
+
+                      <div className="flex items-center w-full">
+                        <div className="text-xl mr-2">🔥</div>
+                        <div className="flex-1">
+                          <div
+                            className="text-red-800 font-bold text-xs leading-tight mb-1"
+                            style={{ fontFamily: '"Rock Salt", cursive' }}
+                          >
+                            HOT EVENT
+                          </div>
+                          <div
+                            className="text-xs leading-tight"
+                            style={{ fontFamily: '"Courier New", monospace' }}
+                          >
+                            {hotEvents[0].name.substring(0, hotEvents[0].poster_image_url ? 15 : 25)}...
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Mobile Buttons */}
+                  <div className="absolute bottom-4 left-1 right-1 flex justify-between space-x-2">
+                    {/* View Event Button */}
+                    <button
+                      onClick={() => setShowEventsPopup(true)}
+                      className="flex-1 bg-black/90 border border-gray-600/50 text-white px-3 py-2 rounded text-xs font-bold hover:bg-gray-800 transition-colors shadow-lg"
+                    >
+                      VIEW EVENT
+                    </button>
+
+                    {/* Register Button */}
+                    <button
+                      onClick={() => setShowMobileRegistrationDisclaimer(true)}
+                      className="flex-1 bg-red-900/90 border border-red-600/50 text-white px-3 py-2 rounded text-xs font-bold hover:bg-red-800 transition-colors shadow-lg"
+                    >
+                      REGISTER
+                    </button>
                   </div>
+                </>
+              ) : (
+                // No events fallback
+                <div
+                  className="notice-item absolute top-5 left-2 right-2 bottom-10 bg-yellow-100 border-2 border-red-600 p-2 flex flex-col items-center justify-center text-center"
+                  style={{
+                    transform: 'rotate(-1deg)',
+                    boxShadow: '2px 2px 6px rgba(0,0,0,0.4)',
+                    background: 'linear-gradient(135deg, #fef3c7 0%, #fde047 100%)'
+                  }}
+                >
+                  {/* Pin */}
                   <div
-                    className="text-gray-800 text-xs leading-tight"
-                    style={{ fontFamily: '"Courier New", monospace' }}
-                  >
-                    To register for events & view full details
-                  </div>
-                  <div className="text-xs text-red-600 font-bold">
-                    📱 ➡️ 🖥️
+                    className="absolute -top-1 left-1/2 w-2 h-2 bg-gray-600 rounded-full transform -translate-x-1/2"
+                    style={{ boxShadow: 'inset 0 0 2px rgba(0,0,0,0.6)' }}
+                  ></div>
+
+                  <div className="text-center">
+                    <div className="text-xl mb-2">📝</div>
+                    <div
+                      className="text-red-800 font-bold text-sm leading-tight"
+                      style={{ fontFamily: '"Permanent Marker", cursive' }}
+                    >
+                      NO EVENTS YET
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Small SAE Logo */}
               <div
-                className="notice-item absolute bottom-2 right-3 w-12 h-8 bg-white border border-gray-400 flex items-center justify-center"
+                className="notice-item absolute top-2 right-2 w-10 sm:w-12 h-6 sm:h-8 bg-white border border-gray-400 flex items-center justify-center"
                 style={{
                   transform: 'rotate(2deg)',
                   boxShadow: '1px 1px 3px rgba(0,0,0,0.3)'
                 }}
               >
                 <div
-                  className="text-center"
-                  style={{ fontFamily: '"Impact", sans-serif', fontSize: '6px' }}
+                  className="text-center text-xs sm:text-sm"
+                  style={{ fontFamily: '"Impact", sans-serif' }}
                 >
                   <div className="text-blue-800 font-bold">SAE</div>
                   <div className="text-red-600">INDIA</div>
@@ -2238,6 +2316,164 @@ const Hero = ({ onStateChange }) => {
         <GTAEventsPopup
           onClose={() => setShowEventsPopup(false)}
         />
+      )}
+
+      {/* Mobile Registration Disclaimer Popup */}
+      {showMobileRegistrationDisclaimer && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className="min-h-screen flex items-center justify-center py-4 px-4">
+            <button
+              onClick={() => setShowMobileRegistrationDisclaimer(false)}
+              className="fixed top-4 right-4 z-[10000] text-white bg-black/50 hover:bg-black/70 rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold transition-all duration-300"
+            >
+              ×
+            </button>
+
+            <div style={{
+              fontFamily: '"Inter", "Segoe UI", "Arial", sans-serif',
+              background: `
+                linear-gradient(145deg, #f4f1e8 0%, #ede8d8 25%, #f0ebe0 50%, #e8e3d3 75%, #f2ede5 100%),
+                radial-gradient(circle at 20% 30%, rgba(139, 125, 107, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(160, 145, 125, 0.08) 0%, transparent 50%)
+              `,
+              border: window.innerWidth < 768 ? '4px solid #2a2a2a' : '6px solid #2a2a2a',
+              borderRadius: '0',
+              boxShadow: `
+                inset 0 0 50px rgba(0,0,0,0.1),
+                0 0 0 2px #444,
+                0 8px 32px rgba(0,0,0,0.3)
+              `,
+              position: 'relative',
+              maxWidth: window.innerWidth < 768 ? '90vw' : '500px',
+              width: '100%',
+              margin: '0 auto',
+              padding: window.innerWidth < 768 ? '20px' : '30px',
+              color: '#222'
+            }}>
+              {/* Paper texture overlay */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                opacity: 0.15,
+                background: `
+                  repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 1px,
+                    rgba(0,0,0,0.03) 1px,
+                    rgba(0,0,0,0.03) 2px
+                  ),
+                  repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 1px,
+                    rgba(0,0,0,0.02) 1px,
+                    rgba(0,0,0,0.02) 2px
+                  )
+                `,
+                pointerEvents: 'none'
+              }}></div>
+
+              {/* Header */}
+              <div style={{ textAlign: 'center', marginBottom: '25px', position: 'relative', zIndex: 2 }}>
+                <div style={{
+                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)',
+                  color: '#fff',
+                  padding: '10px 20px',
+                  margin: '0 auto 20px',
+                  width: 'fit-content',
+                  fontFamily: '"Poppins", sans-serif',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  letterSpacing: '1.5px',
+                  border: '2px solid #dc2626',
+                  borderRadius: '6px',
+                  textShadow: '1px 1px 3px rgba(0,0,0,0.5)',
+                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)'
+                }}>
+                  REGISTRATION NOTICE
+                </div>
+
+                <h1 style={{
+                  fontFamily: '"Poppins", "Inter", sans-serif',
+                  fontSize: window.innerWidth < 768 ? '20px' : '28px',
+                  fontWeight: '700',
+                  color: '#1a1a1a',
+                  textTransform: 'uppercase',
+                  letterSpacing: window.innerWidth < 768 ? '1px' : '2px',
+                  margin: '0',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+                  lineHeight: '1.2'
+                }}>
+                  DESKTOP REQUIRED
+                </h1>
+              </div>
+
+              {/* Content */}
+              <div style={{ position: 'relative', zIndex: 2, textAlign: 'center' }}>
+                <div style={{ fontSize: '48px', marginBottom: '20px' }}>💻</div>
+
+                <div style={{
+                  fontFamily: '"Inter", "Segoe UI", sans-serif',
+                  fontSize: '16px',
+                  color: '#374151',
+                  lineHeight: '1.6',
+                  marginBottom: '20px',
+                  textAlign: 'center'
+                }}>
+                  <strong>Sorry!</strong> Registration requires a desktop computer for the best experience and form completion.
+                </div>
+
+                <div style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '2px solid #fecaca',
+                  borderRadius: '8px',
+                  padding: '15px',
+                  marginBottom: '25px',
+                  fontFamily: '"Inter", sans-serif',
+                  fontSize: '14px',
+                  color: '#991b1b',
+                  fontWeight: '500'
+                }}>
+                  📱 ➡️ 🖥️ Please switch to a desktop computer to register for events.
+                </div>
+
+                <button
+                  onClick={() => setShowMobileRegistrationDisclaimer(false)}
+                  style={{
+                    fontFamily: '"Poppins", sans-serif',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#fff',
+                    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)',
+                    border: '2px solid #dc2626',
+                    borderRadius: '8px',
+                    padding: '12px 24px',
+                    cursor: 'pointer',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
+                    textShadow: '1px 1px 2px rgba(0,0,0,0.6)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%)';
+                    e.target.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)';
+                    e.target.style.transform = 'translateY(0)';
+                  }}
+                >
+                  UNDERSTOOD
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
     </>

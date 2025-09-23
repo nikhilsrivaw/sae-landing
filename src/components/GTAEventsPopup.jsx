@@ -570,36 +570,8 @@ const GTAEventsPopup = ({ onClose }) => {
           <div style={{
             display: 'flex',
             justifyContent: 'center',
-            gap: window.innerWidth < 768 ? '15px' : '20px',
-            marginTop: window.innerWidth < 768 ? '20px' : '30px',
-            flexWrap: 'wrap',
-            flexDirection: window.innerWidth < 768 ? 'column' : 'row',
-            alignItems: 'center'
+            marginTop: window.innerWidth < 768 ? '20px' : '30px'
           }}>
-            {/* Rule Book Button */}
-            <button
-              onClick={() => setShowPDFViewer(true)}
-              style={{
-                ...styles.closeButton,
-                background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e40af 100%)',
-                border: '2px solid #3b82f6',
-                boxShadow: '0 6px 20px rgba(59, 130, 246, 0.4)',
-                width: window.innerWidth < 768 ? '100%' : 'auto',
-                padding: window.innerWidth < 768 ? '16px 32px' : '14px 32px',
-                fontSize: window.innerWidth < 768 ? '14px' : '16px'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #1e40af 100%)';
-                e.target.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e40af 100%)';
-                e.target.style.transform = 'translateY(0)';
-              }}
-            >
-              📋 OPEN RULE BOOK →
-            </button>
-
             {/* Close Button */}
             <button
               onClick={onClose}

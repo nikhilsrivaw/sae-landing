@@ -1026,7 +1026,7 @@ const Hero = ({ onStateChange }) => {
                     
                     <div>
                       <h3 className="text-white font-bold text-sm">Society of Automotive Engineers</h3>
-                      <p className="text-gray-400 text-xs">Chief Engineer</p>
+                      <p className="text-gray-400 text-xs">COLLEGIATE CLUB MMMUT</p>
                       <p className="text-gray-500 text-xs">MMMUT CHAPTER</p>
                     </div>
                   </div>
@@ -1076,29 +1076,6 @@ const Hero = ({ onStateChange }) => {
                   </div>
                 </div>
                 
-                {/* Status bar */}
-                <div className="flex items-center justify-between border-t border-gray-600/40 pt-3">
-                  <div>
-                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Budget</div>
-                    <div className="text-green-400 font-mono text-sm font-bold">
-                      ₹25.48L
-                    </div>
-                  </div>
-                  
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Rating</div>
-                    <div className="flex space-x-1">
-                      {[...Array(5)].map((_, i) => (
-                        <span 
-                          key={i} 
-                          className="text-yellow-600/80 text-xs"
-                        >
-                          ★
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
                 
               </div>
             </div>

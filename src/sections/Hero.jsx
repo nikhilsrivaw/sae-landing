@@ -6,6 +6,7 @@ import GTARegistrationForm from '../components/GTARegistrationForm';
 import GTAAuth from '../components/GTAAuth';
 import RegistrationStatus from '../components/RegistrationStatus';
 import GTAEventsPopup from '../components/GTAEventsPopup';
+import PDFViewer from '../components/PDFViewer';
 import { useAuth } from '../contexts/AuthContext';
 
 // Register the ScrollTrigger plugin
@@ -54,6 +55,7 @@ const Hero = ({ onStateChange }) => {
   const [showRegistrationStatus, setShowRegistrationStatus] = useState(false);
   const [showEventsPopup, setShowEventsPopup] = useState(false);
   const [userRegistration, setUserRegistration] = useState(null);
+  const [showPDFViewer, setShowPDFViewer] = useState(false);
 
   // Use authentication context
   const { user, isAuthenticated, logout } = useAuth();
@@ -958,6 +960,15 @@ const Hero = ({ onStateChange }) => {
               🎯 Mark your attendance in the first technical event of your college journey 🎯
             </div>
           </div>
+
+          {/* Event Date below marquee */}
+          <div className="mt-6 text-center">
+            <div className="text-white text-2xl font-bold tracking-wider" style={{
+              textShadow: '0 0 15px rgba(255,255,255,0.8), 0 0 25px rgba(59,130,246,0.4), 0 0 35px rgba(59,130,246,0.2)'
+            }}>
+              Date of Event: 4th & 5th October
+            </div>
+          </div>
         </div>
 
         {/* SAE Engineering HUD */}
@@ -1691,10 +1702,10 @@ const Hero = ({ onStateChange }) => {
                         {/* Button text */}
                         <div className="flex flex-col items-start">
                           <span className="text-white font-bold text-xs tracking-wider group-hover:text-yellow-300 transition-colors duration-300 font-mono">
-                            VIEW ALL
+                            VIEW
                           </span>
                           <span className="text-gray-400 text-xs group-hover:text-yellow-400 transition-colors duration-300 font-mono">
-                            EVENTS
+                            EVENT
                           </span>
                         </div>
                       </div>
@@ -1740,6 +1751,44 @@ const Hero = ({ onStateChange }) => {
 
                       {/* Subtle glow effect */}
                       <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-red-400/5 via-red-300/10 to-red-400/5"></div>
+                    </button>
+
+                    {/* Rule Book Button */}
+                    <button
+                      onClick={() => setShowPDFViewer(true)}
+                      className="group relative bg-blue-900/90 border border-blue-600/50 text-white px-3 py-2 rounded-lg hover:bg-blue-800/95 hover:border-blue-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm flex items-center justify-center"
+                      style={{
+                        minHeight: '40px',
+                        minWidth: '110px'
+                      }}
+                    >
+                      {/* Corner brackets for GTA 5 feel */}
+                      <div className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
+                      <div className="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
+                      <div className="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
+                      <div className="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
+
+                      <div className="flex items-center space-x-2">
+                        {/* Icon */}
+                        <div className="w-4 h-4 flex items-center justify-center">
+                          <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600 rounded-sm flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
+                            <span className="text-white text-xs font-bold">📋</span>
+                          </div>
+                        </div>
+
+                        {/* Button text */}
+                        <div className="flex flex-col items-start">
+                          <span className="text-white font-bold text-xs tracking-wider group-hover:text-purple-300 transition-colors duration-300 font-mono">
+                            RULE BOOK
+                          </span>
+                          <span className="text-gray-400 text-xs group-hover:text-purple-400 transition-colors duration-300 font-mono">
+                            VIEW
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Subtle glow effect */}
+                      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-blue-400/5 via-blue-300/10 to-blue-400/5"></div>
                     </button>
                   </div>
                 </>
@@ -1868,6 +1917,61 @@ const Hero = ({ onStateChange }) => {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Mobile Download Rule Book Button */}
+        {showMainContent && (
+          <div className="absolute top-68 right-4 z-20 w-56 block lg:hidden">
+            <button
+              onClick={() => {
+                const link = document.createElement('a');
+                link.href = '/sae-rulebook.pdf';
+                link.download = 'SAE-Rule-Book.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              className="w-full group relative bg-blue-900/90 border-2 border-blue-600/60 text-white px-4 py-3 rounded-lg hover:bg-blue-800/95 hover:border-blue-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm flex items-center justify-center"
+              style={{
+                transform: 'rotate(-0.5deg)',
+                fontFamily: '"Poppins", sans-serif',
+                fontSize: '14px',
+                fontWeight: '600',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                textShadow: '1px 1px 3px rgba(0,0,0,0.6)',
+                boxShadow: '0 6px 20px rgba(59, 130, 246, 0.4)'
+              }}
+            >
+              {/* Corner brackets for GTA feel */}
+              <div className="absolute -top-0.5 -left-0.5 w-2 h-2 border-t-2 border-l-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
+              <div className="absolute -top-0.5 -right-0.5 w-2 h-2 border-t-2 border-r-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
+              <div className="absolute -bottom-0.5 -left-0.5 w-2 h-2 border-b-2 border-l-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 border-b-2 border-r-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
+
+              <div className="flex items-center space-x-2">
+                {/* Icon */}
+                <div className="w-5 h-5 flex items-center justify-center">
+                  <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 rounded-sm flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
+                    <span className="text-white text-sm font-bold">📄</span>
+                  </div>
+                </div>
+
+                {/* Button text */}
+                <div className="flex flex-col items-start">
+                  <span className="text-white font-bold text-xs tracking-wider group-hover:text-blue-300 transition-colors duration-300 font-mono">
+                    DOWNLOAD
+                  </span>
+                  <span className="text-gray-300 text-xs group-hover:text-blue-400 transition-colors duration-300 font-mono">
+                    RULE BOOK
+                  </span>
+                </div>
+              </div>
+
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-blue-400/5 via-blue-300/10 to-blue-400/5"></div>
+            </button>
           </div>
         )}
 
@@ -2056,6 +2160,14 @@ const Hero = ({ onStateChange }) => {
             100% { transform: translateX(100%); opacity: 0; }
           }
         `}</style>
+
+      {/* PDF Viewer Modal */}
+      <PDFViewer
+        pdfUrl="/sae-rulebook.pdf"
+        isOpen={showPDFViewer}
+        onClose={() => setShowPDFViewer(false)}
+        title="SAE Rule Book"
+      />
 
       {/* Registration Form Modal */}
       {showRegistrationForm && (

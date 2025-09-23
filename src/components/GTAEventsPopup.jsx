@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { supabaseService } from '../lib/supabase';
+import PDFViewer from './PDFViewer';
 
 const GTAEventsPopup = ({ onClose }) => {
   const [hotEvents, setHotEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showPDFViewer, setShowPDFViewer] = useState(false);
 
   useEffect(() => {
     fetchHotEvents();
@@ -40,14 +42,15 @@ const GTAEventsPopup = ({ onClose }) => {
         0 8px 32px rgba(0,0,0,0.3)
       `,
       position: 'relative',
-      maxWidth: '1200px',
-      width: '95vw',
-      margin: '10px auto',
-      padding: window.innerWidth < 768 ? '20px' : '50px',
+      maxWidth: window.innerWidth < 768 ? '95vw' : '1400px',
+      width: '100%',
+      margin: '0 auto',
+      padding: window.innerWidth < 768 ? '20px' : '40px',
+      paddingBottom: window.innerWidth < 768 ? '60px' : '80px',
       color: '#222',
-      minHeight: window.innerWidth < 768 ? 'auto' : '800px',
-      maxHeight: '90vh',
-      overflow: 'hidden'
+      minHeight: 'auto',
+      maxHeight: 'none',
+      overflow: 'visible'
     },
     paperTexture: {
       position: 'absolute',
@@ -159,9 +162,8 @@ const GTAEventsPopup = ({ onClose }) => {
     eventsContainer: {
       position: 'relative',
       zIndex: 2,
-      maxHeight: '600px',
-      overflowY: 'auto',
-      paddingRight: '15px'
+      paddingRight: '15px',
+      marginBottom: '30px'
     },
     eventCard: {
       background: 'rgba(255, 255, 255, 0.9)',
@@ -273,15 +275,53 @@ const GTAEventsPopup = ({ onClose }) => {
       position: 'relative',
       zIndex: 2
     },
-    loadingText: {
+    loadingContainer: {
       textAlign: 'center',
-      fontFamily: '"Poppins", sans-serif',
-      fontSize: '18px',
-      color: '#6b7280',
-      fontWeight: '500',
-      margin: '40px 0',
+      margin: '60px 0',
       position: 'relative',
       zIndex: 2
+    },
+    loadingText: {
+      fontFamily: '"Poppins", sans-serif',
+      fontSize: '20px',
+      color: '#1a1a1a',
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: '2px',
+      marginBottom: '30px',
+      textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+    },
+    loadingBar: {
+      width: '300px',
+      height: '8px',
+      background: '#e5e7eb',
+      border: '2px solid #374151',
+      borderRadius: '4px',
+      margin: '0 auto 20px',
+      position: 'relative',
+      overflow: 'hidden',
+      boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
+    },
+    loadingBarFill: {
+      height: '100%',
+      background: 'linear-gradient(90deg, #1e3a8a 0%, #3b82f6 50%, #1e40af 100%)',
+      borderRadius: '2px',
+      animation: 'loadingPulse 2s ease-in-out infinite',
+      boxShadow: '0 0 10px rgba(59, 130, 246, 0.5)'
+    },
+    loadingDots: {
+      fontSize: '24px',
+      color: '#3b82f6',
+      animation: 'loadingDots 1.5s infinite'
+    },
+    loadingSpinner: {
+      width: '40px',
+      height: '40px',
+      border: '4px solid #e5e7eb',
+      borderTop: '4px solid #3b82f6',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+      margin: '0 auto 20px'
     },
     errorText: {
       textAlign: 'center',
@@ -306,11 +346,37 @@ const GTAEventsPopup = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="relative max-h-[95vh] overflow-y-auto">
+    <>
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+
+          @keyframes loadingPulse {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+          }
+
+          @keyframes loadingDots {
+            0%, 80%, 100% {
+              opacity: 0.3;
+              transform: scale(0.8);
+            }
+            40% {
+              opacity: 1;
+              transform: scale(1.2);
+            }
+          }
+        `}
+      </style>
+      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto">
+      <div className="min-h-screen flex items-start justify-center py-4 px-4">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 text-white bg-black/50 hover:bg-black/70 rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold transition-all duration-300"
+          className="fixed top-4 right-4 z-[10000] text-white bg-black/50 hover:bg-black/70 rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold transition-all duration-300"
         >
           ×
         </button>
@@ -339,8 +405,17 @@ const GTAEventsPopup = ({ onClose }) => {
 
           {/* Content */}
           {isLoading ? (
-            <div style={styles.loadingText}>
-              📋 LOADING EVENTS FROM DATABASE...
+            <div style={styles.loadingContainer}>
+              <div style={styles.loadingSpinner}></div>
+              <div style={styles.loadingText}>
+                📋 LOADING EVENTS FROM DATABASE
+              </div>
+              <div style={styles.loadingBar}>
+                <div style={styles.loadingBarFill}></div>
+              </div>
+              <div style={styles.loadingDots}>
+                ●●●
+              </div>
             </div>
           ) : error ? (
             <div style={styles.errorText}>
@@ -477,23 +552,65 @@ const GTAEventsPopup = ({ onClose }) => {
             </div>
           )}
 
-          <button
-            onClick={onClose}
-            style={styles.closeButton}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'linear-gradient(45deg, #888 0%, #aaa 50%, #888 100%)';
-              e.target.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'linear-gradient(45deg, #666 0%, #888 50%, #666 100%)';
-              e.target.style.transform = 'translateY(0)';
-            }}
-          >
-            CLOSE ARCHIVE
-          </button>
+          {/* Buttons Container */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '20px',
+            marginTop: '30px',
+            flexWrap: 'wrap'
+          }}>
+            {/* Rule Book Button */}
+            <button
+              onClick={() => setShowPDFViewer(true)}
+              style={{
+                ...styles.closeButton,
+                background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e40af 100%)',
+                border: '2px solid #3b82f6',
+                boxShadow: '0 6px 20px rgba(59, 130, 246, 0.4)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #1e40af 100%)';
+                e.target.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e40af 100%)';
+                e.target.style.transform = 'translateY(0)';
+              }}
+            >
+              📋 OPEN RULE BOOK →
+            </button>
+
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              style={styles.closeButton}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%)';
+                e.target.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)';
+                e.target.style.transform = 'translateY(0)';
+              }}
+            >
+              CLOSE ARCHIVE
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* PDF Viewer Modal */}
+      {showPDFViewer && (
+        <PDFViewer
+          pdfUrl="/sae-rulebook.pdf"
+          isOpen={showPDFViewer}
+          onClose={() => setShowPDFViewer(false)}
+          title="SAE Rule Book"
+        />
+      )}
+      </div>
+    </>
   );
 };
 

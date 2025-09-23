@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import HomeButton from '../components/HomeButton';
 import LoadingScreen from "../components/LoadingScreen";
 import logo from "../assets/logoSAE.png";
-import backgroundImg from "../assets/background (3).jpg";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Linkedin, Mail } from 'lucide-react';
@@ -366,11 +365,7 @@ const Team = () => {
       className="main-container fixed top-0 left-0 w-full h-full bg-cover bg-center z-10"
       ref={containerRef}
       style={{
-        backgroundImage: `url(${backgroundImg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center center',
-        backgroundAttachment: 'fixed',
-        backgroundRepeat: 'no-repeat'
+        backgroundColor: '#000000'
       }}
     >
       {/* Header Section */}

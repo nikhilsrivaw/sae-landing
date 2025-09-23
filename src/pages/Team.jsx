@@ -155,7 +155,7 @@ const Team = () => {
       {
         photo: "https://github.com/adityatrymail/images/blob/main/509267843_18366214711182222_5950869176448722328_n.webp?raw=true",
         name: "Abhinav Pratap Singh",
-        post: "Chair Person",
+        post: "ChairPerson",
         branch: "Mechanical Engineering",
         instagram: "@abhinavsingh2535",
         linkedin: "linkedin.com/in/abhinav-pratap-singh-257a38258?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
@@ -164,7 +164,7 @@ const Team = () => {
       {
         photo: "https://github.com/adityatrymail/images/blob/main/503610562_18366214720182222_1166049392477191456_n.webp?raw=true",
         name: "Ansh Shukla",
-        post: "Vice - Chairperson",
+        post: "Vice-Chairperson",
         branch: "Mechanical Engineering",
         instagram: "@anshshukla1303",
         linkedin: "linkedin.com/in/ansh-shukla-557542263?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
@@ -173,7 +173,7 @@ const Team = () => {
       {
         photo: "https://github.com/adityatrymail/images/blob/main/509671913_18366214729182222_6618237273431321811_n.webp?raw=true",
         name: "Ayush Kumar Singh",
-        post: " Vice - Chairperson",
+        post: " Vice-Chairperson",
         branch: "Electrical Engineering",
         instagram: "@artistically_an_engineer",
         linkedin: "linkedin.com/in/ayush-singh-5a846b258",

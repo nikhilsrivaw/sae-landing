@@ -233,7 +233,6 @@ const Creators = () => {
       className="main-container fixed top-0 left-0 w-full h-full bg-cover bg-center z-10 overflow-y-auto"
       ref={containerRef}
       style={{
-        backgroundImage: 'url(/background3.webp)',
         backgroundColor: '#000000'
       }}
     >

@@ -934,7 +934,7 @@ const Hero = ({ onStateChange }) => {
         </div>
 
         {/* Marquee Text Below Auth Controls */}
-        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-25 w-full max-w-xs sm:max-w-lg px-2 sm:px-4 lg:max-w-lg">
+        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-25 w-full max-w-xs sm:max-w-md lg:max-w-lg px-2 sm:px-4">
           <div className="relative bg-gradient-to-r from-black/90 via-gray-900/90 to-black/90 border-2 border-blue-500/30 text-white px-3 sm:px-5 py-2 sm:py-3 overflow-hidden whitespace-nowrap backdrop-blur-md rounded-lg shadow-2xl">
             {/* Animated background glow */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 opacity-50"></div>
@@ -1855,7 +1855,7 @@ const Hero = ({ onStateChange }) => {
 
         {/* Mobile Notice Board - Desktop Login Message */}
         {showMainContent && (
-          <div className="absolute top-20 right-2 sm:right-4 z-20 w-56 sm:w-64 h-44 sm:h-48 block lg:hidden">
+          <div className="absolute top-28 right-2 sm:right-4 z-30 w-56 sm:w-64 h-44 sm:h-48 block lg:hidden">
             {/* Cork Board Background */}
             <div
               className="notice-board relative w-full h-full"
@@ -1967,12 +1967,22 @@ const Hero = ({ onStateChange }) => {
 
                   {/* Mobile Buttons */}
                   <div className="absolute bottom-4 left-1 right-1 flex justify-between space-x-2">
-                    {/* View Event Button */}
+                    {/* Rule Button */}
                     <button
-                      onClick={() => setShowEventsPopup(true)}
-                      className="flex-1 bg-black/90 border border-gray-600/50 text-white px-3 py-2 rounded text-xs font-bold hover:bg-gray-800 transition-colors shadow-lg"
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = '/sae-rulebook.pdf';
+                        link.download = 'SAE-Rule-Book.pdf';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        // Show download confirmation alert
+                        alert('Downloaded! ✅ Rule book has been downloaded to your device.');
+                      }}
+                      className="flex-1 bg-blue-900/90 border border-blue-600/50 text-white px-3 py-2 rounded text-xs font-bold hover:bg-blue-800 transition-colors shadow-lg"
                     >
-                      VIEW EVENT
+                      RULE
                     </button>
 
                     {/* Register Button */}
@@ -2032,58 +2042,14 @@ const Hero = ({ onStateChange }) => {
           </div>
         )}
 
-        {/* Mobile Download Rule Book Button */}
+        {/* Event Date Below Mobile Notice Board */}
         {showMainContent && (
-          <div className="absolute top-68 right-2 sm:right-4 z-20 w-52 sm:w-56 block lg:hidden">
-            <button
-              onClick={() => {
-                const link = document.createElement('a');
-                link.href = '/sae-rulebook.pdf';
-                link.download = 'SAE-Rule-Book.pdf';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-              }}
-              className="w-full group relative bg-blue-900/90 border-2 border-blue-600/60 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg hover:bg-blue-800/95 hover:border-blue-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm flex items-center justify-center"
-              style={{
-                transform: 'rotate(-0.5deg)',
-                fontFamily: '"Poppins", sans-serif',
-                fontSize: '14px',
-                fontWeight: '600',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                textShadow: '1px 1px 3px rgba(0,0,0,0.6)',
-                boxShadow: '0 6px 20px rgba(59, 130, 246, 0.4)'
-              }}
-            >
-              {/* Corner brackets for GTA feel */}
-              <div className="absolute -top-0.5 -left-0.5 w-2 h-2 border-t-2 border-l-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
-              <div className="absolute -top-0.5 -right-0.5 w-2 h-2 border-t-2 border-r-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
-              <div className="absolute -bottom-0.5 -left-0.5 w-2 h-2 border-b-2 border-l-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 border-b-2 border-r-2 border-blue-400/60 group-hover:border-blue-300/80 transition-colors duration-300"></div>
-
-              <div className="flex items-center space-x-2">
-                {/* Icon */}
-                <div className="w-5 h-5 flex items-center justify-center">
-                  <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 rounded-sm flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
-                    <span className="text-white text-sm font-bold">📄</span>
-                  </div>
-                </div>
-
-                {/* Button text */}
-                <div className="flex flex-col items-start">
-                  <span className="text-white font-bold text-xs tracking-wider group-hover:text-blue-300 transition-colors duration-300 font-mono">
-                    DOWNLOAD
-                  </span>
-                  <span className="text-gray-300 text-xs group-hover:text-blue-400 transition-colors duration-300 font-mono">
-                    RULE BOOK
-                  </span>
-                </div>
-              </div>
-
-              {/* Subtle glow effect */}
-              <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-blue-400/5 via-blue-300/10 to-blue-400/5"></div>
-            </button>
+          <div className="absolute top-72 right-2 sm:right-4 z-20 block lg:hidden">
+            <div className="text-white text-lg font-bold tracking-wider text-right" style={{
+              textShadow: '0 0 15px rgba(255,255,255,0.8), 0 0 25px rgba(59,130,246,0.4), 0 0 35px rgba(59,130,246,0.2)'
+            }}>
+              Event → 4th and 5th October
+            </div>
           </div>
         )}
 

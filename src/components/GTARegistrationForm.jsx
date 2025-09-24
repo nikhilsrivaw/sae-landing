@@ -291,20 +291,19 @@ const GTARegistrationForm = ({ onClose }) => {
         radial-gradient(circle at 20% 30%, rgba(139, 125, 107, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 80% 70%, rgba(160, 145, 125, 0.08) 0%, transparent 50%)
       `,
-      border: window.innerWidth < 768 ? '4px solid #2a2a2a' : '8px solid #2a2a2a',
+      border: window.innerWidth < 768 ? '3px solid #2a2a2a' : '8px solid #2a2a2a',
       borderRadius: '0',
-      boxShadow: `
-        inset 0 0 50px rgba(0,0,0,0.1),
-        0 0 0 2px #444,
-        0 8px 32px rgba(0,0,0,0.3)
-      `,
+      boxShadow: window.innerWidth < 768 ?
+        'inset 0 0 30px rgba(0,0,0,0.08), 0 0 0 1px #444, 0 4px 16px rgba(0,0,0,0.2)' :
+        'inset 0 0 50px rgba(0,0,0,0.1), 0 0 0 2px #444, 0 8px 32px rgba(0,0,0,0.3)',
       position: 'relative',
       maxWidth: window.innerWidth < 768 ? '100vw' : '850px',
+      width: window.innerWidth < 768 ? '100%' : 'auto',
       margin: window.innerWidth < 768 ? '0' : '20px auto',
-      padding: window.innerWidth < 768 ? '20px 15px' : '40px',
+      padding: window.innerWidth < 768 ? '15px 10px' : '40px',
       color: '#222',
       minHeight: window.innerWidth < 768 ? 'auto' : '800px',
-      overflow: 'hidden'
+      overflow: window.innerWidth < 768 ? 'visible' : 'hidden'
     },
     paperTexture: {
       position: 'absolute',
@@ -377,34 +376,42 @@ const GTARegistrationForm = ({ onClose }) => {
     },
     title: {
       fontFamily: '"Impact", "Arial Black", sans-serif',
-      fontSize: window.innerWidth < 768 ? '24px' : '42px',
+      fontSize: window.innerWidth < 768 ? '20px' : window.innerWidth < 1024 ? '32px' : '42px',
       fontWeight: '900',
       color: '#1a1a1a',
       textTransform: 'uppercase',
-      letterSpacing: window.innerWidth < 768 ? '1px' : '3px',
-      margin: window.innerWidth < 768 ? '15px 0' : '20px 0',
+      letterSpacing: window.innerWidth < 768 ? '0.5px' : window.innerWidth < 1024 ? '2px' : '3px',
+      margin: window.innerWidth < 768 ? '10px 0' : '20px 0',
       textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-      lineHeight: '1.1'
+      lineHeight: window.innerWidth < 768 ? '1.2' : '1.1',
+      textAlign: 'center',
+      wordWrap: 'break-word'
     },
     logoSection: {
       background: 'linear-gradient(90deg, #2a2a2a 0%, #444 50%, #2a2a2a 100%)',
       color: '#fff',
-      padding: '8px 20px',
+      padding: window.innerWidth < 768 ? '6px 12px' : '8px 20px',
       margin: '0 auto 20px',
       width: 'fit-content',
+      maxWidth: window.innerWidth < 768 ? '90%' : 'auto',
       fontFamily: '"Impact", sans-serif',
-      fontSize: '16px',
+      fontSize: window.innerWidth < 768 ? '12px' : '16px',
       fontWeight: 'bold',
-      letterSpacing: '2px',
-      border: '3px solid #1a1a1a',
-      textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
+      letterSpacing: window.innerWidth < 768 ? '1px' : '2px',
+      border: window.innerWidth < 768 ? '2px solid #1a1a1a' : '3px solid #1a1a1a',
+      textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+      textAlign: 'center',
+      lineHeight: '1.2'
     },
     subtitle: {
       fontFamily: '"Courier New", monospace',
-      fontSize: '14px',
+      fontSize: window.innerWidth < 768 ? '11px' : '14px',
       color: '#444',
       margin: '10px 0',
-      fontWeight: 'bold'
+      fontWeight: 'bold',
+      textAlign: 'center',
+      lineHeight: '1.4',
+      padding: window.innerWidth < 768 ? '0 5px' : '0'
     },
     formSection: {
       marginBottom: '25px',
@@ -423,32 +430,33 @@ const GTARegistrationForm = ({ onClose }) => {
       paddingBottom: '5px'
     },
     inputGroup: {
-      marginBottom: '20px'
+      marginBottom: window.innerWidth < 768 ? '15px' : '20px'
     },
     label: {
       display: 'block',
       fontFamily: '"Courier New", monospace',
-      fontSize: '13px',
+      fontSize: window.innerWidth < 768 ? '12px' : '13px',
       fontWeight: 'bold',
       color: '#333',
-      marginBottom: '5px',
+      marginBottom: window.innerWidth < 768 ? '8px' : '5px',
       textTransform: 'uppercase',
       letterSpacing: '0.5px'
     },
     input: {
       width: '100%',
-      padding: window.innerWidth < 768 ? '12px 5px' : '8px 5px',
+      padding: window.innerWidth < 768 ? '14px 8px' : '8px 5px',
       fontSize: window.innerWidth < 768 ? '16px' : '14px',
       fontFamily: '"Courier New", monospace',
       fontWeight: 'bold',
       color: '#222',
       background: 'transparent',
       border: 'none',
-      borderBottom: '2px dotted #444',
+      borderBottom: window.innerWidth < 768 ? '2px solid #666' : '2px dotted #444',
       borderRadius: '0',
       outline: 'none',
       transition: 'border-bottom 0.3s ease',
-      lineHeight: '1.4'
+      lineHeight: '1.4',
+      boxSizing: 'border-box'
     },
     inputFocus: {
       borderBottom: '2px solid #ff9900'
@@ -459,18 +467,19 @@ const GTARegistrationForm = ({ onClose }) => {
     },
     select: {
       width: '100%',
-      padding: window.innerWidth < 768 ? '12px 5px' : '8px 5px',
+      padding: window.innerWidth < 768 ? '14px 8px' : '8px 5px',
       fontSize: window.innerWidth < 768 ? '16px' : '14px',
       fontFamily: '"Courier New", monospace',
       fontWeight: 'bold',
       color: '#222',
       background: 'transparent',
       border: 'none',
-      borderBottom: '2px dotted #444',
+      borderBottom: window.innerWidth < 768 ? '2px solid #666' : '2px dotted #444',
       borderRadius: '0',
       outline: 'none',
       appearance: 'none',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      boxSizing: 'border-box'
     },
     memberGrid: {
       display: 'grid',
@@ -479,42 +488,46 @@ const GTARegistrationForm = ({ onClose }) => {
       marginTop: '15px'
     },
     memberBox: {
-      border: '2px solid #666',
-      padding: '15px',
+      border: window.innerWidth < 768 ? '2px solid #666' : '2px solid #666',
+      padding: window.innerWidth < 768 ? '12px' : '15px',
       background: 'rgba(255, 255, 255, 0.3)',
       position: 'relative'
     },
     memberTitle: {
       fontFamily: '"Impact", sans-serif',
-      fontSize: '14px',
+      fontSize: window.innerWidth < 768 ? '13px' : '14px',
       fontWeight: 'bold',
       color: '#2a2a2a',
       textTransform: 'uppercase',
-      letterSpacing: '1px',
-      marginBottom: '10px',
+      letterSpacing: window.innerWidth < 768 ? '0.5px' : '1px',
+      marginBottom: window.innerWidth < 768 ? '8px' : '10px',
       textAlign: 'center',
       background: '#f4f1e8',
-      padding: '5px',
+      padding: window.innerWidth < 768 ? '4px' : '5px',
       border: '1px solid #888'
     },
     submitButton: {
       fontFamily: '"Impact", sans-serif',
-      fontSize: window.innerWidth < 768 ? '18px' : '24px',
+      fontSize: window.innerWidth < 768 ? '16px' : '24px',
       fontWeight: 'bold',
       color: '#fff',
       background: 'linear-gradient(45deg, #8B0000 0%, #A0522D 50%, #8B0000 100%)',
       border: window.innerWidth < 768 ? '3px solid #2a2a2a' : '4px solid #2a2a2a',
-      padding: window.innerWidth < 768 ? '12px 30px' : '15px 40px',
+      padding: window.innerWidth < 768 ? '14px 20px' : '15px 40px',
       cursor: 'pointer',
       textTransform: 'uppercase',
-      letterSpacing: window.innerWidth < 768 ? '1px' : '2px',
+      letterSpacing: window.innerWidth < 768 ? '0.5px' : '2px',
       display: 'block',
       margin: '30px auto 0',
       transition: 'all 0.3s ease',
       boxShadow: '0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
       textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      width: window.innerWidth < 768 ? 'calc(100% - 20px)' : 'auto',
+      maxWidth: window.innerWidth < 768 ? '300px' : 'auto',
+      lineHeight: '1.4',
+      textAlign: 'center'
     },
     submitButtonHover: {
       background: 'linear-gradient(45deg, #A0522D 0%, #CD853F 50%, #A0522D 100%)',
@@ -522,11 +535,11 @@ const GTARegistrationForm = ({ onClose }) => {
       boxShadow: '0 6px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
     },
     smallPrint: {
-      fontSize: '7px',
+      fontSize: window.innerWidth < 768 ? '8px' : '7px',
       color: '#666',
-      lineHeight: '1.2',
-      marginTop: '30px',
-      padding: '10px',
+      lineHeight: window.innerWidth < 768 ? '1.3' : '1.2',
+      marginTop: window.innerWidth < 768 ? '25px' : '30px',
+      padding: window.innerWidth < 768 ? '8px' : '10px',
       border: '1px solid #ccc',
       background: 'rgba(255, 255, 255, 0.5)',
       fontFamily: '"Times New Roman", serif',
@@ -542,35 +555,36 @@ const GTARegistrationForm = ({ onClose }) => {
       textTransform: 'uppercase'
     },
     paymentSection: {
-      border: '3px solid #8B0000',
-      padding: '20px',
+      border: window.innerWidth < 768 ? '2px solid #8B0000' : '3px solid #8B0000',
+      padding: window.innerWidth < 768 ? '15px' : '20px',
       background: 'rgba(255, 255, 255, 0.1)',
       position: 'relative',
-      marginTop: '25px'
+      marginTop: window.innerWidth < 768 ? '20px' : '25px'
     },
     paymentTitle: {
       fontFamily: '"Impact", sans-serif',
-      fontSize: '20px',
+      fontSize: window.innerWidth < 768 ? '16px' : '20px',
       fontWeight: 'bold',
       color: '#8B0000',
       textTransform: 'uppercase',
-      letterSpacing: '2px',
-      marginBottom: '15px',
+      letterSpacing: window.innerWidth < 768 ? '1px' : '2px',
+      marginBottom: window.innerWidth < 768 ? '12px' : '15px',
       textAlign: 'center',
       background: '#f4f1e8',
-      padding: '10px',
-      border: '2px solid #8B0000',
-      textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
+      padding: window.innerWidth < 768 ? '8px' : '10px',
+      border: window.innerWidth < 768 ? '2px solid #8B0000' : '2px solid #8B0000',
+      textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+      lineHeight: '1.3'
     },
     paymentAmount: {
       fontFamily: '"Impact", sans-serif',
-      fontSize: '32px',
+      fontSize: window.innerWidth < 768 ? '24px' : '32px',
       fontWeight: 'bold',
       color: '#8B0000',
       textAlign: 'center',
-      margin: '15px 0',
+      margin: window.innerWidth < 768 ? '12px 0' : '15px 0',
       textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-      letterSpacing: '3px'
+      letterSpacing: window.innerWidth < 768 ? '2px' : '3px'
     },
     fileUpload: {
       position: 'relative',
@@ -609,21 +623,23 @@ const GTARegistrationForm = ({ onClose }) => {
       textAlign: 'center'
     },
     previewImage: {
-      maxWidth: '300px',
-      maxHeight: '200px',
-      border: '3px solid #2a2a2a',
-      boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+      maxWidth: window.innerWidth < 768 ? '100%' : '300px',
+      maxHeight: window.innerWidth < 768 ? '150px' : '200px',
+      border: window.innerWidth < 768 ? '2px solid #2a2a2a' : '3px solid #2a2a2a',
+      boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+      width: window.innerWidth < 768 ? 'auto' : 'auto'
     },
     paymentInfo: {
       fontFamily: '"Courier New", monospace',
-      fontSize: '12px',
+      fontSize: window.innerWidth < 768 ? '11px' : '12px',
       color: '#444',
       margin: '10px 0',
       fontWeight: 'bold',
       textAlign: 'center',
       background: 'rgba(255, 255, 255, 0.5)',
-      padding: '10px',
-      border: '1px solid #888'
+      padding: window.innerWidth < 768 ? '8px' : '10px',
+      border: '1px solid #888',
+      lineHeight: '1.4'
     },
     successMessage: {
       background: 'linear-gradient(45deg, #006400 0%, #228B22 50%, #006400 100%)',
@@ -716,17 +732,20 @@ const GTARegistrationForm = ({ onClose }) => {
     },
     toggleButton: {
       fontFamily: '"Impact", sans-serif',
-      fontSize: '14px',
+      fontSize: window.innerWidth < 768 ? '13px' : '14px',
       fontWeight: 'bold',
       color: '#fff',
       background: 'linear-gradient(45deg, #4a90e2 0%, #357abd 50%, #4a90e2 100%)',
-      border: '3px solid #2a2a2a',
-      padding: '10px 20px',
+      border: window.innerWidth < 768 ? '2px solid #2a2a2a' : '3px solid #2a2a2a',
+      padding: window.innerWidth < 768 ? '12px 16px' : '10px 20px',
       cursor: 'pointer',
       textTransform: 'uppercase',
-      letterSpacing: '1px',
+      letterSpacing: window.innerWidth < 768 ? '0.5px' : '1px',
       margin: '0 auto 20px',
-      display: 'block'
+      display: 'block',
+      width: window.innerWidth < 768 ? 'calc(100% - 20px)' : 'auto',
+      maxWidth: window.innerWidth < 768 ? '280px' : 'auto',
+      textAlign: 'center'
     }
   };
 
@@ -751,15 +770,15 @@ const GTARegistrationForm = ({ onClose }) => {
             onClick={onClose}
             style={{
               position: 'absolute',
-              top: '15px',
-              right: '15px',
+              top: window.innerWidth < 768 ? '10px' : '15px',
+              right: window.innerWidth < 768 ? '10px' : '15px',
               background: 'rgba(139, 0, 0, 0.8)',
               border: '2px solid #fff',
               color: '#fff',
-              width: '40px',
-              height: '40px',
+              width: window.innerWidth < 768 ? '35px' : '40px',
+              height: window.innerWidth < 768 ? '35px' : '40px',
               borderRadius: '50%',
-              fontSize: '20px',
+              fontSize: window.innerWidth < 768 ? '18px' : '20px',
               fontWeight: 'bold',
               cursor: 'pointer',
               display: 'flex',
@@ -799,37 +818,39 @@ const GTARegistrationForm = ({ onClose }) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: '1rem',
+          gap: window.innerWidth < 768 ? '0.5rem' : '1rem',
           margin: '20px 0',
-          padding: '15px',
+          padding: window.innerWidth < 768 ? '12px 8px' : '15px',
           background: 'rgba(255, 255, 255, 0.1)',
-          border: '2px solid #8B0000',
-          borderRadius: '8px'
+          border: window.innerWidth < 768 ? '2px solid #8B0000' : '2px solid #8B0000',
+          borderRadius: '8px',
+          flexWrap: window.innerWidth < 768 ? 'wrap' : 'nowrap'
         }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
             color: currentStep >= 1 ? '#006400' : '#666',
             fontWeight: 'bold',
-            fontSize: '14px'
+            fontSize: window.innerWidth < 768 ? '11px' : '14px',
+            flexShrink: 0
           }}>
             <span style={{
               display: 'inline-block',
-              width: '24px',
-              height: '24px',
+              width: window.innerWidth < 768 ? '20px' : '24px',
+              height: window.innerWidth < 768 ? '20px' : '24px',
               borderRadius: '50%',
               background: currentStep >= 1 ? '#006400' : '#666',
               color: 'white',
               textAlign: 'center',
-              lineHeight: '24px',
-              marginRight: '8px',
-              fontSize: '12px'
+              lineHeight: window.innerWidth < 768 ? '20px' : '24px',
+              marginRight: window.innerWidth < 768 ? '6px' : '8px',
+              fontSize: window.innerWidth < 768 ? '10px' : '12px'
             }}>1</span>
-            TEAM REGISTRATION
+            {window.innerWidth < 768 ? 'TEAM' : 'TEAM REGISTRATION'}
           </div>
 
           <div style={{
-            width: '30px',
+            width: window.innerWidth < 768 ? '20px' : '30px',
             height: '2px',
             background: currentStep >= 2 ? '#006400' : '#666'
           }}></div>
@@ -839,25 +860,26 @@ const GTARegistrationForm = ({ onClose }) => {
             alignItems: 'center',
             color: currentStep >= 2 ? '#006400' : '#666',
             fontWeight: 'bold',
-            fontSize: '14px'
+            fontSize: window.innerWidth < 768 ? '11px' : '14px',
+            flexShrink: 0
           }}>
             <span style={{
               display: 'inline-block',
-              width: '24px',
-              height: '24px',
+              width: window.innerWidth < 768 ? '20px' : '24px',
+              height: window.innerWidth < 768 ? '20px' : '24px',
               borderRadius: '50%',
               background: currentStep >= 2 ? '#006400' : '#666',
               color: 'white',
               textAlign: 'center',
-              lineHeight: '24px',
-              marginRight: '8px',
-              fontSize: '12px'
+              lineHeight: window.innerWidth < 768 ? '20px' : '24px',
+              marginRight: window.innerWidth < 768 ? '6px' : '8px',
+              fontSize: window.innerWidth < 768 ? '10px' : '12px'
             }}>2</span>
             PAYMENT
           </div>
 
           <div style={{
-            width: '30px',
+            width: window.innerWidth < 768 ? '20px' : '30px',
             height: '2px',
             background: currentStep >= 3 ? '#006400' : '#666'
           }}></div>
@@ -867,21 +889,22 @@ const GTARegistrationForm = ({ onClose }) => {
             alignItems: 'center',
             color: currentStep >= 3 ? '#006400' : '#666',
             fontWeight: 'bold',
-            fontSize: '14px'
+            fontSize: window.innerWidth < 768 ? '11px' : '14px',
+            flexShrink: 0
           }}>
             <span style={{
               display: 'inline-block',
-              width: '24px',
-              height: '24px',
+              width: window.innerWidth < 768 ? '20px' : '24px',
+              height: window.innerWidth < 768 ? '20px' : '24px',
               borderRadius: '50%',
               background: currentStep >= 3 ? '#006400' : '#666',
               color: 'white',
               textAlign: 'center',
-              lineHeight: '24px',
-              marginRight: '8px',
-              fontSize: '12px'
+              lineHeight: window.innerWidth < 768 ? '20px' : '24px',
+              marginRight: window.innerWidth < 768 ? '6px' : '8px',
+              fontSize: window.innerWidth < 768 ? '10px' : '12px'
             }}>3</span>
-            VERIFICATION
+            {window.innerWidth < 768 ? 'VERIFY' : 'VERIFICATION'}
           </div>
         </div>
       </div>
@@ -1271,21 +1294,21 @@ const GTARegistrationForm = ({ onClose }) => {
 
           {/* Bank Details Section */}
           <div style={{
-            margin: '20px 0',
-            padding: '20px',
+            margin: window.innerWidth < 768 ? '15px 0' : '20px 0',
+            padding: window.innerWidth < 768 ? '15px' : '20px',
             background: 'rgba(255, 255, 255, 0.95)',
-            border: '3px solid #8B0000',
+            border: window.innerWidth < 768 ? '2px solid #8B0000' : '3px solid #8B0000',
             borderRadius: '8px',
             textAlign: 'center'
           }}>
             <div style={{
               fontFamily: '"Impact", sans-serif',
-              fontSize: '16px',
+              fontSize: window.innerWidth < 768 ? '14px' : '16px',
               fontWeight: 'bold',
               color: '#8B0000',
               textTransform: 'uppercase',
-              letterSpacing: '1px',
-              marginBottom: '15px'
+              letterSpacing: window.innerWidth < 768 ? '0.5px' : '1px',
+              marginBottom: window.innerWidth < 768 ? '12px' : '15px'
             }}>
               🏦 BANK ACCOUNT DETAILS
             </div>

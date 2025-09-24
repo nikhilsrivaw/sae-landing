@@ -360,14 +360,27 @@ const Team = () => {
   };
 
   return (
-    
-    <div
-      className="main-container fixed top-0 left-0 w-full h-full bg-cover bg-center z-10"
-      ref={containerRef}
-      style={{
-        backgroundColor: '#000000'
-      }}
-    >
+    <>
+      {/* Fixed Background Layer */}
+      <div
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/background3.webp)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat',
+          backgroundColor: '#000'
+        }}
+      ></div>
+
+      {/* Scrollable Content Layer */}
+      <div
+        className="main-container relative w-full min-h-screen z-10"
+        ref={containerRef}
+        style={{
+          backgroundColor: 'transparent'
+        }}
+      >
       {/* Header Section */}
       <div className="header-section">
         <div className="header-top">
@@ -506,7 +519,8 @@ const Team = () => {
           margin-top:-10px
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 };
 

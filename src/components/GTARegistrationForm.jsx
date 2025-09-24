@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabaseService } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
-const GTARegistrationForm = () => {
+const GTARegistrationForm = ({ onClose }) => {
   const { user, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     teamName: '',
@@ -32,6 +32,8 @@ const GTARegistrationForm = () => {
   const [showStatusCheck, setShowStatusCheck] = useState(false);
   const [registrationStatus, setRegistrationStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [stepTwoEnabled, setStepTwoEnabled] = useState(false);
 
   // Bank details state
   const [bankDetails, setBankDetails] = useState(null);
@@ -50,7 +52,7 @@ const GTARegistrationForm = () => {
     'Other'
   ];
 
-  // Load bank details on component mount
+  // Load bank details and check registration status on component mount
   useEffect(() => {
     const loadBankDetails = async () => {
       try {
@@ -64,8 +66,36 @@ const GTARegistrationForm = () => {
       }
     };
 
+    const checkUserRegistrationStep = async () => {
+      if (isAuthenticated && user?.id) {
+        try {
+          const registration = await supabaseService.getUserRegistration(user.id);
+          if (registration) {
+            setRegistrationStatus(registration);
+            // Determine which step user should be on
+            if (registration.registration_status === 'pending' && !registration.payment_screenshot_url) {
+              if (registration.step_2_enabled) {
+                setCurrentStep(2); // User completed step 1, step 2 enabled, needs payment
+                setStepTwoEnabled(true);
+              } else {
+                setCurrentStep(1); // Stay on step 1 until admin enables step 2
+                setStepTwoEnabled(false);
+              }
+            } else if (registration.registration_status === 'pending' && registration.payment_screenshot_url) {
+              setCurrentStep(3); // User completed payment, awaiting verification
+            } else if (registration.registration_status === 'verified') {
+              setCurrentStep(3); // User is fully verified
+            }
+          }
+        } catch (err) {
+          console.error('Error checking registration step:', err);
+        }
+      }
+    };
+
     loadBankDetails();
-  }, []);
+    checkUserRegistrationStep();
+  }, [isAuthenticated, user]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -148,11 +178,20 @@ const GTARegistrationForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleStep1Submit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    const step1Fields = ['teamName', 'leaderName', 'leaderRoll', 'leaderBranch'];
+    const step1Errors = {};
 
-    // Check if user is authenticated
+    step1Fields.forEach(field => {
+      if (!formData[field].trim()) {
+        step1Errors[field] = 'REQUIRED FIELD';
+      }
+    });
+
+    setErrors(step1Errors);
+    if (Object.keys(step1Errors).length > 0) return;
+
     if (!isAuthenticated || !user?.id) {
       setSubmissionError('You must be signed in to submit a registration');
       return;
@@ -162,57 +201,83 @@ const GTARegistrationForm = () => {
     setSubmissionError('');
 
     try {
-      // First, upload the payment screenshot
-      let paymentData = {};
-
-      if (formData.paymentScreenshot) {
-        const uploadResult = await supabaseService.uploadPaymentScreenshot(
-          formData.paymentScreenshot,
-          formData.teamName
-        );
-
-        paymentData = {
-          payment_screenshot_url: uploadResult.url,
-          payment_screenshot_path: uploadResult.path
-        };
-      }
-
-      // Prepare registration data
+      // Save step 1 data (team info only)
       const registrationData = {
-        userId: user.id, // Link to authenticated user
-        ...formData,
-        ...paymentData
+        userId: user.id,
+        teamName: formData.teamName,
+        leaderName: formData.leaderName,
+        leaderRoll: formData.leaderRoll,
+        leaderBranch: formData.leaderBranch,
+        member1Name: formData.member1Name || null,
+        member1Roll: formData.member1Roll || null,
+        member1Branch: formData.member1Branch || null,
+        member2Name: formData.member2Name || null,
+        member2Roll: formData.member2Roll || null,
+        member2Branch: formData.member2Branch || null,
+        member3Name: formData.member3Name || null,
+        member3Roll: formData.member3Roll || null,
+        member3Branch: formData.member3Branch || null,
+        member4Name: formData.member4Name || null,
+        member4Roll: formData.member4Roll || null,
+        member4Branch: formData.member4Branch || null,
+        // No payment data in step 1
+        payment_screenshot_url: null,
+        payment_screenshot_path: null
       };
 
-      // Remove the file object as it's not needed for database storage
-      delete registrationData.paymentScreenshot;
-
-
-      // Save to database
       const result = await supabaseService.createTeamRegistration(registrationData);
-
-
-      // Show success message
+      setRegistrationStatus(result);
+      // Stay on step 1 until admin enables step 2
+      setCurrentStep(1);
+      setStepTwoEnabled(false);
       setShowSuccess(true);
-
-      // Reset form
-      setFormData({
-        teamName: '', leaderName: '', leaderRoll: '', leaderBranch: '',
-        member1Name: '', member1Roll: '', member1Branch: '',
-        member2Name: '', member2Roll: '', member2Branch: '',
-        member3Name: '', member3Roll: '', member3Branch: '',
-        member4Name: '', member4Roll: '', member4Branch: '',
-        paymentScreenshot: null
-      });
-      setPreviewImage(null);
-      setErrors({});
-
-      // Hide success message after 5 seconds
       setTimeout(() => setShowSuccess(false), 5000);
 
     } catch (error) {
-      console.error('Registration submission failed:', error);
+      console.error('Step 1 registration failed:', error);
       setSubmissionError(`Registration failed: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleStep2Submit = async (e) => {
+    e.preventDefault();
+    if (!formData.paymentScreenshot) {
+      setErrors({paymentScreenshot: 'PAYMENT PROOF REQUIRED'});
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmissionError('');
+
+    try {
+      // Upload payment screenshot
+      const uploadResult = await supabaseService.uploadPaymentScreenshot(
+        formData.paymentScreenshot,
+        registrationStatus.team_name
+      );
+
+      // Update registration with payment info
+      await supabaseService.updateTeamRegistrationPayment(registrationStatus.id, {
+        payment_screenshot_url: uploadResult.url,
+        payment_screenshot_path: uploadResult.path
+      });
+
+      // Update local state
+      setRegistrationStatus({
+        ...registrationStatus,
+        payment_screenshot_url: uploadResult.url,
+        payment_screenshot_path: uploadResult.path
+      });
+
+      setCurrentStep(3);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 5000);
+
+    } catch (error) {
+      console.error('Payment submission failed:', error);
+      setSubmissionError(`Payment submission failed: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -680,12 +745,144 @@ const GTARegistrationForm = () => {
 
       {/* Header */}
       <div style={styles.header}>
+        {/* Close Button */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            style={{
+              position: 'absolute',
+              top: '15px',
+              right: '15px',
+              background: 'rgba(139, 0, 0, 0.8)',
+              border: '2px solid #fff',
+              color: '#fff',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              fontSize: '20px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.3s ease',
+              fontFamily: '"Impact", sans-serif',
+              zIndex: 10,
+              lineHeight: '1'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(139, 0, 0, 1)';
+              e.target.style.transform = 'scale(1.1)';
+              e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'rgba(139, 0, 0, 0.8)';
+              e.target.style.transform = 'scale(1)';
+              e.target.style.boxShadow = 'none';
+            }}
+            title="Close Registration Form"
+          >
+            ×
+          </button>
+        )}
+
         <div style={styles.logoSection}>
           LOS SANTOS COUNTY SHERIFF'S DEPARTMENT
         </div>
         <h1 style={styles.title}>EVENT REGISTRATION</h1>
         <div style={styles.subtitle}>
           LIFEINVADER WEB FORM PRINT-OUT - AUTOMOTIVE ENGINEERING CREW
+        </div>
+
+        {/* Step Progress Indicator */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '1rem',
+          margin: '20px 0',
+          padding: '15px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          border: '2px solid #8B0000',
+          borderRadius: '8px'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            color: currentStep >= 1 ? '#006400' : '#666',
+            fontWeight: 'bold',
+            fontSize: '14px'
+          }}>
+            <span style={{
+              display: 'inline-block',
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              background: currentStep >= 1 ? '#006400' : '#666',
+              color: 'white',
+              textAlign: 'center',
+              lineHeight: '24px',
+              marginRight: '8px',
+              fontSize: '12px'
+            }}>1</span>
+            TEAM REGISTRATION
+          </div>
+
+          <div style={{
+            width: '30px',
+            height: '2px',
+            background: currentStep >= 2 ? '#006400' : '#666'
+          }}></div>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            color: currentStep >= 2 ? '#006400' : '#666',
+            fontWeight: 'bold',
+            fontSize: '14px'
+          }}>
+            <span style={{
+              display: 'inline-block',
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              background: currentStep >= 2 ? '#006400' : '#666',
+              color: 'white',
+              textAlign: 'center',
+              lineHeight: '24px',
+              marginRight: '8px',
+              fontSize: '12px'
+            }}>2</span>
+            PAYMENT
+          </div>
+
+          <div style={{
+            width: '30px',
+            height: '2px',
+            background: currentStep >= 3 ? '#006400' : '#666'
+          }}></div>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            color: currentStep >= 3 ? '#006400' : '#666',
+            fontWeight: 'bold',
+            fontSize: '14px'
+          }}>
+            <span style={{
+              display: 'inline-block',
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              background: currentStep >= 3 ? '#006400' : '#666',
+              color: 'white',
+              textAlign: 'center',
+              lineHeight: '24px',
+              marginRight: '8px',
+              fontSize: '12px'
+            }}>3</span>
+            VERIFICATION
+          </div>
         </div>
       </div>
 
@@ -786,7 +983,7 @@ const GTARegistrationForm = () => {
       )}
 
       {!showStatusCheck && (
-        <form onSubmit={handleSubmit}>
+        <div>
           {/* Success Message */}
           {showSuccess && (
             <div style={styles.successMessage}>
@@ -807,9 +1004,31 @@ const GTARegistrationForm = () => {
             </div>
           )}
 
-        {/* Team Information */}
-        <div style={styles.formSection}>
-          <div style={styles.sectionTitle}>Team Information</div>
+        {/* STEP 1: Team Registration */}
+        {currentStep === 1 && !registrationStatus && (
+          <form onSubmit={handleStep1Submit}>
+            <div style={{
+              ...styles.paymentSection,
+              borderColor: '#006400',
+              marginBottom: '25px'
+            }}>
+              <div style={{
+                ...styles.paymentTitle,
+                color: '#006400',
+                borderColor: '#006400'
+              }}>STEP 1: TEAM REGISTRATION</div>
+
+              <div style={{
+                ...styles.paymentInfo,
+                color: '#006400'
+              }}>
+                Complete your team information to proceed to payment.
+              </div>
+            </div>
+
+            {/* Team Information */}
+            <div style={styles.formSection}>
+              <div style={styles.sectionTitle}>Team Information</div>
 
           <div style={styles.inputGroup}>
             <label style={styles.label}>Team Name *</label>
@@ -884,61 +1103,164 @@ const GTARegistrationForm = () => {
           </div>
         </div>
 
-        {/* Team Members */}
-        <div style={styles.formSection}>
-          <div style={styles.sectionTitle}>Team Members (Optional)</div>
-          <div style={styles.memberGrid}>
-            {[1, 2, 3, 4].map((memberNum) => (
-              <div key={memberNum} style={styles.memberBox}>
-                <div style={styles.memberTitle}>Member {memberNum}</div>
+            {/* Team Members */}
+            <div style={styles.formSection}>
+              <div style={styles.sectionTitle}>Team Members (Optional)</div>
+              <div style={styles.memberGrid}>
+                {[1, 2, 3, 4].map((memberNum) => (
+                  <div key={memberNum} style={styles.memberBox}>
+                    <div style={styles.memberTitle}>Member {memberNum}</div>
 
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>Full Name</label>
-                  <input
-                    type="text"
-                    value={formData[`member${memberNum}Name`]}
-                    onChange={(e) => handleInputChange(`member${memberNum}Name`, e.target.value)}
-                    style={styles.input}
-                    onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
-                    onBlur={(e) => e.target.style.borderBottom = '2px dotted #444'}
-                  />
-                </div>
+                    <div style={styles.inputGroup}>
+                      <label style={styles.label}>Full Name</label>
+                      <input
+                        type="text"
+                        value={formData[`member${memberNum}Name`]}
+                        onChange={(e) => handleInputChange(`member${memberNum}Name`, e.target.value)}
+                        style={styles.input}
+                        onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
+                        onBlur={(e) => e.target.style.borderBottom = '2px dotted #444'}
+                      />
+                    </div>
 
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>Roll Number</label>
-                  <input
-                    type="text"
-                    value={formData[`member${memberNum}Roll`]}
-                    onChange={(e) => handleInputChange(`member${memberNum}Roll`, e.target.value)}
-                    style={styles.input}
-                    onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
-                    onBlur={(e) => e.target.style.borderBottom = '2px dotted #444'}
-                  />
-                </div>
+                    <div style={styles.inputGroup}>
+                      <label style={styles.label}>Roll Number</label>
+                      <input
+                        type="text"
+                        value={formData[`member${memberNum}Roll`]}
+                        onChange={(e) => handleInputChange(`member${memberNum}Roll`, e.target.value)}
+                        style={styles.input}
+                        onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
+                        onBlur={(e) => e.target.style.borderBottom = '2px dotted #444'}
+                      />
+                    </div>
 
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>Branch</label>
-                  <select
-                    value={formData[`member${memberNum}Branch`]}
-                    onChange={(e) => handleInputChange(`member${memberNum}Branch`, e.target.value)}
-                    style={styles.select}
-                    onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
-                    onBlur={(e) => e.target.style.borderBottom = '2px dotted #444'}
-                  >
-                    <option value="">SELECT BRANCH</option>
-                    {branches.map(branch => (
-                      <option key={branch} value={branch}>{branch}</option>
-                    ))}
-                  </select>
-                </div>
+                    <div style={styles.inputGroup}>
+                      <label style={styles.label}>Branch</label>
+                      <select
+                        value={formData[`member${memberNum}Branch`]}
+                        onChange={(e) => handleInputChange(`member${memberNum}Branch`, e.target.value)}
+                        style={styles.select}
+                        onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
+                        onBlur={(e) => e.target.style.borderBottom = '2px dotted #444'}
+                      >
+                        <option value="">SELECT BRANCH</option>
+                        {branches.map(branch => (
+                          <option key={branch} value={branch}>{branch}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Payment Section */}
-        <div style={styles.paymentSection}>
-          <div style={styles.paymentTitle}>REGISTRATION FEE PAYMENT</div>
+            {/* Submit Button for Step 1 */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={styles.submitButton}
+              onMouseEnter={(e) => {
+                if (!isSubmitting) {
+                  Object.assign(e.target.style, styles.submitButtonHover);
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSubmitting) {
+                  e.target.style.background = 'linear-gradient(45deg, #8B0000 0%, #A0522D 50%, #8B0000 100%)';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)';
+                }
+              }}
+            >
+              {isSubmitting ? 'REGISTERING TEAM...' : 'COMPLETE STEP 1 - REGISTER TEAM'}
+            </button>
+          </form>
+        )}
+
+        {/* Step 1 Completed - Waiting for Step 2 */}
+        {currentStep === 1 && registrationStatus && !stepTwoEnabled && (
+          <div>
+            <div style={{
+              ...styles.paymentSection,
+              borderColor: '#ff8800',
+              marginBottom: '25px'
+            }}>
+              <div style={{
+                ...styles.paymentTitle,
+                color: '#ff8800',
+                borderColor: '#ff8800'
+              }}>STEP 1 COMPLETED ✅</div>
+
+              <div style={{
+                ...styles.paymentInfo,
+                color: '#ff8800'
+              }}>
+                Your team registration has been submitted successfully!<br/>
+                Step 2 (Payment) will be available soon. We will notify you when payment is enabled.
+              </div>
+            </div>
+
+            {/* Show completed team info */}
+            <div style={{
+              ...styles.formSection,
+              background: 'rgba(0, 100, 0, 0.1)',
+              padding: '20px',
+              border: '2px solid #006400',
+              marginBottom: '25px'
+            }}>
+              <div style={{...styles.sectionTitle, color: '#006400'}}>✅ Your Team Information</div>
+              <div style={{...styles.paymentInfo, color: '#006400'}}>
+                <strong>Team:</strong> {registrationStatus.team_name}<br/>
+                <strong>Leader:</strong> {registrationStatus.leader_name} ({registrationStatus.leader_roll})<br/>
+                <strong>Branch:</strong> {registrationStatus.leader_branch}<br/>
+                <strong>Status:</strong> ⏳ Waiting for Step 2 to be enabled
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: Payment */}
+        {currentStep === 2 && registrationStatus && (
+          <form onSubmit={handleStep2Submit}>
+            <div style={{
+              ...styles.paymentSection,
+              borderColor: '#ff8800',
+              marginBottom: '25px'
+            }}>
+              <div style={{
+                ...styles.paymentTitle,
+                color: '#ff8800',
+                borderColor: '#ff8800'
+              }}>STEP 2: PAYMENT</div>
+
+              <div style={{
+                ...styles.paymentInfo,
+                color: '#ff8800'
+              }}>
+                Team registration completed! Now proceed with payment to complete your registration.
+              </div>
+            </div>
+
+            {/* Show completed team info */}
+            <div style={{
+              ...styles.formSection,
+              background: 'rgba(0, 100, 0, 0.1)',
+              padding: '20px',
+              border: '2px solid #006400',
+              marginBottom: '25px'
+            }}>
+              <div style={{...styles.sectionTitle, color: '#006400'}}>✅ STEP 1 COMPLETED - Team Information</div>
+              <div style={{...styles.paymentInfo, color: '#006400'}}>
+                <strong>Team:</strong> {registrationStatus.team_name}<br/>
+                <strong>Leader:</strong> {registrationStatus.leader_name} ({registrationStatus.leader_roll})<br/>
+                <strong>Branch:</strong> {registrationStatus.leader_branch}
+              </div>
+            </div>
+
+            {/* Payment Section */}
+            <div style={styles.paymentSection}>
+              <div style={styles.paymentTitle}>REGISTRATION FEE PAYMENT</div>
 
           <div style={styles.paymentAmount}>₹3,000</div>
 
@@ -1110,41 +1432,115 @@ const GTARegistrationForm = () => {
           </div>
         </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          style={styles.submitButton}
-          onMouseEnter={(e) => {
-            if (!isSubmitting) {
-              Object.assign(e.target.style, styles.submitButtonHover);
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isSubmitting) {
-              e.target.style.background = 'linear-gradient(45deg, #8B0000 0%, #A0522D 50%, #8B0000 100%)';
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)';
-            }
-          }}
-        >
-          {isSubmitting ? 'PROCESSING...' : 'REGISTER TEAM'}
-        </button>
+            {/* Submit Button for Step 2 */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                ...styles.submitButton,
+                background: 'linear-gradient(45deg, #ff8800 0%, #ff6600 50%, #ff8800 100%)'
+              }}
+              onMouseEnter={(e) => {
+                if (!isSubmitting) {
+                  e.target.style.background = 'linear-gradient(45deg, #ff6600 0%, #ff4400 50%, #ff6600 100%)';
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSubmitting) {
+                  e.target.style.background = 'linear-gradient(45deg, #ff8800 0%, #ff6600 50%, #ff8800 100%)';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)';
+                }
+              }}
+            >
+              {isSubmitting ? 'PROCESSING PAYMENT...' : 'COMPLETE STEP 2 - SUBMIT PAYMENT'}
+            </button>
+          </form>
+        )}
 
-        {/* Small Print */}
-        <div style={styles.smallPrint}>
-          <strong>TERMS & CONDITIONS:</strong> By submitting this form, you waive all rights to not be shot, stabbed,
-          or run over during team activities. Participants may be subject to police harassment, random vehicle theft,
-          and spontaneous gang warfare. Not responsible for lost limbs, stolen vehicles, or emotional trauma from
-          repeated deaths. Team members acknowledge that Los Santos is a dangerous place and agree to respawn at
-          nearest hospital upon expiration. Vehicle insurance not included. May contain traces of explosive materials.
-          Side effects may include: reckless driving, increased aggression, and compulsive urge to steal motorcycles.
-          This form was printed on recycled police reports. Los Santos County Sheriff's Department is not liable for
-          any damages, physical or psychological, resulting from participation in automotive engineering activities
-          within city limits. All team members must pass background check (criminal history preferred).
-          Registration fee payable in cash, stolen goods, or equivalent street credibility.
+        {/* STEP 3: Verification Status */}
+        {currentStep === 3 && registrationStatus && (
+          <div>
+            <div style={{
+              ...styles.paymentSection,
+              borderColor: registrationStatus.registration_status === 'verified' ? '#006400' : '#666',
+              marginBottom: '25px'
+            }}>
+              <div style={{
+                ...styles.paymentTitle,
+                color: registrationStatus.registration_status === 'verified' ? '#006400' : '#666',
+                borderColor: registrationStatus.registration_status === 'verified' ? '#006400' : '#666'
+              }}>STEP 3: VERIFICATION</div>
+
+              <div style={{
+                ...styles.paymentInfo,
+                color: registrationStatus.registration_status === 'verified' ? '#006400' : '#666'
+              }}>
+                {registrationStatus.registration_status === 'verified'
+                  ? '🎉 Congratulations! Your registration is verified and complete.'
+                  : '⏳ Your registration is under review. You will be notified once verified.'}
+              </div>
+            </div>
+
+            {/* Show completed registration details */}
+            <div style={{
+              ...styles.formSection,
+              background: registrationStatus.registration_status === 'verified'
+                ? 'rgba(0, 100, 0, 0.1)' : 'rgba(255, 140, 0, 0.1)',
+              padding: '20px',
+              border: `2px solid ${registrationStatus.registration_status === 'verified' ? '#006400' : '#ff8800'}`,
+              marginBottom: '25px'
+            }}>
+              <div style={{
+                ...styles.sectionTitle,
+                color: registrationStatus.registration_status === 'verified' ? '#006400' : '#ff8800'
+              }}>📋 REGISTRATION SUMMARY</div>
+
+              <div style={{...styles.paymentInfo, color: '#333', textAlign: 'left'}}>
+                <strong>Team Name:</strong> {registrationStatus.team_name}<br/>
+                <strong>Leader:</strong> {registrationStatus.leader_name}<br/>
+                <strong>Roll Number:</strong> {registrationStatus.leader_roll}<br/>
+                <strong>Branch:</strong> {registrationStatus.leader_branch}<br/>
+                <strong>Registration Status:</strong> <span style={{
+                  color: registrationStatus.registration_status === 'verified' ? '#006400' :
+                         registrationStatus.registration_status === 'rejected' ? '#cc0000' : '#ff8800',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase'
+                }}>
+                  {registrationStatus.registration_status === 'verified' ? '✅ VERIFIED' :
+                   registrationStatus.registration_status === 'rejected' ? '❌ REJECTED' :
+                   '⏳ PENDING VERIFICATION'}
+                </span><br/>
+                <strong>Payment Status:</strong> <span style={{
+                  color: registrationStatus.payment_screenshot_url ? '#006400' : '#cc0000',
+                  fontWeight: 'bold'
+                }}>
+                  {registrationStatus.payment_screenshot_url ? '✅ SUBMITTED' : '❌ NOT SUBMITTED'}
+                </span><br/>
+                <strong>Submitted Date:</strong> {new Date(registrationStatus.created_at).toLocaleDateString()}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Small Print - Show only in Step 1 */}
+        {currentStep === 1 && (
+          <div style={styles.smallPrint}>
+            <strong>TERMS & CONDITIONS:</strong> By submitting this form, you waive all rights to not be shot, stabbed,
+            or run over during team activities. Participants may be subject to police harassment, random vehicle theft,
+            and spontaneous gang warfare. Not responsible for lost limbs, stolen vehicles, or emotional trauma from
+            repeated deaths. Team members acknowledge that Los Santos is a dangerous place and agree to respawn at
+            nearest hospital upon expiration. Vehicle insurance not included. May contain traces of explosive materials.
+            Side effects may include: reckless driving, increased aggression, and compulsive urge to steal motorcycles.
+            This form was printed on recycled police reports. Los Santos County Sheriff's Department is not liable for
+            any damages, physical or psychological, resulting from participation in automotive engineering activities
+            within city limits. All team members must pass background check (criminal history preferred).
+            Registration fee payable in cash, stolen goods, or equivalent street credibility.
+          </div>
+        )}
         </div>
-        </form>
       )}
 
       {/* Error Message for Status Check */}

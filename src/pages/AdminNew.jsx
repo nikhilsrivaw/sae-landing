@@ -247,6 +247,19 @@ const AdminNew = () => {
     }
   };
 
+  // Enable Step 2 for a team
+  const enableStep2ForTeam = async (id) => {
+    try {
+      await supabaseService.enableStep2ForTeam(id);
+      // Reload registrations to reflect changes
+      await loadTeamRegistrations();
+      setError(null);
+    } catch (err) {
+      setError('Failed to enable Step 2 for team');
+      console.error('Error enabling Step 2:', err);
+    }
+  };
+
   // Handle poster file selection
   const handlePosterChange = (e) => {
     const file = e.target.files[0];
@@ -2099,24 +2112,98 @@ const AdminNew = () => {
                                 )}
                               </div>
 
+                              {/* Step Status */}
+                              <div className="member-section">
+                                <h5 className="section-title">📋 Registration Steps</h5>
+                                <div style={{
+                                  display: 'flex',
+                                  gap: '1rem',
+                                  alignItems: 'center',
+                                  padding: '1rem',
+                                  background: '#1a1a1a',
+                                  borderRadius: '0.5rem'
+                                }}>
+                                  <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    color: '#006400',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 'bold'
+                                  }}>
+                                    ✅ Step 1: Team Registered
+                                  </div>
+
+                                  <div style={{
+                                    width: '20px',
+                                    height: '2px',
+                                    background: registration.step_2_enabled ? '#006400' : '#666'
+                                  }}></div>
+
+                                  <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    color: registration.step_2_enabled ? '#006400' : '#666',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 'bold'
+                                  }}>
+                                    {registration.step_2_enabled ? '✅' : '⏳'} Step 2: Payment
+                                  </div>
+
+                                  <div style={{
+                                    width: '20px',
+                                    height: '2px',
+                                    background: registration.registration_status === 'verified' ? '#006400' : '#666'
+                                  }}></div>
+
+                                  <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    color: registration.registration_status === 'verified' ? '#006400' : '#666',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 'bold'
+                                  }}>
+                                    {registration.registration_status === 'verified' ? '✅' : '⏳'} Step 3: Verified
+                                  </div>
+                                </div>
+                              </div>
+
                               {/* Action Buttons */}
                               <div className="registration-actions">
-                                {registration.registration_status === 'pending' && (
-                                  <>
-                                    <button
-                                      className="btn btn-success"
-                                      onClick={() => updateRegistrationStatus(registration.id, 'verified')}
-                                    >
-                                      ✅ Verify Registration
-                                    </button>
-                                    <button
-                                      className="btn btn-danger"
-                                      onClick={() => updateRegistrationStatus(registration.id, 'rejected')}
-                                    >
-                                      ❌ Reject Registration
-                                    </button>
-                                  </>
+                                {/* STEP 1 → STEP 2: Allow Payment */}
+                                {!registration.step_2_enabled && !registration.payment_screenshot_url && registration.registration_status === 'pending' && (
+                                  <button
+                                    className="btn"
+                                    style={{
+                                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                      color: 'white'
+                                    }}
+                                    onClick={() => enableStep2ForTeam(registration.id)}
+                                  >
+                                    🔓 Allow Step 2 (Payment)
+                                  </button>
                                 )}
+
+                                {/* STEP 2 → STEP 3: Final Verification (only after payment) */}
+                                {registration.step_2_enabled && registration.payment_screenshot_url && registration.registration_status === 'pending' && (
+                                  <button
+                                    className="btn btn-success"
+                                    onClick={() => updateRegistrationStatus(registration.id, 'verified')}
+                                  >
+                                    ✅ Verify Registration (Step 3)
+                                  </button>
+                                )}
+
+                                {/* Reject Registration (available at any pending step) */}
+                                {registration.registration_status === 'pending' && (
+                                  <button
+                                    className="btn btn-danger"
+                                    onClick={() => updateRegistrationStatus(registration.id, 'rejected')}
+                                  >
+                                    ❌ Reject Registration
+                                  </button>
+                                )}
+
+                                {/* Actions for already verified teams */}
                                 {registration.registration_status === 'verified' && (
                                   <button
                                     className="btn btn-warning"
@@ -2125,6 +2212,8 @@ const AdminNew = () => {
                                     ⏳ Move to Pending
                                   </button>
                                 )}
+
+                                {/* Actions for rejected teams */}
                                 {registration.registration_status === 'rejected' && (
                                   <button
                                     className="btn btn-success"

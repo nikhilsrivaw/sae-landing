@@ -378,15 +378,57 @@ export const supabaseService = {
     return data
   },
 
-  async updateRegistrationStatus(id, status) {
+  async updateRegistrationStatus(id, status, enableStep2 = false) {
+    const updateData = {
+      registration_status: status,
+      payment_verified: status === 'verified'
+    }
+
+    // If admin is enabling step 2, set step_2_enabled flag
+    if (enableStep2) {
+      updateData.step_2_enabled = true
+    }
+
     const { data, error } = await supabase
       .from('team_registrations')
-      .update({ registration_status: status, payment_verified: status === 'verified' })
+      .update(updateData)
       .eq('id', id)
       .select()
 
     if (error) {
       console.error('Error updating registration status:', error)
+      throw error
+    }
+    return data[0]
+  },
+
+  async enableStep2ForTeam(id) {
+    const { data, error } = await supabase
+      .from('team_registrations')
+      .update({ step_2_enabled: true })
+      .eq('id', id)
+      .select()
+
+    if (error) {
+      console.error('Error enabling step 2 for team:', error)
+      throw error
+    }
+    return data[0]
+  },
+
+  async updateTeamRegistrationPayment(id, paymentData) {
+    const { data, error } = await supabase
+      .from('team_registrations')
+      .update({
+        payment_screenshot_url: paymentData.payment_screenshot_url,
+        payment_screenshot_path: paymentData.payment_screenshot_path,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+
+    if (error) {
+      console.error('Error updating team registration payment:', error)
       throw error
     }
     return data[0]

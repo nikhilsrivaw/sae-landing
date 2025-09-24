@@ -2264,7 +2264,7 @@ const Hero = ({ onStateChange }) => {
               ✕
             </button>
             <div className="w-full md:max-w-4xl mt-0 md:mt-16">
-              <GTARegistrationForm />
+              <GTARegistrationForm onClose={() => setShowRegistrationForm(false)} />
 
               {/* Mobile Close Button at Bottom */}
               <div className="md:hidden w-full p-4 bg-black/50 backdrop-blur-sm">

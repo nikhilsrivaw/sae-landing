@@ -7,7 +7,7 @@ import AdminLogin from '../components/AdminLogin';
 const AdminNew = () => {
   console.log('🎯 AdminNew component is loading...');
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [showAddEventForm, setShowAddEventForm] = useState(false);
   const [eventForm, setEventForm] = useState({
@@ -37,6 +37,15 @@ const AdminNew = () => {
   const [adminData, setAdminData] = useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
+
+  // Bank Details State
+  const [bankDetails, setBankDetails] = useState({
+    account_number: '',
+    ifsc_code: '',
+    is_confirmed: false
+  });
+  const [existingBankDetails, setExistingBankDetails] = useState(null);
+  const [isEditingBank, setIsEditingBank] = useState(false);
 
   // Authentication functions
   const checkAdminAuthentication = async () => {
@@ -358,6 +367,83 @@ const AdminNew = () => {
     }
   };
 
+  // Load bank details from database
+  const loadBankDetails = async () => {
+    try {
+      // First test if table exists
+      const tableExists = await supabaseService.testBankTableExists();
+      if (!tableExists) {
+        console.warn('⚠️ bank_details table does not exist. Please create it in Supabase.');
+        setError('Bank details table not found. Please create the database table first.');
+        return;
+      }
+
+      const details = await supabaseService.getBankDetails();
+      if (details) {
+        setExistingBankDetails(details);
+        setBankDetails(details);
+      }
+    } catch (err) {
+      console.error('Error loading bank details:', err);
+    }
+  };
+
+  // Handle saving bank details
+  const handleSaveBankDetails = async () => {
+    if (!bankDetails.account_number || !bankDetails.ifsc_code) {
+      setError('Please fill in both account number and IFSC code');
+      return;
+    }
+
+    if (!bankDetails.is_confirmed) {
+      setError('Please confirm that the bank details are correct');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      console.log('🏦 Attempting to save bank details:', bankDetails);
+      const savedDetails = await supabaseService.saveBankDetails(bankDetails);
+      console.log('✅ Bank details saved successfully:', savedDetails);
+      setExistingBankDetails(savedDetails);
+      setBankDetails(savedDetails);
+      setIsEditingBank(false);
+      setError(null);
+    } catch (err) {
+      console.error('❌ Detailed error saving bank details:', err);
+      console.error('Error message:', err.message);
+      console.error('Error details:', err);
+      setError(`Failed to save bank details: ${err.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle editing bank details
+  const handleEditBankDetails = () => {
+    setIsEditingBank(true);
+    setBankDetails({ ...existingBankDetails, is_confirmed: false });
+  };
+
+  // Handle deleting bank details
+  const handleDeleteBankDetails = async () => {
+    if (!confirm('Are you sure you want to delete the bank details?')) return;
+
+    setLoading(true);
+    try {
+      await supabaseService.deleteBankDetails();
+      setExistingBankDetails(null);
+      setBankDetails({ account_number: '', ifsc_code: '', is_confirmed: false });
+      setIsEditingBank(false);
+      setError(null);
+    } catch (err) {
+      setError('Failed to delete bank details');
+      console.error('Error deleting bank details:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     console.log('🚀 AdminNew component mounted, starting auth check');
     // Check admin authentication first
@@ -370,8 +456,32 @@ const AdminNew = () => {
       loadHotEvents();
       loadTeamRegistrations();
       loadQrUpiSettings();
+      loadBankDetails();
     }
   }, [isAdminAuthenticated]);
+
+  // Handle window resize for responsive sidebar
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Handle section change with mobile sidebar auto-close
+  const handleSectionChange = (section) => {
+    setActiveSection(section);
+    // Auto-close sidebar on mobile when a section is selected
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
+  };
 
   const stats = [
     { title: 'Total Events', value: hotEvents.length.toString(), icon: '🔥', color: 'from-blue-400 to-cyan-400' },
@@ -494,15 +604,68 @@ const AdminNew = () => {
           height: 100vh;
           z-index: 1000;
           transition: transform 0.3s ease;
+          left: 0;
+          top: 0;
         }
 
         .sidebar.closed {
           transform: translateX(-100%);
         }
 
+        /* Desktop sidebar behavior */
         @media (min-width: 769px) {
           .sidebar.closed {
             transform: translateX(-100%);
+          }
+
+          .main-content {
+            margin-left: 280px;
+          }
+
+          .main-content.sidebar-closed {
+            margin-left: 0;
+          }
+        }
+
+        /* Mobile sidebar starts closed */
+        @media (max-width: 768px) {
+          .sidebar {
+            transform: translateX(-100%);
+            width: 100%;
+            z-index: 1001;
+          }
+
+          .sidebar:not(.closed) {
+            transform: translateX(0);
+          }
+
+          .main-content {
+            margin-left: 0;
+          }
+        }
+
+        /* Mobile backdrop */
+        .mobile-backdrop {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 1000;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .mobile-backdrop.active {
+          opacity: 1;
+          visibility: visible;
+        }
+
+        @media (min-width: 769px) {
+          .mobile-backdrop {
+            display: none;
           }
         }
 
@@ -510,12 +673,48 @@ const AdminNew = () => {
           padding: 0 2rem 2rem;
           border-bottom: 1px solid #333;
           margin-bottom: 2rem;
+          position: relative;
         }
 
         .sidebar-logo {
           display: flex;
           align-items: center;
           gap: 0.75rem;
+        }
+
+        .sidebar-close {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          background: none;
+          border: none;
+          color: #aaa;
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 0.5rem;
+          border-radius: 0.25rem;
+          transition: all 0.2s ease;
+          display: none;
+          line-height: 1;
+          width: 2rem;
+          height: 2rem;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .sidebar-close:hover {
+          background: #333;
+          color: #fff;
+        }
+
+        @media (max-width: 768px) {
+          .sidebar-close {
+            display: flex;
+          }
+
+          .sidebar-header {
+            padding-top: 1rem;
+          }
         }
 
         .sidebar-nav {
@@ -548,18 +747,8 @@ const AdminNew = () => {
 
         .main-content {
           flex: 1;
-          margin-left: 280px;
           transition: margin-left 0.3s ease;
-        }
-
-        .main-content.sidebar-closed {
-          margin-left: 0;
-        }
-
-        @media (min-width: 769px) {
-          .main-content.sidebar-closed {
-            margin-left: 0;
-          }
+          padding: 1rem;
         }
 
         .header {
@@ -964,28 +1153,215 @@ const AdminNew = () => {
 
         @media (max-width: 768px) {
 
-          .sidebar {
-            transform: translateX(-100%);
-          }
-
-          .sidebar.open {
-            transform: translateX(0);
-          }
-
           .main-content {
             margin-left: 0;
+            padding: 1rem;
+          }
+
+          .header {
+            padding: 1rem;
+            flex-direction: column;
+            gap: 1rem;
+          }
+
+          .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+          }
+
+          .header-right {
+            width: 100%;
+            justify-content: center;
           }
 
           .search-input {
-            width: 200px;
+            width: 100%;
+            max-width: 300px;
+          }
+
+          .page-title {
+            font-size: 1.25rem;
           }
 
           .dashboard-grid {
             grid-template-columns: 1fr;
+            gap: 1rem;
           }
 
           .stats-grid {
             grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+          }
+
+          .dashboard-card {
+            padding: 1rem;
+          }
+
+          .card-title {
+            font-size: 1rem;
+          }
+
+          .form-group {
+            margin-bottom: 1rem;
+          }
+
+          .form-input,
+          .form-textarea,
+          .form-select {
+            font-size: 16px; /* Prevents zoom on iOS */
+          }
+
+          .btn {
+            width: 100%;
+            padding: 0.875rem;
+            margin-bottom: 0.5rem;
+          }
+
+          .filter-controls {
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+          }
+
+          .filter-select {
+            width: 100%;
+          }
+
+          .registrations-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .event-card {
+            padding: 1rem;
+          }
+
+          .event-image {
+            height: 150px;
+          }
+
+          /* Bank Details Mobile Styles */
+          .bank-details-container {
+            padding: 1rem;
+          }
+
+          .bank-details-form {
+            gap: 1rem;
+          }
+
+          .bank-details-actions {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .bank-details-actions button {
+            width: 100%;
+          }
+
+          /* Navigation adjustments */
+          .nav-item {
+            padding: 1rem;
+            font-size: 0.875rem;
+          }
+
+          .sidebar-header {
+            padding: 1rem;
+          }
+
+          .sidebar-nav {
+            padding: 0 0.5rem;
+          }
+
+          /* Responsive tables/lists */
+          .registration-card {
+            padding: 1rem;
+            margin-bottom: 1rem;
+          }
+
+          .registration-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+          }
+
+          .registration-actions {
+            width: 100%;
+            justify-content: space-between;
+          }
+
+          /* Form inputs mobile optimization */
+          input[type="text"],
+          input[type="email"],
+          input[type="url"],
+          textarea,
+          select {
+            font-size: 16px !important; /* Prevents iOS zoom */
+            -webkit-appearance: none;
+            border-radius: 0.5rem;
+          }
+
+          /* Prevent horizontal scroll */
+          .main-content {
+            overflow-x: hidden;
+          }
+
+          .dashboard-grid {
+            width: 100%;
+            overflow-x: hidden;
+          }
+
+          /* Touch-friendly button sizes */
+          .hamburger {
+            padding: 0.75rem;
+            font-size: 1.25rem;
+          }
+
+          /* Better spacing for mobile */
+          .content {
+            padding: 1rem 0;
+          }
+
+          .stats-grid .stat-card {
+            min-height: 100px;
+          }
+        }
+
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+          .stats-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .page-title {
+            font-size: 1.125rem;
+          }
+
+          .sidebar {
+            width: 100vw;
+          }
+
+          .header-right {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .search-input {
+            width: 100%;
+          }
+
+          .btn {
+            font-size: 0.875rem;
+            padding: 0.75rem;
+          }
+
+          .dashboard-card {
+            padding: 0.75rem;
+          }
+
+          .form-input,
+          .form-textarea {
+            padding: 0.75rem;
           }
         }
 
@@ -1204,9 +1580,22 @@ const AdminNew = () => {
           </div>
         )}
 
+        {/* Mobile Backdrop */}
+        <div
+          className={`mobile-backdrop ${sidebarOpen && window.innerWidth <= 768 ? 'active' : ''}`}
+          onClick={() => window.innerWidth <= 768 && setSidebarOpen(false)}
+        ></div>
+
         {/* Sidebar */}
         <aside className={`sidebar ${!sidebarOpen ? 'closed' : ''}`}>
           <div className="sidebar-header">
+            <button
+              className="sidebar-close"
+              onClick={() => setSidebarOpen(false)}
+              title="Close sidebar"
+            >
+              ×
+            </button>
             <div className="sidebar-logo">
               <div style={{
                 width: '40px',
@@ -1230,7 +1619,7 @@ const AdminNew = () => {
             <a
               href="#"
               className={`nav-item ${activeSection === 'dashboard' ? 'active' : ''}`}
-              onClick={() => setActiveSection('dashboard')}
+              onClick={() => handleSectionChange('dashboard')}
             >
               <span>📊</span>
               <span>Dashboard</span>
@@ -1238,7 +1627,7 @@ const AdminNew = () => {
             <a
               href="#"
               className={`nav-item ${activeSection === 'events' ? 'active' : ''}`}
-              onClick={() => setActiveSection('events')}
+              onClick={() => handleSectionChange('events')}
             >
               <span>🔥</span>
               <span>Hot Events</span>
@@ -1246,7 +1635,7 @@ const AdminNew = () => {
             <a
               href="#"
               className={`nav-item ${activeSection === 'registrations' ? 'active' : ''}`}
-              onClick={() => setActiveSection('registrations')}
+              onClick={() => handleSectionChange('registrations')}
             >
               <span>👥</span>
               <span>Team Registrations</span>
@@ -1254,15 +1643,23 @@ const AdminNew = () => {
             <a
               href="#"
               className={`nav-item ${activeSection === 'qr-upi' ? 'active' : ''}`}
-              onClick={() => setActiveSection('qr-upi')}
+              onClick={() => handleSectionChange('qr-upi')}
             >
               <span>💳</span>
               <span>QR & UPI Settings</span>
             </a>
             <a
               href="#"
+              className={`nav-item ${activeSection === 'bank-details' ? 'active' : ''}`}
+              onClick={() => handleSectionChange('bank-details')}
+            >
+              <span>🏦</span>
+              <span>Bank Details</span>
+            </a>
+            <a
+              href="#"
               className={`nav-item ${activeSection === 'analytics' ? 'active' : ''}`}
-              onClick={() => setActiveSection('analytics')}
+              onClick={() => handleSectionChange('analytics')}
             >
               <span>📈</span>
               <span>Analytics</span>
@@ -1270,7 +1667,7 @@ const AdminNew = () => {
             <a
               href="#"
               className={`nav-item ${activeSection === 'settings' ? 'active' : ''}`}
-              onClick={() => setActiveSection('settings')}
+              onClick={() => handleSectionChange('settings')}
             >
               <span>⚙️</span>
               <span>Settings</span>
@@ -1294,6 +1691,7 @@ const AdminNew = () => {
                  activeSection === 'events' ? 'Hot Events Management' :
                  activeSection === 'registrations' ? 'Team Registrations Management' :
                  activeSection === 'qr-upi' ? 'QR & UPI Settings' :
+                 activeSection === 'bank-details' ? 'Bank Details Management' :
                  activeSection === 'analytics' ? 'Analytics' : 'Settings'}
               </h1>
             </div>
@@ -1381,7 +1779,7 @@ const AdminNew = () => {
                       <h3 className="card-title">Recent Events</h3>
                       <button
                         className="btn btn-primary btn-small"
-                        onClick={() => setActiveSection('events')}
+                        onClick={() => handleSectionChange('events')}
                       >
                         View All
                       </button>
@@ -1855,6 +2253,192 @@ const AdminNew = () => {
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bank Details Section */}
+            {activeSection === 'bank-details' && (
+              <div className="dashboard-grid">
+                <div className="dashboard-card">
+                  <div className="card-header">
+                    <h3 className="card-title">🏦 Bank Account Details</h3>
+                  </div>
+
+                  {existingBankDetails && !isEditingBank ? (
+                    <div style={{ padding: '1.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h4 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '600' }}>Current Bank Details</h4>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button
+                            type="button"
+                            onClick={handleEditBankDetails}
+                            style={{
+                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              border: 'none',
+                              color: 'white',
+                              padding: '0.5rem 1rem',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontSize: '0.875rem',
+                              fontWeight: '500'
+                            }}
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleDeleteBankDetails}
+                            disabled={loading}
+                            style={{
+                              background: 'linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%)',
+                              border: 'none',
+                              color: 'white',
+                              padding: '0.5rem 1rem',
+                              borderRadius: '6px',
+                              cursor: loading ? 'not-allowed' : 'pointer',
+                              fontSize: '0.875rem',
+                              fontWeight: '500',
+                              opacity: loading ? 0.6 : 1
+                            }}
+                          >
+                            🗑️ Delete
+                          </button>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gap: '1rem' }}>
+                        <div>
+                          <label style={{ color: '#aaa', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Account Number
+                          </label>
+                          <p style={{ color: '#fff', fontSize: '1.1rem', fontFamily: 'monospace', marginTop: '0.25rem' }}>
+                            {existingBankDetails.account_number}
+                          </p>
+                        </div>
+                        <div>
+                          <label style={{ color: '#aaa', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            IFSC Code
+                          </label>
+                          <p style={{ color: '#fff', fontSize: '1.1rem', fontFamily: 'monospace', marginTop: '0.25rem' }}>
+                            {existingBankDetails.ifsc_code}
+                          </p>
+                        </div>
+                        <div>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            padding: '0.25rem 0.75rem',
+                            borderRadius: '9999px',
+                            fontSize: '0.75rem',
+                            fontWeight: '600',
+                            background: existingBankDetails.is_confirmed
+                              ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                              : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                            color: 'white'
+                          }}>
+                            {existingBankDetails.is_confirmed ? '✅ Confirmed' : '❌ Not Confirmed'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ padding: '1.5rem' }}>
+                      <div className="form-group">
+                        <label className="form-label">Account Number *</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={bankDetails.account_number}
+                          onChange={(e) => setBankDetails({...bankDetails, account_number: e.target.value})}
+                          placeholder="Enter bank account number"
+                          required
+                          disabled={loading}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">IFSC Code *</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={bankDetails.ifsc_code}
+                          onChange={(e) => setBankDetails({...bankDetails, ifsc_code: e.target.value.toUpperCase()})}
+                          placeholder="Enter IFSC code (e.g., SBIN0001234)"
+                          required
+                          disabled={loading}
+                          maxLength="11"
+                          pattern="[A-Z]{4}0[A-Z0-9]{6}"
+                          title="Please enter a valid IFSC code (11 characters, format: ABCD0123456)"
+                        />
+                        <p style={{ color: '#aaa', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                          Standard 11-character IFSC code format
+                        </p>
+                      </div>
+
+                      <div className="form-group">
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={bankDetails.is_confirmed}
+                            onChange={(e) => setBankDetails({...bankDetails, is_confirmed: e.target.checked})}
+                            disabled={loading}
+                            style={{
+                              width: '1.2rem',
+                              height: '1.2rem',
+                              accentColor: '#667eea'
+                            }}
+                          />
+                          <span style={{ color: '#fff', fontSize: '0.875rem' }}>
+                            I confirm that these bank details are correct
+                          </span>
+                        </label>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                        <button
+                          type="button"
+                          onClick={handleSaveBankDetails}
+                          disabled={loading || !bankDetails.account_number || !bankDetails.ifsc_code || !bankDetails.is_confirmed}
+                          style={{
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            border: 'none',
+                            color: 'white',
+                            padding: '0.75rem 1.5rem',
+                            borderRadius: '8px',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            fontSize: '0.875rem',
+                            fontWeight: '600',
+                            opacity: (loading || !bankDetails.account_number || !bankDetails.ifsc_code || !bankDetails.is_confirmed) ? 0.6 : 1,
+                            flex: '1'
+                          }}
+                        >
+                          {loading ? '💾 Saving...' : '💾 Save Bank Details'}
+                        </button>
+                        {isEditingBank && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsEditingBank(false);
+                              setBankDetails(existingBankDetails || { account_number: '', ifsc_code: '', is_confirmed: false });
+                            }}
+                            style={{
+                              background: 'transparent',
+                              border: '1px solid #444',
+                              color: '#aaa',
+                              padding: '0.75rem 1.5rem',
+                              borderRadius: '8px',
+                              cursor: 'pointer',
+                              fontSize: '0.875rem',
+                              fontWeight: '600'
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

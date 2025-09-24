@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 
 const FloatingDropdown = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   const [hoverIntensity, setHoverIntensity] = useState(0);
   const [waveOffset, setWaveOffset] = useState(0);
   const [quantumField, setQuantumField] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Use variables to prevent linting errors
   const _unused = { mousePos, hoverIntensity, waveOffset, quantumField };
@@ -27,6 +29,48 @@ const FloatingDropdown = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Detect when modals are open and hide dropdown
+  useEffect(() => {
+    const checkForModals = () => {
+      // Be very specific - only look for modals with backdrop blur AND black background
+      const modalWithBackdrop = document.querySelector('.fixed.inset-0.z-50.bg-black\\/80.backdrop-blur-sm');
+      const dialogModals = document.querySelectorAll('[role="dialog"]');
+
+      // Check for other backdrop blur modals
+      const backdroppedModals = document.querySelectorAll('.backdrop-blur-sm.fixed');
+
+      const modalOpen = modalWithBackdrop !== null ||
+                       dialogModals.length > 0 ||
+                       backdroppedModals.length > 0;
+
+      if (modalOpen !== isModalOpen) {
+        setIsModalOpen(modalOpen);
+        // Close dropdown when modal opens
+        if (modalOpen && isDropdownOpen) {
+          setIsDropdownOpen(false);
+        }
+      }
+    };
+
+    // Check immediately and then set up an observer
+    checkForModals();
+
+    // Use MutationObserver to detect DOM changes
+    const observer = new MutationObserver(() => {
+      // Debounce the check to avoid excessive calls
+      setTimeout(checkForModals, 100);
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: false
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isModalOpen, isDropdownOpen]);
 
   // SMOOTH ANIMATION LOOP optimized for 60fps
   useEffect(() => {
@@ -121,11 +165,21 @@ const FloatingDropdown = () => {
     // { name: 'EVENTS', href: '/events' },
   ];
 
+  // Don't render dropdown on admin pages
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
+
+  // Don't render dropdown when modal is open (temporarily disabled for testing)
+  // if (isModalOpen) {
+  //   return null;
+  // }
+
   return (
-    <div 
+    <div
       ref={dropdownRef}
       className="fixed z-[100000]"
-      style={{ 
+      style={{
         top: isMobile ? '10px' : '20px',
         right: isMobile ? '10px' : '20px'
       }}

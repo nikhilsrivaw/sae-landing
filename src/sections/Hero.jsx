@@ -84,6 +84,21 @@ const Hero = ({ onStateChange }) => {
     checkUserRegistration();
   }, [user]);
 
+  // Scroll to top when registration form opens
+  useEffect(() => {
+    if (showRegistrationForm) {
+      // Scroll the modal container to top
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Also scroll any modal containers
+        const modalElements = document.querySelectorAll('.fixed.inset-0');
+        modalElements.forEach(modal => {
+          modal.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }, 100);
+    }
+  }, [showRegistrationForm]);
+
   // Notify parent about state changes
   useEffect(() => {
     if (onStateChange) {
@@ -688,9 +703,7 @@ const Hero = ({ onStateChange }) => {
             
             {/* Classic GTA V Style Title */}
             <div className="mb-24">
-              <div className="text-white/60 text-sm sm:text-base font-mono tracking-[0.5em] mb-8 uppercase">
-                Welcome to Los Santos
-              </div>
+              {/* Removed Welcome to Los Santos text */}
               
               <h1 className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-12 leading-tight"
                   style={{
@@ -1283,8 +1296,8 @@ const Hero = ({ onStateChange }) => {
               textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
               fontFamily: 'Arial, sans-serif'
             }}>
-            Welcome to Los Santos' most elite automotive engineering crew. 
-            Where cutting-edge technology meets street racing culture in the neon-soaked nights of Vice City.
+            From wind-cheating aerodynamics to rugged all-terrain frames, we engineer excellence.
+            We are the Society of Automotive Engineers, driving innovation from the racetrack to the Baja desert.
           </p>
           
         </div>
@@ -1964,7 +1977,13 @@ const Hero = ({ onStateChange }) => {
 
                     {/* Register Button */}
                     <button
-                      onClick={() => setShowMobileRegistrationDisclaimer(true)}
+                      onClick={() => {
+                        if (isAuthenticated) {
+                          setShowRegistrationForm(true);
+                        } else {
+                          setShowAuth(true);
+                        }
+                      }}
                       className="flex-1 bg-red-900/90 border border-red-600/50 text-white px-3 py-2 rounded text-xs font-bold hover:bg-red-800 transition-colors shadow-lg"
                     >
                       REGISTER
@@ -2226,15 +2245,37 @@ const Hero = ({ onStateChange }) => {
 
       {/* Registration Form Modal */}
       {showRegistrationForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="relative max-h-[95vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto"
+          style={{ scrollBehavior: 'smooth' }}
+          onClick={(e) => {
+            // Close if clicking the backdrop (not the form content)
+            if (e.target === e.currentTarget) {
+              setShowRegistrationForm(false);
+            }
+          }}
+        >
+          <div className="min-h-screen w-full flex flex-col md:items-center md:justify-start md:py-8 md:px-4">
             <button
               onClick={() => setShowRegistrationForm(false)}
-              className="absolute top-4 right-4 z-10 text-white bg-black/50 hover:bg-black/70 rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold transition-all duration-300"
+              className="fixed top-2 right-2 md:top-4 md:right-4 z-30 text-white bg-red-600/80 hover:bg-red-700 rounded-full w-12 h-12 md:w-10 md:h-10 flex items-center justify-center text-2xl md:text-xl font-bold transition-all duration-300 border-2 border-white/20 shadow-lg"
+              style={{ backdropFilter: 'blur(10px)' }}
             >
-              ×
+              ✕
             </button>
-            <GTARegistrationForm />
+            <div className="w-full md:max-w-4xl mt-0 md:mt-16">
+              <GTARegistrationForm />
+
+              {/* Mobile Close Button at Bottom */}
+              <div className="md:hidden w-full p-4 bg-black/50 backdrop-blur-sm">
+                <button
+                  onClick={() => setShowRegistrationForm(false)}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition-colors duration-300 flex items-center justify-center gap-2"
+                >
+                  ✕ CLOSE REGISTRATION FORM
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

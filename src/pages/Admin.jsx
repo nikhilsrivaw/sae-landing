@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import { supabaseService } from '../lib/supabase';
 
 const Admin = () => {
-  // const [activeSection, setActiveSection] = useState('add-events');
+  const [activeSection, setActiveSection] = useState('events');
   const [showAddEventForm, setShowAddEventForm] = useState(false);
   const [eventForm, setEventForm] = useState({
     name: '',
@@ -16,6 +16,15 @@ const Admin = () => {
   const [hotEvents, setHotEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Bank Details State
+  const [bankDetails, setBankDetails] = useState({
+    account_number: '',
+    ifsc_code: '',
+    is_confirmed: false
+  });
+  const [existingBankDetails, setExistingBankDetails] = useState(null);
+  const [isEditingBank, setIsEditingBank] = useState(false);
 
   // Load hot events from database
   const loadHotEvents = async () => {
@@ -144,8 +153,74 @@ const Admin = () => {
     }
   };
 
+  // Load bank details
+  const loadBankDetails = async () => {
+    try {
+      const details = await supabaseService.getBankDetails();
+      if (details) {
+        setExistingBankDetails(details);
+        setBankDetails(details);
+      }
+    } catch (err) {
+      console.error('Error loading bank details:', err);
+    }
+  };
+
+  // Handle saving bank details
+  const handleSaveBankDetails = async () => {
+    if (!bankDetails.account_number || !bankDetails.ifsc_code) {
+      setError('Please fill in both account number and IFSC code');
+      return;
+    }
+
+    if (!bankDetails.is_confirmed) {
+      setError('Please confirm that the bank details are correct');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const savedDetails = await supabaseService.saveBankDetails(bankDetails);
+      setExistingBankDetails(savedDetails);
+      setBankDetails(savedDetails);
+      setIsEditingBank(false);
+      setError(null);
+    } catch (err) {
+      setError('Failed to save bank details');
+      console.error('Error saving bank details:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle editing bank details
+  const handleEditBankDetails = () => {
+    setIsEditingBank(true);
+    setBankDetails({ ...existingBankDetails, is_confirmed: false });
+  };
+
+  // Handle deleting bank details
+  const handleDeleteBankDetails = async () => {
+    if (!confirm('Are you sure you want to delete the bank details?')) return;
+
+    setLoading(true);
+    try {
+      await supabaseService.deleteBankDetails();
+      setExistingBankDetails(null);
+      setBankDetails({ account_number: '', ifsc_code: '', is_confirmed: false });
+      setIsEditingBank(false);
+      setError(null);
+    } catch (err) {
+      setError('Failed to delete bank details');
+      console.error('Error deleting bank details:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadHotEvents();
+    loadBankDetails();
 
     // Entrance animation
     gsap.fromTo('.admin-dashboard',
@@ -180,7 +255,143 @@ const Admin = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto p-8">
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="w-80 bg-white border-r border-gray-200 min-h-screen">
+          <div className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Admin Panel</h3>
+
+            {/* Navigation */}
+            <nav className="space-y-2 mb-6">
+              <button
+                onClick={() => setActiveSection('events')}
+                className={`w-full text-left px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                  activeSection === 'events'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                🔥 Hot Events
+              </button>
+              <button
+                onClick={() => setActiveSection('bank')}
+                className={`w-full text-left px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                  activeSection === 'bank'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                🏦 Bank Details
+              </button>
+            </nav>
+
+            {/* Bank Details Section */}
+            {activeSection === 'bank' && (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-semibold text-gray-900">Bank Information</h4>
+                  {existingBankDetails && !isEditingBank && (
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={handleEditBankDetails}
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        onClick={handleDeleteBankDetails}
+                        disabled={loading}
+                        className="text-red-600 hover:text-red-700 text-sm font-medium disabled:opacity-50"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {existingBankDetails && !isEditingBank ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-gray-500 uppercase tracking-wide">Account Number</label>
+                      <p className="font-mono text-sm text-gray-900">{existingBankDetails.account_number}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500 uppercase tracking-wide">IFSC Code</label>
+                      <p className="font-mono text-sm text-gray-900">{existingBankDetails.ifsc_code}</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        existingBankDetails.is_confirmed
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {existingBankDetails.is_confirmed ? '✅ Confirmed' : '❌ Not Confirmed'}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
+                      <input
+                        type="text"
+                        value={bankDetails.account_number}
+                        onChange={(e) => setBankDetails({...bankDetails, account_number: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none"
+                        placeholder="Enter account number"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">IFSC Code</label>
+                      <input
+                        type="text"
+                        value={bankDetails.ifsc_code}
+                        onChange={(e) => setBankDetails({...bankDetails, ifsc_code: e.target.value.toUpperCase()})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none"
+                        placeholder="Enter IFSC code"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="confirmBank"
+                        checked={bankDetails.is_confirmed}
+                        onChange={(e) => setBankDetails({...bankDetails, is_confirmed: e.target.checked})}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <label htmlFor="confirmBank" className="text-sm text-gray-700">
+                        Confirm details are correct
+                      </label>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={handleSaveBankDetails}
+                        disabled={loading}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200"
+                      >
+                        💾 Save
+                      </button>
+                      {isEditingBank && (
+                        <button
+                          onClick={() => {
+                            setIsEditingBank(false);
+                            setBankDetails(existingBankDetails || { account_number: '', ifsc_code: '', is_confirmed: false });
+                          }}
+                          className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 p-8">
         {/* Error Message */}
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
@@ -207,8 +418,9 @@ const Admin = () => {
           </div>
         )}
 
-        {/* Main Content - Two Sections Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Events Section */}
+        {activeSection === 'events' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
           {/* Section 1: Add Hot Events */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
@@ -424,6 +636,31 @@ const Admin = () => {
               )}
             </div>
           </div>
+          </div>
+        )}
+
+        {/* Bank Details Section */}
+        {activeSection === 'bank' && (
+          <div className="max-w-4xl">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+              <div className="px-8 py-6 border-b border-gray-200">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                    <span className="text-green-600 text-lg">🏦</span>
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-900">Bank Details Management</h2>
+                </div>
+              </div>
+              <div className="p-8">
+                <div className="text-center py-12">
+                  <div className="text-gray-400 text-5xl mb-4">🏦</div>
+                  <p className="text-gray-500">Use the sidebar to manage bank details</p>
+                  <p className="text-gray-400 text-sm mt-2">Add, edit, or delete bank account information</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         </div>
       </div>
     </div>

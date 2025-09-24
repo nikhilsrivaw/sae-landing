@@ -33,9 +33,9 @@ const GTARegistrationForm = () => {
   const [registrationStatus, setRegistrationStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
 
-  // QR & UPI settings state
-  const [qrUpiSettings, setQrUpiSettings] = useState(null);
-  const [qrUpiLoading, setQrUpiLoading] = useState(true);
+  // Bank details state
+  const [bankDetails, setBankDetails] = useState(null);
+  const [bankDetailsLoading, setBankDetailsLoading] = useState(true);
 
   const branches = [
     'Computer Science (CSE)',
@@ -50,21 +50,21 @@ const GTARegistrationForm = () => {
     'Other'
   ];
 
-  // Load QR & UPI settings on component mount
+  // Load bank details on component mount
   useEffect(() => {
-    const loadQrUpiSettings = async () => {
+    const loadBankDetails = async () => {
       try {
-        const settings = await supabaseService.getQrUpiSettings();
-        setQrUpiSettings(settings);
+        const details = await supabaseService.getBankDetails();
+        setBankDetails(details);
       } catch (err) {
-        console.error('Error loading QR & UPI settings:', err);
+        console.error('Error loading bank details:', err);
         // Don't show error to user, just log it - form will show fallback message
       } finally {
-        setQrUpiLoading(false);
+        setBankDetailsLoading(false);
       }
     };
 
-    loadQrUpiSettings();
+    loadBankDetails();
   }, []);
 
   const handleInputChange = (field, value) => {
@@ -226,7 +226,7 @@ const GTARegistrationForm = () => {
         radial-gradient(circle at 20% 30%, rgba(139, 125, 107, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 80% 70%, rgba(160, 145, 125, 0.08) 0%, transparent 50%)
       `,
-      border: '8px solid #2a2a2a',
+      border: window.innerWidth < 768 ? '4px solid #2a2a2a' : '8px solid #2a2a2a',
       borderRadius: '0',
       boxShadow: `
         inset 0 0 50px rgba(0,0,0,0.1),
@@ -234,11 +234,11 @@ const GTARegistrationForm = () => {
         0 8px 32px rgba(0,0,0,0.3)
       `,
       position: 'relative',
-      maxWidth: '850px',
-      margin: '20px auto',
-      padding: '40px',
+      maxWidth: window.innerWidth < 768 ? '100vw' : '850px',
+      margin: window.innerWidth < 768 ? '0' : '20px auto',
+      padding: window.innerWidth < 768 ? '20px 15px' : '40px',
       color: '#222',
-      minHeight: '800px',
+      minHeight: window.innerWidth < 768 ? 'auto' : '800px',
       overflow: 'hidden'
     },
     paperTexture: {
@@ -312,12 +312,12 @@ const GTARegistrationForm = () => {
     },
     title: {
       fontFamily: '"Impact", "Arial Black", sans-serif',
-      fontSize: '42px',
+      fontSize: window.innerWidth < 768 ? '24px' : '42px',
       fontWeight: '900',
       color: '#1a1a1a',
       textTransform: 'uppercase',
-      letterSpacing: '3px',
-      margin: '20px 0',
+      letterSpacing: window.innerWidth < 768 ? '1px' : '3px',
+      margin: window.innerWidth < 768 ? '15px 0' : '20px 0',
       textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
       lineHeight: '1.1'
     },
@@ -372,8 +372,8 @@ const GTARegistrationForm = () => {
     },
     input: {
       width: '100%',
-      padding: '8px 5px',
-      fontSize: '14px',
+      padding: window.innerWidth < 768 ? '12px 5px' : '8px 5px',
+      fontSize: window.innerWidth < 768 ? '16px' : '14px',
       fontFamily: '"Courier New", monospace',
       fontWeight: 'bold',
       color: '#222',
@@ -394,8 +394,8 @@ const GTARegistrationForm = () => {
     },
     select: {
       width: '100%',
-      padding: '8px 5px',
-      fontSize: '14px',
+      padding: window.innerWidth < 768 ? '12px 5px' : '8px 5px',
+      fontSize: window.innerWidth < 768 ? '16px' : '14px',
       fontFamily: '"Courier New", monospace',
       fontWeight: 'bold',
       color: '#222',
@@ -409,8 +409,8 @@ const GTARegistrationForm = () => {
     },
     memberGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-      gap: '20px',
+      gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))',
+      gap: window.innerWidth < 768 ? '15px' : '20px',
       marginTop: '15px'
     },
     memberBox: {
@@ -434,15 +434,15 @@ const GTARegistrationForm = () => {
     },
     submitButton: {
       fontFamily: '"Impact", sans-serif',
-      fontSize: '24px',
+      fontSize: window.innerWidth < 768 ? '18px' : '24px',
       fontWeight: 'bold',
       color: '#fff',
       background: 'linear-gradient(45deg, #8B0000 0%, #A0522D 50%, #8B0000 100%)',
-      border: '4px solid #2a2a2a',
-      padding: '15px 40px',
+      border: window.innerWidth < 768 ? '3px solid #2a2a2a' : '4px solid #2a2a2a',
+      padding: window.innerWidth < 768 ? '12px 30px' : '15px 40px',
       cursor: 'pointer',
       textTransform: 'uppercase',
-      letterSpacing: '2px',
+      letterSpacing: window.innerWidth < 768 ? '1px' : '2px',
       display: 'block',
       margin: '30px auto 0',
       transition: 'all 0.3s ease',
@@ -944,15 +944,15 @@ const GTARegistrationForm = () => {
 
           <div style={styles.paymentInfo}>
             PAYMENT MUST BE MADE BEFORE REGISTRATION COMPLETION.<br/>
-            UPI ID: sae@losantos
+            Transfer to the bank account details below.
           </div>
 
-          {/* QR Code Section */}
+          {/* Bank Details Section */}
           <div style={{
             margin: '20px 0',
-            padding: '15px',
-            background: 'rgba(255, 255, 255, 0.9)',
-            border: '2px solid #8B0000',
+            padding: '20px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: '3px solid #8B0000',
             borderRadius: '8px',
             textAlign: 'center'
           }}>
@@ -963,82 +963,108 @@ const GTARegistrationForm = () => {
               color: '#8B0000',
               textTransform: 'uppercase',
               letterSpacing: '1px',
-              marginBottom: '10px'
+              marginBottom: '15px'
             }}>
-              🏧 QR CODE FOR PAYMENT
+              🏦 BANK ACCOUNT DETAILS
             </div>
-            {qrUpiLoading ? (
+
+            {bankDetailsLoading ? (
               <div style={{
-                width: '300px',
-                height: '300px',
-                border: '3px solid #2a2a2a',
-                margin: '0 auto',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: '#f5f5f5',
+                padding: '40px',
                 fontSize: '14px',
+                fontWeight: 'bold',
                 color: '#666',
-                fontFamily: '"Courier New", monospace',
-                textAlign: 'center',
-                lineHeight: '1.4'
+                fontFamily: '"Courier New", monospace'
               }}>
-                ⏳ LOADING QR CODE...
+                ⏳ LOADING BANK DETAILS...
               </div>
-            ) : qrUpiSettings?.qr_code_url ? (
-              <div style={{ textAlign: 'center' }}>
-                <img
-                  src={qrUpiSettings.qr_code_url}
-                  alt="Payment QR Code"
-                  style={{
-                    width: '300px',
-                    height: '300px',
-                    border: '3px solid #2a2a2a',
-                    borderRadius: '8px',
-                    objectFit: 'contain',
-                    background: '#fff'
-                  }}
-                />
-                {qrUpiSettings.upi_id && (
+            ) : bankDetails ? (
+              <div>
+                <div style={{
+                  marginBottom: '20px',
+                  padding: '15px',
+                  background: '#f8f8f8',
+                  border: '2px solid #ddd',
+                  borderRadius: '6px'
+                }}>
                   <div style={{
-                    fontFamily: '"Courier New", monospace',
-                    fontSize: '12px',
-                    color: '#444',
-                    marginTop: '10px',
-                    fontWeight: 'bold'
+                    fontSize: '14px',
+                    color: '#666',
+                    marginBottom: '5px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    fontFamily: '"Impact", sans-serif'
                   }}>
-                    UPI ID: {qrUpiSettings.upi_id}
+                    ACCOUNT NUMBER
                   </div>
-                )}
+                  <div style={{
+                    fontSize: '22px',
+                    fontWeight: 'bold',
+                    color: '#000',
+                    fontFamily: '"Courier New", monospace',
+                    letterSpacing: '2px'
+                  }}>
+                    {bankDetails.account_number}
+                  </div>
+                </div>
+
+                <div style={{
+                  marginBottom: '15px',
+                  padding: '15px',
+                  background: '#f8f8f8',
+                  border: '2px solid #ddd',
+                  borderRadius: '6px'
+                }}>
+                  <div style={{
+                    fontSize: '14px',
+                    color: '#666',
+                    marginBottom: '5px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    fontFamily: '"Impact", sans-serif'
+                  }}>
+                    IFSC CODE
+                  </div>
+                  <div style={{
+                    fontSize: '22px',
+                    fontWeight: 'bold',
+                    color: '#000',
+                    fontFamily: '"Courier New", monospace',
+                    letterSpacing: '2px'
+                  }}>
+                    {bankDetails.ifsc_code}
+                  </div>
+                </div>
+
+                <div style={{
+                  fontSize: '12px',
+                  color: '#444',
+                  fontWeight: 'bold',
+                  marginTop: '15px',
+                  fontFamily: '"Courier New", monospace'
+                }}>
+                  Transfer ₹3,000 to the above account and upload payment screenshot
+                </div>
               </div>
             ) : (
               <div style={{
-                width: '300px',
-                height: '300px',
-                border: '3px solid #2a2a2a',
-                margin: '0 auto',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: '#f5f5f5',
+                padding: '40px',
                 fontSize: '14px',
+                fontWeight: 'bold',
                 color: '#666',
                 fontFamily: '"Courier New", monospace',
                 textAlign: 'center',
                 lineHeight: '1.4'
               }}>
-                ❌ QR CODE NOT AVAILABLE<br/>CONTACT ADMIN
+                ❌ BANK DETAILS NOT AVAILABLE<br/>CONTACT ADMIN
               </div>
             )}
-            <div style={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '12px',
-              color: '#444',
-              marginTop: '10px',
-              fontWeight: 'bold'
-            }}>
-              Scan QR code with any UPI app to pay ₹3,000
-            </div>
           </div>
 
           <div style={styles.inputGroup}>

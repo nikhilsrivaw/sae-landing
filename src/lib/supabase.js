@@ -742,5 +742,101 @@ export const supabaseService = {
     // Note: We could add QR code path tracking for cleanup, but keeping it simple for now
 
     return true
+  },
+
+  // Bank Details operations
+  async testBankTableExists() {
+    try {
+      console.log('🧪 Testing if bank_details table exists...');
+      const { data, error } = await supabase
+        .from('bank_details')
+        .select('id')
+        .limit(1);
+
+      if (error) {
+        console.error('❌ Table test failed:', error);
+        return false;
+      }
+      console.log('✅ bank_details table exists and is accessible');
+      return true;
+    } catch (err) {
+      console.error('❌ Table test error:', err);
+      return false;
+    }
+  },
+
+  async saveBankDetails(bankData) {
+    // First, check if bank details already exist
+    const { data: existingDetails } = await supabase
+      .from('bank_details')
+      .select('*')
+      .limit(1)
+      .single()
+
+    const detailsData = {
+      account_number: bankData.account_number,
+      ifsc_code: bankData.ifsc_code,
+      is_confirmed: bankData.is_confirmed || false,
+      updated_at: new Date().toISOString()
+    }
+
+    if (existingDetails) {
+      // Update existing details
+      const { data, error } = await supabase
+        .from('bank_details')
+        .update(detailsData)
+        .eq('id', existingDetails.id)
+        .select()
+
+      if (error) {
+        console.error('Error updating bank details:', error)
+        throw error
+      }
+      return data[0]
+    } else {
+      // Create new details
+      detailsData.created_at = new Date().toISOString()
+      const { data, error } = await supabase
+        .from('bank_details')
+        .insert([detailsData])
+        .select()
+
+      if (error) {
+        console.error('Error creating bank details:', error)
+        throw error
+      }
+      return data[0]
+    }
+  },
+
+  async getBankDetails() {
+    const { data, error } = await supabase
+      .from('bank_details')
+      .select('*')
+      .limit(1)
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No details found
+        return null;
+      }
+      console.error('Error fetching bank details:', error)
+      throw error
+    }
+    return data
+  },
+
+  async deleteBankDetails() {
+    const { error } = await supabase
+      .from('bank_details')
+      .delete()
+      .gte('id', 0) // Delete all rows
+
+    if (error) {
+      console.error('Error deleting bank details:', error)
+      throw error
+    }
+    return true
   }
 }

@@ -2073,6 +2073,7 @@ const AdminNew = () => {
                                   <div><strong>Name:</strong> {registration.leader_name}</div>
                                   <div><strong>Roll:</strong> {registration.leader_roll}</div>
                                   <div><strong>Branch:</strong> {registration.leader_branch}</div>
+                                  <div><strong>Phone:</strong> {registration.leader_phone || 'Not provided'}</div>
                                 </div>
                               </div>
 

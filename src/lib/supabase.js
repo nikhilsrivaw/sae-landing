@@ -333,6 +333,7 @@ export const supabaseService = {
       leader_name: registrationData.leaderName,
       leader_roll: registrationData.leaderRoll,
       leader_branch: registrationData.leaderBranch,
+      leader_phone: registrationData.leaderPhone || null,
       member1_name: registrationData.member1Name || null,
       member1_roll: registrationData.member1Roll || null,
       member1_branch: registrationData.member1Branch || null,

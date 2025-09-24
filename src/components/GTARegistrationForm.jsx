@@ -9,6 +9,7 @@ const GTARegistrationForm = ({ onClose }) => {
     leaderName: '',
     leaderRoll: '',
     leaderBranch: '',
+    leaderPhone: '',
     member1Name: '',
     member1Roll: '',
     member1Branch: '',
@@ -161,13 +162,18 @@ const GTARegistrationForm = ({ onClose }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    const requiredFields = ['teamName', 'leaderName', 'leaderRoll', 'leaderBranch'];
+    const requiredFields = ['teamName', 'leaderName', 'leaderRoll', 'leaderBranch', 'leaderPhone'];
 
     requiredFields.forEach(field => {
       if (!formData[field].trim()) {
         newErrors[field] = 'REQUIRED FIELD';
       }
     });
+
+    // Phone number validation
+    if (formData.leaderPhone && !/^[0-9]{10}$/.test(formData.leaderPhone)) {
+      newErrors.leaderPhone = 'PHONE NUMBER MUST BE 10 DIGITS';
+    }
 
     // Validate payment screenshot
     if (!formData.paymentScreenshot) {
@@ -180,7 +186,7 @@ const GTARegistrationForm = ({ onClose }) => {
 
   const handleStep1Submit = async (e) => {
     e.preventDefault();
-    const step1Fields = ['teamName', 'leaderName', 'leaderRoll', 'leaderBranch'];
+    const step1Fields = ['teamName', 'leaderName', 'leaderRoll', 'leaderBranch', 'leaderPhone'];
     const step1Errors = {};
 
     step1Fields.forEach(field => {
@@ -188,6 +194,11 @@ const GTARegistrationForm = ({ onClose }) => {
         step1Errors[field] = 'REQUIRED FIELD';
       }
     });
+
+    // Phone number validation
+    if (formData.leaderPhone && !/^[0-9]{10}$/.test(formData.leaderPhone)) {
+      step1Errors.leaderPhone = 'PHONE NUMBER MUST BE 10 DIGITS';
+    }
 
     setErrors(step1Errors);
     if (Object.keys(step1Errors).length > 0) return;
@@ -208,6 +219,7 @@ const GTARegistrationForm = ({ onClose }) => {
         leaderName: formData.leaderName,
         leaderRoll: formData.leaderRoll,
         leaderBranch: formData.leaderBranch,
+        leaderPhone: formData.leaderPhone,
         member1Name: formData.member1Name || null,
         member1Roll: formData.member1Roll || null,
         member1Branch: formData.member1Branch || null,
@@ -1123,6 +1135,24 @@ const GTARegistrationForm = ({ onClose }) => {
               ))}
             </select>
             {errors.leaderBranch && <div style={styles.errorText}>{errors.leaderBranch}</div>}
+          </div>
+
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Leader Phone Number *</label>
+            <input
+              type="tel"
+              value={formData.leaderPhone}
+              onChange={(e) => handleInputChange('leaderPhone', e.target.value)}
+              style={{
+                ...styles.input,
+                ...(errors.leaderPhone && styles.inputError)
+              }}
+              onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
+              onBlur={(e) => e.target.style.borderBottom = errors.leaderPhone ? '2px wavy #cc0000' : '2px dotted #444'}
+              placeholder="Enter 10-digit phone number"
+              required
+            />
+            {errors.leaderPhone && <div style={styles.errorText}>{errors.leaderPhone}</div>}
           </div>
         </div>
 

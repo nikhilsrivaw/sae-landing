@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { supabaseService } from '../lib/supabase';
 
 const RegistrationForm = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
@@ -6,6 +7,7 @@ const RegistrationForm = ({ isOpen, onClose }) => {
     leaderName: '',
     leaderRoll: '',
     leaderBranch: '',
+    leaderPhone: '',
     member1Name: '',
     member1Roll: '',
     member1Branch: '',
@@ -61,13 +63,31 @@ const RegistrationForm = ({ isOpen, onClose }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    const requiredFields = ['teamName', 'leaderName', 'leaderRoll', 'leaderBranch'];
+    const requiredFields = ['teamName', 'leaderName', 'leaderRoll', 'leaderBranch', 'leaderPhone'];
 
     requiredFields.forEach(field => {
       if (!formData[field].trim()) {
         newErrors[field] = 'This field is required';
       }
     });
+
+    // Roll number validation (10 digits format: 2023071048)
+    if (formData.leaderRoll && !/^[0-9]{10}$/.test(formData.leaderRoll)) {
+      newErrors.leaderRoll = 'Roll number must be exactly 10 digits (e.g., 2023071048)';
+    }
+
+    // Validate member roll numbers (if provided)
+    [1, 2, 3, 4].forEach(i => {
+      const rollField = `member${i}Roll`;
+      if (formData[rollField] && formData[rollField].trim() && !/^[0-9]{10}$/.test(formData[rollField])) {
+        newErrors[rollField] = 'Roll number must be exactly 10 digits (e.g., 2023071048)';
+      }
+    });
+
+    // Phone number validation (+91 79055 67854 format)
+    if (formData.leaderPhone && !/^\+91 [0-9]{5} [0-9]{5}$/.test(formData.leaderPhone)) {
+      newErrors.leaderPhone = 'Phone number format: +91 79055 67854';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -79,29 +99,66 @@ const RegistrationForm = ({ isOpen, onClose }) => {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Clean the data
+      const cleanedData = {};
+      Object.keys(formData).forEach(key => {
+        if (formData[key].trim()) {
+          cleanedData[key] = formData[key].trim();
+        }
+      });
 
-    const cleanedData = {};
-    Object.keys(formData).forEach(key => {
-      if (formData[key].trim()) {
-        cleanedData[key] = formData[key].trim();
-      }
-    });
+      // Debug: Log the form data
+      console.log('Form Data:', formData);
+      console.log('Cleaned Data:', cleanedData);
+      console.log('Leader Phone:', cleanedData.leaderPhone);
 
-    setShowSuccess(true);
-    setIsSubmitting(false);
+      // Save to database
+      const registrationData = {
+        teamName: cleanedData.teamName,
+        leaderName: cleanedData.leaderName,
+        leaderRoll: cleanedData.leaderRoll,
+        leaderBranch: cleanedData.leaderBranch,
+        leaderPhone: cleanedData.leaderPhone,
+        member1Name: cleanedData.member1Name || null,
+        member1Roll: cleanedData.member1Roll || null,
+        member1Branch: cleanedData.member1Branch || null,
+        member2Name: cleanedData.member2Name || null,
+        member2Roll: cleanedData.member2Roll || null,
+        member2Branch: cleanedData.member2Branch || null,
+        member3Name: cleanedData.member3Name || null,
+        member3Roll: cleanedData.member3Roll || null,
+        member3Branch: cleanedData.member3Branch || null,
+        member4Name: cleanedData.member4Name || null,
+        member4Roll: cleanedData.member4Roll || null,
+        member4Branch: cleanedData.member4Branch || null,
+        userId: null // You may need to add user authentication later
+      };
 
-    // Reset form
-    setFormData({
-      teamName: '', leaderName: '', leaderRoll: '', leaderBranch: '',
-      member1Name: '', member1Roll: '', member1Branch: '',
-      member2Name: '', member2Roll: '', member2Branch: '',
-      member3Name: '', member3Roll: '', member3Branch: '',
-      member4Name: '', member4Roll: '', member4Branch: ''
-    });
+      console.log('Registration Data being sent to DB:', registrationData);
 
-    setTimeout(() => setShowSuccess(false), 5000);
+      const result = await supabaseService.createTeamRegistration(registrationData);
+      console.log('Database save result:', result);
+
+      setShowSuccess(true);
+
+      // Reset form
+      setFormData({
+        teamName: '', leaderName: '', leaderRoll: '', leaderBranch: '', leaderPhone: '',
+        member1Name: '', member1Roll: '', member1Branch: '',
+        member2Name: '', member2Roll: '', member2Branch: '',
+        member3Name: '', member3Roll: '', member3Branch: '',
+        member4Name: '', member4Roll: '', member4Branch: ''
+      });
+
+      setTimeout(() => setShowSuccess(false), 5000);
+
+    } catch (error) {
+      console.error('Registration failed:', error);
+      alert('Registration failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = useCallback(() => {
@@ -361,18 +418,27 @@ const RegistrationForm = ({ isOpen, onClose }) => {
                     <InputField
                       label="Roll Number"
                       name="leaderRoll"
-                      placeholder="Enter roll number"
+                      placeholder="Enter 10-digit roll number (e.g., 2023071048)"
                       required
                     />
                   </div>
 
-                  <InputField
-                    label="Branch"
-                    name="leaderBranch"
-                    placeholder="Select your branch"
-                    options={branches}
-                    required
-                  />
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <InputField
+                      label="Branch"
+                      name="leaderBranch"
+                      placeholder="Select your branch"
+                      options={branches}
+                      required
+                    />
+                    <InputField
+                      label="Phone Number"
+                      name="leaderPhone"
+                      type="tel"
+                      placeholder="+91 79055 67854"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -415,7 +481,7 @@ const RegistrationForm = ({ isOpen, onClose }) => {
                         <InputField
                           label="Roll Number"
                           name={`member${memberNum}Roll`}
-                          placeholder="Enter roll number"
+                          placeholder="Enter 10-digit roll number (e.g., 2023071048)"
                         />
                         <InputField
                           label="Branch"

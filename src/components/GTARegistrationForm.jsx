@@ -1415,6 +1415,62 @@ const GTARegistrationForm = ({ onClose }) => {
                 </div>
 
                 <div style={{
+                  marginBottom: '15px',
+                  padding: '15px',
+                  background: '#f8f8f8',
+                  border: '2px solid #ddd',
+                  borderRadius: '6px'
+                }}>
+                  <div style={{
+                    fontSize: '14px',
+                    color: '#666',
+                    marginBottom: '5px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    fontFamily: '"Impact", sans-serif'
+                  }}>
+                    ACCOUNT HOLDER NAME
+                  </div>
+                  <div style={{
+                    fontSize: window.innerWidth < 768 ? '18px' : '22px',
+                    fontWeight: 'bold',
+                    color: '#000',
+                    fontFamily: '"Courier New", monospace',
+                    letterSpacing: window.innerWidth < 768 ? '1px' : '2px'
+                  }}>
+                    SAE COLLEGIATE CLUB MMMUT
+                  </div>
+                </div>
+
+                <div style={{
+                  marginBottom: '15px',
+                  padding: '15px',
+                  background: '#f8f8f8',
+                  border: '2px solid #ddd',
+                  borderRadius: '6px'
+                }}>
+                  <div style={{
+                    fontSize: '14px',
+                    color: '#666',
+                    marginBottom: '5px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    fontFamily: '"Impact", sans-serif'
+                  }}>
+                    ACCOUNT TYPE
+                  </div>
+                  <div style={{
+                    fontSize: '22px',
+                    fontWeight: 'bold',
+                    color: '#000',
+                    fontFamily: '"Courier New", monospace',
+                    letterSpacing: '2px'
+                  }}>
+                    CURRENT ACCOUNT
+                  </div>
+                </div>
+
+                <div style={{
                   fontSize: '12px',
                   color: '#444',
                   fontWeight: 'bold',
@@ -1422,6 +1478,24 @@ const GTARegistrationForm = ({ onClose }) => {
                   fontFamily: '"Courier New", monospace'
                 }}>
                   Transfer ₹3,000 to the above account and upload payment screenshot
+                </div>
+
+                <div style={{
+                  fontSize: window.innerWidth < 768 ? '13px' : '14px',
+                  color: '#8B0000',
+                  fontWeight: 'bold',
+                  marginTop: '12px',
+                  padding: window.innerWidth < 768 ? '10px' : '12px',
+                  background: 'rgba(139, 0, 0, 0.1)',
+                  border: '2px solid #8B0000',
+                  borderRadius: '6px',
+                  fontFamily: '"Courier New", monospace',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  textAlign: 'center',
+                  lineHeight: '1.5'
+                }}>
+                  ⚠️ IMPORTANT: TRANSACTION ID MUST BE CLEARLY VISIBLE IN PAYMENT SCREENSHOT OR IT WILL NOT BE CONSIDERED VALID
                 </div>
               </div>
             ) : (

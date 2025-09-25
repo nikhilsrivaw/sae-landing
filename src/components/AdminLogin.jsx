@@ -90,9 +90,6 @@ const AdminLogin = ({ onLoginSuccess, onCancel }) => {
             marginBottom: '0.5rem'
           }}>Admin Access</h2>
           <p style={{ color: '#aaa', fontSize: '0.875rem' }}>Please enter your admin credentials</p>
-          <p style={{ color: '#666', fontSize: '0.75rem', marginTop: '0.5rem' }}>
-            Default: admin / sae2024
-          </p>
         </div>
 
         {/* Form */}

@@ -84,3 +84,5 @@ tmp/
 temp/
 EOF < /dev/null
 schema
+
+docs

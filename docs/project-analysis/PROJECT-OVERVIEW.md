@@ -106,8 +106,8 @@ sae-3/
 
 ### 📋 Registration System
 1. **3-Step Process**
-   - **Step 1**: Team information registration
-   - **Step 2**: Payment processing (admin-enabled)
+   - **Step 1**: Team information registration + WhatsApp group invitation
+   - **Step 2**: Payment processing (admin-enabled) + WhatsApp reminder
    - **Step 3**: Verification and approval
 
 2. **Authentication Integration**
@@ -121,6 +121,11 @@ sae-3/
    - QR code + UPI ID integration
    - Payment screenshot upload with validation
    - Transaction ID verification requirement
+
+4. **Community Integration** *(NEW)*
+   - WhatsApp group integration after Step 1 & 2 completion
+   - Dual touchpoints for maximum engagement
+   - GTA-styled community access sections
 
 ### 🛠 Admin Dashboard
 1. **Event Management**
@@ -138,7 +143,7 @@ sae-3/
 3. **System Configuration**
    - QR code and UPI settings
    - Bank account details management
-   - Admin authentication system
+   - Admin authentication system (secured, no default credentials display)
    - Analytics and statistics
 
 ## 🗄 Database Schema
@@ -244,6 +249,7 @@ teams, points, events (for compatibility)
 **Project Owner**: Nikhil Srivastava (nikhilksrivastav190@gmail.com)
 **Institution**: MMMUT (Madan Mohan Malviya University of Technology)
 **Organization**: SAE Collegiate Club
+**Last Updated**: September 26, 2025 (WhatsApp integration & admin security improvements)
 
 ---
 

@@ -1254,6 +1254,87 @@ const GTARegistrationForm = ({ onClose }) => {
               </div>
             </div>
 
+            {/* WhatsApp Group Section */}
+            <div style={{
+              border: window.innerWidth < 768 ? '2px solid #666' : '3px solid #8B0000',
+              padding: window.innerWidth < 768 ? '15px' : '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              position: 'relative',
+              marginTop: window.innerWidth < 768 ? '20px' : '25px',
+              marginBottom: '25px'
+            }}>
+              <div style={{
+                fontFamily: '"Impact", sans-serif',
+                fontSize: window.innerWidth < 768 ? '16px' : '18px',
+                fontWeight: 'bold',
+                color: '#2a2a2a',
+                textTransform: 'uppercase',
+                letterSpacing: window.innerWidth < 768 ? '1px' : '2px',
+                marginBottom: window.innerWidth < 768 ? '12px' : '15px',
+                textAlign: 'center',
+                background: '#f4f1e8',
+                padding: window.innerWidth < 768 ? '8px' : '10px',
+                border: window.innerWidth < 768 ? '2px solid #8B0000' : '2px solid #8B0000',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+                lineHeight: '1.3'
+              }}>
+                📱 COMMUNITY ACCESS
+              </div>
+
+              <div style={{
+                fontFamily: '"Courier New", monospace',
+                fontSize: window.innerWidth < 768 ? '11px' : '12px',
+                color: '#444',
+                margin: '10px 0',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                background: 'rgba(255, 255, 255, 0.5)',
+                padding: window.innerWidth < 768 ? '8px' : '10px',
+                border: '1px solid #888',
+                lineHeight: '1.4'
+              }}>
+                CONNECT WITH OTHER CREWS AND RECEIVE OFFICIAL UPDATES
+              </div>
+
+              <div style={{ textAlign: 'center', marginTop: '15px' }}>
+                <a
+                  href="https://chat.whatsapp.com/IpaTpzKbKuVEnCnB81DvQV"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontFamily: '"Impact", sans-serif',
+                    fontSize: window.innerWidth < 768 ? '14px' : '16px',
+                    fontWeight: 'bold',
+                    color: '#fff',
+                    background: 'linear-gradient(45deg, #006400 0%, #228B22 50%, #006400 100%)',
+                    border: window.innerWidth < 768 ? '3px solid #2a2a2a' : '4px solid #2a2a2a',
+                    padding: window.innerWidth < 768 ? '12px 18px' : '15px 25px',
+                    cursor: 'pointer',
+                    textTransform: 'uppercase',
+                    letterSpacing: window.innerWidth < 768 ? '0.5px' : '1px',
+                    display: 'inline-block',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+                    textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                    textDecoration: 'none',
+                    borderRadius: '0'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'linear-gradient(45deg, #228B22 0%, #32CD32 50%, #228B22 100%)';
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'linear-gradient(45deg, #006400 0%, #228B22 50%, #006400 100%)';
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)';
+                  }}
+                >
+                  📱 JOIN WHATSAPP GROUP
+                </a>
+              </div>
+            </div>
+
             {/* Show completed team info */}
             <div style={{
               ...styles.formSection,
@@ -1584,6 +1665,87 @@ const GTARegistrationForm = ({ onClose }) => {
             >
               {isSubmitting ? 'PROCESSING PAYMENT...' : 'COMPLETE STEP 2 - SUBMIT PAYMENT'}
             </button>
+
+            {/* WhatsApp Group Section for Step 2 */}
+            <div style={{
+              border: window.innerWidth < 768 ? '2px solid #666' : '3px solid #8B0000',
+              padding: window.innerWidth < 768 ? '15px' : '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              position: 'relative',
+              marginTop: window.innerWidth < 768 ? '20px' : '25px',
+              marginBottom: '25px'
+            }}>
+              <div style={{
+                fontFamily: '"Impact", sans-serif',
+                fontSize: window.innerWidth < 768 ? '16px' : '18px',
+                fontWeight: 'bold',
+                color: '#2a2a2a',
+                textTransform: 'uppercase',
+                letterSpacing: window.innerWidth < 768 ? '1px' : '2px',
+                marginBottom: window.innerWidth < 768 ? '12px' : '15px',
+                textAlign: 'center',
+                background: '#f4f1e8',
+                padding: window.innerWidth < 768 ? '8px' : '10px',
+                border: window.innerWidth < 768 ? '2px solid #8B0000' : '2px solid #8B0000',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+                lineHeight: '1.3'
+              }}>
+                📱 COMMUNITY ACCESS
+              </div>
+
+              <div style={{
+                fontFamily: '"Courier New", monospace',
+                fontSize: window.innerWidth < 768 ? '11px' : '12px',
+                color: '#444',
+                margin: '10px 0',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                background: 'rgba(255, 255, 255, 0.5)',
+                padding: window.innerWidth < 768 ? '8px' : '10px',
+                border: '1px solid #888',
+                lineHeight: '1.4'
+              }}>
+                IN CASE YOU FORGOT TO JOIN THE GROUP - CONNECT WITH OTHER CREWS
+              </div>
+
+              <div style={{ textAlign: 'center', marginTop: '15px' }}>
+                <a
+                  href="https://chat.whatsapp.com/IpaTpzKbKuVEnCnB81DvQV"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontFamily: '"Impact", sans-serif',
+                    fontSize: window.innerWidth < 768 ? '14px' : '16px',
+                    fontWeight: 'bold',
+                    color: '#fff',
+                    background: 'linear-gradient(45deg, #006400 0%, #228B22 50%, #006400 100%)',
+                    border: window.innerWidth < 768 ? '3px solid #2a2a2a' : '4px solid #2a2a2a',
+                    padding: window.innerWidth < 768 ? '12px 18px' : '15px 25px',
+                    cursor: 'pointer',
+                    textTransform: 'uppercase',
+                    letterSpacing: window.innerWidth < 768 ? '0.5px' : '1px',
+                    display: 'inline-block',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+                    textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                    textDecoration: 'none',
+                    borderRadius: '0'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'linear-gradient(45deg, #228B22 0%, #32CD32 50%, #228B22 100%)';
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'linear-gradient(45deg, #006400 0%, #228B22 50%, #006400 100())';
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)';
+                  }}
+                >
+                  📱 JOIN WHATSAPP GROUP
+                </a>
+              </div>
+            </div>
           </form>
         )}
 

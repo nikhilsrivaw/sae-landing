@@ -129,6 +129,7 @@
 - Session management
 - GTA-styled login form
 - Cancel/redirect functionality
+- **UPDATED**: Removed default credentials display for security
 
 ---
 
@@ -165,6 +166,7 @@
 - **Mobile Responsive**: Specialized mobile layouts
 - **Form Validation**: Real-time error display
 - **Status Checking**: Existing registration lookup
+- **NEW: WhatsApp Integration**: Community group access after Steps 1 & 2
 
 ### `RegistrationStatus.jsx` - Status Checking
 **Purpose**: Allow users to check their registration status

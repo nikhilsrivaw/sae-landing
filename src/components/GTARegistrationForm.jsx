@@ -43,6 +43,7 @@ const GTARegistrationForm = ({ onClose }) => {
   const branches = [
     'Computer Science (CSE)',
     'Electronics (ECE)',
+    'ECE-IoT',
     'Mechanical (ME)',
     'Civil (CE)',
     'Electrical (EE)',

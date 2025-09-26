@@ -175,6 +175,17 @@ const GTARegistrationForm = ({ onClose }) => {
       newErrors.leaderPhone = 'PHONE NUMBER MUST BE 10 DIGITS';
     }
 
+    // Require at least Member 1 (minimum team size = 2)
+    if (!formData.member1Name.trim()) {
+      newErrors.member1Name = 'AT LEAST 1 TEAM MEMBER REQUIRED';
+    }
+    if (!formData.member1Roll.trim()) {
+      newErrors.member1Roll = 'REQUIRED FIELD';
+    }
+    if (!formData.member1Branch.trim()) {
+      newErrors.member1Branch = 'REQUIRED FIELD';
+    }
+
     // Validate payment screenshot
     if (!formData.paymentScreenshot) {
       newErrors.paymentScreenshot = 'PAYMENT PROOF REQUIRED';
@@ -198,6 +209,17 @@ const GTARegistrationForm = ({ onClose }) => {
     // Phone number validation
     if (formData.leaderPhone && !/^[0-9]{10}$/.test(formData.leaderPhone)) {
       step1Errors.leaderPhone = 'PHONE NUMBER MUST BE 10 DIGITS';
+    }
+
+    // Require at least Member 1 (minimum team size = 2)
+    if (!formData.member1Name.trim()) {
+      step1Errors.member1Name = 'AT LEAST 1 TEAM MEMBER REQUIRED';
+    }
+    if (!formData.member1Roll.trim()) {
+      step1Errors.member1Roll = 'REQUIRED FIELD';
+    }
+    if (!formData.member1Branch.trim()) {
+      step1Errors.member1Branch = 'REQUIRED FIELD';
     }
 
     setErrors(step1Errors);
@@ -1158,50 +1180,73 @@ const GTARegistrationForm = ({ onClose }) => {
 
             {/* Team Members */}
             <div style={styles.formSection}>
-              <div style={styles.sectionTitle}>Team Members (Optional)</div>
+              <div style={styles.sectionTitle}>Team Members (Minimum 1 Required)</div>
               <div style={styles.memberGrid}>
                 {[1, 2, 3, 4].map((memberNum) => (
                   <div key={memberNum} style={styles.memberBox}>
-                    <div style={styles.memberTitle}>Member {memberNum}</div>
+                    <div style={styles.memberTitle}>
+                      Member {memberNum}{memberNum === 1 ? ' *' : ''}
+                    </div>
 
                     <div style={styles.inputGroup}>
-                      <label style={styles.label}>Full Name</label>
+                      <label style={styles.label}>
+                        Full Name{memberNum === 1 ? ' *' : ''}
+                      </label>
                       <input
                         type="text"
                         value={formData[`member${memberNum}Name`]}
                         onChange={(e) => handleInputChange(`member${memberNum}Name`, e.target.value)}
-                        style={styles.input}
+                        style={{
+                          ...styles.input,
+                          ...(errors[`member${memberNum}Name`] && styles.inputError)
+                        }}
                         onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
-                        onBlur={(e) => e.target.style.borderBottom = '2px dotted #444'}
+                        onBlur={(e) => e.target.style.borderBottom = errors[`member${memberNum}Name`] ? '2px wavy #cc0000' : '2px dotted #444'}
+                        required={memberNum === 1}
                       />
+                      {errors[`member${memberNum}Name`] && <div style={styles.errorText}>{errors[`member${memberNum}Name`]}</div>}
                     </div>
 
                     <div style={styles.inputGroup}>
-                      <label style={styles.label}>Roll Number</label>
+                      <label style={styles.label}>
+                        Roll Number{memberNum === 1 ? ' *' : ''}
+                      </label>
                       <input
                         type="text"
                         value={formData[`member${memberNum}Roll`]}
                         onChange={(e) => handleInputChange(`member${memberNum}Roll`, e.target.value)}
-                        style={styles.input}
+                        style={{
+                          ...styles.input,
+                          ...(errors[`member${memberNum}Roll`] && styles.inputError)
+                        }}
                         onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
-                        onBlur={(e) => e.target.style.borderBottom = '2px dotted #444'}
+                        onBlur={(e) => e.target.style.borderBottom = errors[`member${memberNum}Roll`] ? '2px wavy #cc0000' : '2px dotted #444'}
+                        required={memberNum === 1}
                       />
+                      {errors[`member${memberNum}Roll`] && <div style={styles.errorText}>{errors[`member${memberNum}Roll`]}</div>}
                     </div>
 
                     <div style={styles.inputGroup}>
-                      <label style={styles.label}>Branch</label>
+                      <label style={styles.label}>
+                        Branch{memberNum === 1 ? ' *' : ''}
+                      </label>
                       <select
                         value={formData[`member${memberNum}Branch`]}
                         onChange={(e) => handleInputChange(`member${memberNum}Branch`, e.target.value)}
-                        style={styles.select}
+                        style={{
+                          ...styles.select,
+                          ...(errors[`member${memberNum}Branch`] && styles.inputError)
+                        }}
                         onFocus={(e) => e.target.style.borderBottom = '2px solid #ff9900'}
-                        onBlur={(e) => e.target.style.borderBottom = '2px dotted #444'}
+                        onBlur={(e) => e.target.style.borderBottom = errors[`member${memberNum}Branch`] ? '2px wavy #cc0000' : '2px dotted #444'}
+                        required={memberNum === 1}
                       >
                         <option value="">SELECT BRANCH</option>
                         {branches.map(branch => (
                           <option key={branch} value={branch}>{branch}</option>
                         ))}
                       </select>
+                      {errors[`member${memberNum}Branch`] && <div style={styles.errorText}>{errors[`member${memberNum}Branch`]}</div>}
                     </div>
                   </div>
                 ))}

@@ -162,6 +162,7 @@ const FloatingDropdown = () => {
     // { name: '4 CHAMBERS', href: '/chambers' },
     // { name: 'GLIMPSE', href: '/glimpse' },
     { name: 'CREATORS', href: '/creators' },
+    { name: 'LEADERBOARD', href: '/leaderboard' },
     // { name: 'EVENTS', href: '/events' },
   ];
 

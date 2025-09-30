@@ -15,6 +15,8 @@ const Team = React.lazy(() => import('./pages/Team'));
 // const Glimpse = React.lazy(() => import('./pages/Glimpse'));
 const Creators = React.lazy(() => import('./pages/Creators'));
 // const Events = React.lazy(() => import('./pages/Events'));
+// const Leaderboard = React.lazy(() => import('./pages/LeaderboardNew'));
+const LeaderboardComingSoon = React.lazy(() => import('./pages/LeaderboardComingSoon'));
 const AdminNew = React.lazy(() => import('./pages/AdminNew'));
 
 // Loading component
@@ -49,6 +51,7 @@ function App() {
                 {/* <Route path="/glimpse" element={<Glimpse />} /> */}
                 <Route path="/creators" element={<Creators />} />
                 {/* <Route path="/events" element={<Events />} /> */}
+                <Route path="/leaderboard" element={<LeaderboardComingSoon />} />
                 <Route path="/admin" element={<AdminNew />} />
                 <Route path="*" element={<Home />} />
               </Routes>

@@ -7,6 +7,13 @@ A cinematic, GTA V-inspired landing page for the Society of Automotive Engineers
 ### **Immersive Experience**
 - **GTA V-Style Interface**: Authentic GTA V-inspired design elements, animations, and aesthetics
 - **Interactive Start Screen**: "Let's Begin" button to enter the next level experience
+- **Multi-Page Navigation**: Complete application with multiple sections
+
+### **Championship System**
+- **Burnout Leaderboard**: Professional SAE championship leaderboard with premium styling
+- **Team Registration**: 3-step registration system with payment processing
+- **Admin Dashboard**: Complete management system for events and registrations
+- **Community Integration**: WhatsApp group access for team communication
 
 ### **Advanced Animations**
 - **SAE Mask Reveal**: Stunning mask animation that transitions from the SAE logo to the main experience
@@ -25,31 +32,62 @@ A cinematic, GTA V-inspired landing page for the Society of Automotive Engineers
 - **Corner Brackets**: Classic GTA V menu-style corner decorations
 - **Typography**: Impact and Arial fonts matching GTA V's aesthetic
 
-## 🎯 Page Structure
+## 🎯 Application Structure
 
-### **Start Screen**
-- Welcome message: "Ready to see the NEXT LEVEL experience?"
-- Interactive "LET'S BEGIN" button
-- Los Santos Automotive Division branding
-- Grid pattern background for authentic feel
-
-### **Main Experience**
+### **Landing Page (Home)**
+- **Welcome message**: "Ready to see the NEXT LEVEL experience?"
+- **Interactive "LET'S BEGIN" button**: Entry point to the main experience
 - **Hero Section**: Large SAE branding with "AUTO EMPIRE" subtitle
-- **Description**: "Welcome to Los Santos' most elite automotive engineering crew. Where cutting-edge technology meets street racing culture in the neon-soaked nights of Vice City."
 - **Interactive Minimap**: GTA V-style map with SAE HQ and automotive locations
+- **Hot Events**: Dynamic event display with registration access
 
-### **Brand Story**
-- **Four Divisions**: BAJA, SUPRA, AERO, and DISCO with detailed descriptions
-- **Professional Layout**: Clean, expandable sections with smooth scrolling
-- **University Branding**: MMMUT (Madan Mohan Malviya University of Technology) integration
+### **Burnout Leaderboard (/leaderboard)**
+- **Championship Standings**: Professional leaderboard displaying team rankings
+- **Advanced Filtering**: Search by team name, leader, branch, or status
+- **Team Analytics**: Detailed team information with click-to-expand functionality
+- **Premium Styling**: Dark theme with SAE championship branding
+- **Pagination**: Organized viewing of 46+ teams with smooth navigation
+
+### **Sponsors Page (/sponsors)**
+- **Partner Showcase**: Display of event sponsors and partners
+- **Professional Layout**: Corporate-style sponsor presentation
+
+### **Team Page (/team)**
+- **SAE Team**: Core team member profiles and information
+- **University Branding**: MMMUT integration and leadership display
+
+### **Creators Page (/creators)**
+- **Development Team**: Project creators and contributors
+- **Technical Credits**: Development and design acknowledgments
+
+### **Admin Dashboard (/admin)**
+- **Event Management**: Create and manage hot events
+- **Registration System**: 3-step team registration approval workflow
+- **Payment Settings**: QR code and UPI configuration
+- **Bank Details**: Account information management
+- **Analytics**: Team registration statistics and insights
 
 ## 🛠 Technology Stack
 
+### **Frontend**
 - **React 18**: Modern React with hooks and functional components
 - **Vite**: Lightning-fast build tool and development server
+- **React Router**: Client-side routing for single-page application
 - **GSAP**: Professional animation library for smooth transitions
-- **Tailwind CSS**: Utility-first CSS framework for responsive design
+- **CSS-in-JS**: Component-scoped styling with dynamic theming
 - **Modern JavaScript**: ES6+ features and async/await patterns
+
+### **Backend & Database**
+- **Supabase**: Backend-as-a-Service for authentication and database
+- **PostgreSQL**: Relational database for team and event data
+- **File Storage**: Image uploads for payments and event posters
+- **Real-time Updates**: Live data synchronization
+
+### **Development Tools**
+- **ESLint**: Code quality and consistency enforcement
+- **Responsive Design**: Mobile-first development approach
+- **Component Architecture**: Modular and reusable component system
+- **Error Boundaries**: Graceful error handling and user experience
 
 
 ## 📱 Responsive Features
@@ -84,14 +122,43 @@ This landing page is designed for:
 ## 📂 Project Structure
 
 ```
-src/
-├── components/
-│   └── ErrorBoundary.jsx
-├── sections/
-│   └── Hero.jsx (Main landing page component)
-├── assets/
-│   └── background images
-└── App.jsx
+sae-3/
+├── src/
+│   ├── components/          # Reusable UI components
+│   │   ├── AdminLogin.jsx   # Admin authentication
+│   │   ├── ErrorBoundary.jsx # Error handling
+│   │   ├── FloatingDropdown.jsx # Navigation menu
+│   │   ├── GTAAuth.jsx      # User authentication wrapper
+│   │   ├── GTASignin.jsx    # User sign-in form
+│   │   ├── GTASignup.jsx    # User registration form
+│   │   ├── GTARegistrationForm.jsx # Team registration (3-step)
+│   │   ├── HomeButton.jsx   # Navigation helper
+│   │   └── LoadingScreen.jsx # GTA-style loading
+│   │
+│   ├── pages/              # Main page components
+│   │   ├── Home.jsx        # Landing page wrapper
+│   │   ├── AdminNew.jsx    # Admin dashboard
+│   │   ├── LeaderboardNew.jsx # Championship leaderboard
+│   │   ├── Sponsors.jsx    # Sponsors showcase
+│   │   ├── Team.jsx        # Team information
+│   │   └── Creators.jsx    # Development credits
+│   │
+│   ├── contexts/          # React context providers
+│   │   └── AuthContext.jsx # Authentication state
+│   │
+│   ├── lib/               # Service layer
+│   │   ├── supabase.js    # Database operations
+│   │   └── adminAuth.js   # Admin authentication
+│   │
+│   ├── assets/            # Static resources
+│   │   └── images/        # Background and UI images
+│   │
+│   └── App.jsx            # Main application component
+│
+├── docs/                  # Project documentation
+│   └── project-analysis/ # Comprehensive project docs
+│
+└── public/               # Static public files
 ```
 
 ## 🌟 Key Highlights
@@ -132,6 +199,20 @@ src/
 
 ---
 
+## 📋 Recent Updates
+
+### September 29, 2025
+- **Leaderboard Simplification**: Removed complex 3D podium for unified grid layout
+- **Performance Optimization**: Improved mobile performance and loading times
+- **Documentation Update**: Comprehensive documentation refresh
+
+### September 26, 2025
+- **Security Enhancement**: Removed exposed admin credentials
+- **Community Integration**: WhatsApp group access in registration flow
+- **Admin Panel**: Enhanced security and user experience
+
+---
+
 **Built with ❤️ for the Society of Automotive Engineers - MMMUT Chapter**
 
-*Experience the intersection of automotive engineering and street racing culture in this immersive GTA V-inspired journey.*# Force Vercel redeploy
+*Experience the intersection of automotive engineering and street racing culture in this immersive GTA V-inspired journey.*

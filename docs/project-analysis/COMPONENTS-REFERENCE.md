@@ -27,6 +27,7 @@
 /sponsors → Sponsors page
 /team → Team showcase
 /creators → Project creators
+/leaderboard → Burnout Leaderboard (LeaderboardNew)
 /admin → Admin dashboard
 /* → Redirect to Home
 ```
@@ -44,6 +45,7 @@
 - SPONSORS → `/sponsors`
 - TEAM → `/team`
 - CREATORS → `/creators`
+- LEADERBOARD → `/leaderboard`
 - (Events and Chambers commented out)
 
 ---
@@ -74,6 +76,43 @@
 5. Bank Details - Account information
 6. Analytics - Coming soon
 7. Settings - Coming soon
+
+### `LeaderboardNew.jsx` - Premium Championship Leaderboard
+**Purpose**: Professional SAE Championship leaderboard with premium styling
+**Key Features**:
+- **Premium Dark Theme**: Professional esports-style interface
+- **Unified Grid Layout**: All teams displayed consistently without special podium
+- **Advanced Search & Filtering**: Real-time search with status filters
+- **Pagination System**: Organized team browsing with 10 teams per page
+- **Team Analytics**: Detailed popup with team information on click
+- **Responsive Design**: Mobile-optimized layouts and interactions
+
+**Core Functionality**:
+- **Data Management**: Mock data generation for 46 teams
+- **Search System**: Team name, leader, roll number, branch filtering
+- **Status Filtering**: All, verified, pending team status options
+- **Rank Styling**: Position-based color coding and styling
+- **Real-time Updates**: Current time display and data refresh
+
+**Design Elements**:
+- **Title**: "BURNOUT LEADERBOARD" with championship styling
+- **Color Scheme**: Deep navy backgrounds with SAE crimson accents
+- **Typography**: Bold championship fonts with gradient effects
+- **Cards**: Glassmorphism design with hover animations
+- **Status Indicators**: Verified badges with green gradient styling
+
+**State Management**:
+```javascript
+- isLoading, leaderboardData, filteredData
+- currentTime, currentPage, searchTerm, statusFilter
+- selectedTeamForAnalysis, showAnalysisPopup
+```
+
+**Recent Changes** (Sept 29, 2025):
+- **Simplified Interface**: Removed complex 3D podium display
+- **Performance Optimization**: Eliminated resource-intensive animations
+- **Unified Experience**: All teams receive equal visual treatment
+- **Mobile Enhancement**: Improved performance on mobile devices
 
 ### `Hero.jsx` - Main Landing Section (32k+ lines)
 **Purpose**: Massive hero section with complex GTA-style animations

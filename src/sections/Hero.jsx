@@ -1649,6 +1649,47 @@ const Hero = ({ onStateChange }) => {
                     </div>
                   )}
 
+                  {/* Registration Closed Stamp */}
+                  <div
+                    className="notice-item absolute bottom-4 right-4 w-28 h-28 flex items-center justify-center"
+                    style={{
+                      transform: 'rotate(-12deg)',
+                      zIndex: 10
+                    }}
+                  >
+                    <div
+                      className="relative w-full h-full rounded-full border-[5px] border-red-700 flex items-center justify-center bg-white/95"
+                      style={{
+                        boxShadow: '0 0 15px rgba(220, 38, 38, 0.7), inset 0 0 15px rgba(220, 38, 38, 0.1)'
+                      }}
+                    >
+                      <div className="text-center">
+                        <div
+                          className="text-red-700 font-black leading-tight"
+                          style={{
+                            fontFamily: '"Impact", sans-serif',
+                            fontSize: '11px',
+                            letterSpacing: '1px',
+                            textShadow: '0 0 3px rgba(255,255,255,0.8)'
+                          }}
+                        >
+                          REGISTRATION
+                        </div>
+                        <div
+                          className="text-red-700 font-black leading-tight mt-0.5"
+                          style={{
+                            fontFamily: '"Impact", sans-serif',
+                            fontSize: '14px',
+                            letterSpacing: '1.5px',
+                            textShadow: '0 0 3px rgba(255,255,255,0.8)'
+                          }}
+                        >
+                          CLOSED
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Homepage Events Count */}
                   <div
                     className="notice-item absolute top-20 right-12 w-10 h-6 bg-pink-200 border border-pink-400"
@@ -1706,42 +1747,42 @@ const Hero = ({ onStateChange }) => {
                     </button>
 
 
-                    {/* Register Button */}
+                    {/* Leaderboard Button */}
                     <button
-                      onClick={() => setShowRegistrationForm(true)}
-                      className="group relative bg-red-900/90 border border-red-600/50 text-white px-3 py-2 rounded-lg hover:bg-red-800/95 hover:border-red-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm flex items-center justify-center"
+                      onClick={() => window.location.href = '/leaderboard'}
+                      className="group relative bg-yellow-900/90 border border-yellow-600/50 text-white px-3 py-2 rounded-lg hover:bg-yellow-800/95 hover:border-yellow-500/70 transition-all duration-300 shadow-2xl backdrop-blur-sm flex items-center justify-center"
                       style={{
                         minHeight: '40px',
                         minWidth: '110px'
                       }}
                     >
                       {/* Corner brackets for GTA 5 feel */}
-                      <div className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-red-400/60 group-hover:border-red-300/80 transition-colors duration-300"></div>
-                      <div className="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-red-400/60 group-hover:border-red-300/80 transition-colors duration-300"></div>
-                      <div className="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-red-400/60 group-hover:border-red-300/80 transition-colors duration-300"></div>
-                      <div className="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-red-400/60 group-hover:border-red-300/80 transition-colors duration-300"></div>
+                      <div className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-yellow-400/60 group-hover:border-yellow-300/80 transition-colors duration-300"></div>
+                      <div className="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-yellow-400/60 group-hover:border-yellow-300/80 transition-colors duration-300"></div>
+                      <div className="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-yellow-400/60 group-hover:border-yellow-300/80 transition-colors duration-300"></div>
+                      <div className="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-yellow-400/60 group-hover:border-yellow-300/80 transition-colors duration-300"></div>
 
                       <div className="flex items-center space-x-2">
                         {/* Icon */}
                         <div className="w-4 h-4 flex items-center justify-center">
-                          <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 rounded-sm flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
-                            <span className="text-white text-xs font-bold">✓</span>
+                          <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-sm flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
+                            <span className="text-white text-xs font-bold">🏆</span>
                           </div>
                         </div>
 
                         {/* Button text */}
                         <div className="flex flex-col items-start">
-                          <span className="text-white font-bold text-xs tracking-wider group-hover:text-green-300 transition-colors duration-300 font-mono">
-                            REGISTER
+                          <span className="text-white font-bold text-xs tracking-wider group-hover:text-yellow-300 transition-colors duration-300 font-mono">
+                            LEADERBOARD
                           </span>
-                          <span className="text-gray-400 text-xs group-hover:text-green-400 transition-colors duration-300 font-mono">
-                            NOW
+                          <span className="text-gray-400 text-xs group-hover:text-yellow-400 transition-colors duration-300 font-mono">
+                            VIEW
                           </span>
                         </div>
                       </div>
 
                       {/* Subtle glow effect */}
-                      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-red-400/5 via-red-300/10 to-red-400/5"></div>
+                      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-yellow-400/5 via-yellow-300/10 to-yellow-400/5"></div>
                     </button>
 
                     {/* Rule Book Button */}
@@ -1955,6 +1996,26 @@ const Hero = ({ onStateChange }) => {
                     </div>
                   )}
 
+                  {/* Registration Closed Badge for Mobile */}
+                  <div
+                    className="notice-item absolute bottom-20 right-2 bg-red-600 border-2 border-red-800 px-3 py-1.5 rounded-lg shadow-xl"
+                    style={{
+                      transform: 'rotate(-8deg)',
+                      boxShadow: '2px 2px 8px rgba(0,0,0,0.5), 0 0 15px rgba(220, 38, 38, 0.6)',
+                      zIndex: 5
+                    }}
+                  >
+                    <div
+                      className="text-white font-black text-xs tracking-wide leading-tight"
+                      style={{
+                        fontFamily: '"Impact", sans-serif',
+                        textShadow: '1px 1px 3px rgba(0,0,0,0.7)'
+                      }}
+                    >
+                      REGISTRATION<br/>CLOSED
+                    </div>
+                  </div>
+
                   {/* Mobile Buttons */}
                   <div className="absolute bottom-4 left-1 right-1 flex justify-between space-x-2">
                     {/* Rule Button */}
@@ -1975,18 +2036,12 @@ const Hero = ({ onStateChange }) => {
                       RULE
                     </button>
 
-                    {/* Register Button */}
+                    {/* Leaderboard Button */}
                     <button
-                      onClick={() => {
-                        if (isAuthenticated) {
-                          setShowRegistrationForm(true);
-                        } else {
-                          setShowAuth(true);
-                        }
-                      }}
-                      className="flex-1 bg-red-900/90 border border-red-600/50 text-white px-3 py-2 rounded text-xs font-bold hover:bg-red-800 transition-colors shadow-lg"
+                      onClick={() => window.location.href = '/leaderboard'}
+                      className="flex-1 bg-yellow-900/90 border border-yellow-600/50 text-white px-3 py-2 rounded text-xs font-bold hover:bg-yellow-800 transition-colors shadow-lg"
                     >
-                      REGISTER
+                      LEADERBOARD
                     </button>
                   </div>
                 </>

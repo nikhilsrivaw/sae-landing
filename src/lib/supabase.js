@@ -496,6 +496,107 @@ export const supabaseService = {
     return data
   },
 
+  // Points Management operations
+  async updateTeamScores(teamId, scores) {
+    console.log('updateTeamScores called with:', { teamId, scores });
+
+    // Validate teamId
+    if (!teamId) {
+      throw new Error('Team ID is required');
+    }
+
+    // Validate scores object
+    if (!scores || typeof scores !== 'object') {
+      throw new Error('Scores must be an object');
+    }
+
+    // Ensure all score fields exist and are numbers
+    const validatedScores = {
+      technical_inspection: parseInt(scores.technical_inspection) || 0,
+      innovation_bonus: parseInt(scores.innovation_bonus) || 0,
+      manoeuvrability: parseInt(scores.manoeuvrability) || 0,
+      durability: parseInt(scores.durability) || 0,
+      pre_final_race: parseInt(scores.pre_final_race) || 0,
+      final_race: parseInt(scores.final_race) || 0,
+      mixed_team_bonus: parseInt(scores.mixed_team_bonus) || 0
+    };
+
+    console.log('Validated scores:', validatedScores);
+
+    const { data, error } = await supabase
+      .from('team_registrations')
+      .update({
+        scores: validatedScores,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', teamId)
+      .select()
+
+    if (error) {
+      console.error('Supabase error updating team scores:', error);
+      throw new Error(`Failed to update scores: ${error.message}`);
+    }
+
+    if (!data || data.length === 0) {
+      throw new Error('No team found with the provided ID');
+    }
+
+    console.log('Team scores updated successfully:', data[0]);
+    return data[0];
+  },
+
+  async getTeamScores(teamId) {
+    const { data, error } = await supabase
+      .from('team_registrations')
+      .select('id, team_name, leader_name, scores, total_score')
+      .eq('id', teamId)
+      .single()
+
+    if (error) {
+      console.error('Error fetching team scores:', error)
+      throw error
+    }
+    return data
+  },
+
+  async getLeaderboard() {
+    const { data, error } = await supabase
+      .from('team_registrations')
+      .select(`
+        id,
+        team_name,
+        leader_name,
+        leader_roll,
+        leader_branch,
+        leader_phone,
+        registration_status,
+        payment_verified,
+        application_number,
+        created_at,
+        member1_name,
+        member1_roll,
+        member1_branch,
+        member2_name,
+        member2_roll,
+        member2_branch,
+        member3_name,
+        member3_roll,
+        member3_branch,
+        member4_name,
+        member4_roll,
+        member4_branch,
+        scores,
+        total_score
+      `)
+      .order('total_score', { ascending: false, nullsLast: true })
+
+    if (error) {
+      console.error('Error fetching leaderboard:', error)
+      throw error
+    }
+    return data
+  },
+
   // User Authentication operations
   async hashPassword(password) {
     // Simple hash function for demo - in production use bcrypt or similar
@@ -881,5 +982,35 @@ export const supabaseService = {
       throw error
     }
     return true
+  },
+
+  // Package Delivery operations
+  async updatePackageDeliveryStatus(teamId, delivered) {
+    const { data, error } = await supabase
+      .from('team_registrations')
+      .update({ package_delivered: delivered })
+      .eq('id', teamId)
+      .select()
+
+    if (error) {
+      console.error('Error updating package delivery status:', error)
+      throw error
+    }
+    return data[0]
+  },
+
+  async getPackageDeliveryStatus() {
+    const { data, error } = await supabase
+      .from('team_registrations')
+      .select('id, team_name, leader_name, leader_phone, package_delivered')
+      .order('team_name', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching package delivery status:', error)
+      console.error('⚠️ Make sure to run the database migration:')
+      console.error('ALTER TABLE team_registrations ADD COLUMN IF NOT EXISTS package_delivered BOOLEAN DEFAULT false;')
+      throw new Error('Package delivery column not found. Please run the database migration.')
+    }
+    return data
   }
 }

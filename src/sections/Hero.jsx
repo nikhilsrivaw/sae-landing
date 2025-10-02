@@ -676,7 +676,7 @@ const Hero = ({ onStateChange }) => {
             {/* Copyright */}
             <p className="text-gray-600 text-sm mt-8"
                style={{ fontFamily: 'Arial, sans-serif' }}>
-              Society of Automotive Engineers © 2024
+              Society of Automotive Engineers © 2025
             </p>
           </div>
         </div>
@@ -771,7 +771,7 @@ const Hero = ({ onStateChange }) => {
                 LOS SANTOS AUTOMOTIVE DIVISION
               </div>
               <div className="text-white/20 text-xs font-mono">
-                MMMUT © 2024
+                MMMUT © 2025
               </div>
             </div>
           </div>

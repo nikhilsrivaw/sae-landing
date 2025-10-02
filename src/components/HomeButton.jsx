@@ -42,7 +42,7 @@ const HomeButton = () => {
       onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`group fixed ${isMobile ? 'top-4 left-4' : 'top-6 left-6'} z-50 transition-all duration-500 hover:scale-110`}
+      className={`group fixed ${isMobile ? 'top-4 left-4' : 'top-6 left-6'} z-[150] transition-all duration-500 hover:scale-110`}
       style={{
         width: isMobile ? '38px' : '45px',
         height: isMobile ? '38px' : '45px',

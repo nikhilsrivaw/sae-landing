@@ -47,6 +47,9 @@ const AdminNew = () => {
   const [existingBankDetails, setExistingBankDetails] = useState(null);
   const [isEditingBank, setIsEditingBank] = useState(false);
 
+  // Package Delivery State
+  const [packageDeliveryData, setPackageDeliveryData] = useState([]);
+
   // Authentication functions
   const checkAdminAuthentication = async () => {
     console.log('🔍 Checking admin authentication...');
@@ -457,6 +460,33 @@ const AdminNew = () => {
     }
   };
 
+  // Load package delivery data
+  const loadPackageDeliveryData = async () => {
+    try {
+      const data = await supabaseService.getPackageDeliveryStatus();
+      setPackageDeliveryData(data || []);
+      setError(null); // Clear any previous errors
+    } catch (err) {
+      console.error('Error loading package delivery data:', err);
+      setError(err.message || 'Failed to load package delivery data. Please run the database migration.');
+      setPackageDeliveryData([]); // Set empty array to prevent infinite loading
+    }
+  };
+
+  // Handle package delivery checkbox change
+  const handlePackageDeliveryChange = async (teamId, delivered) => {
+    try {
+      await supabaseService.updatePackageDeliveryStatus(teamId, delivered);
+      // Update local state
+      setPackageDeliveryData(packageDeliveryData.map(team =>
+        team.id === teamId ? { ...team, package_delivered: delivered } : team
+      ));
+    } catch (err) {
+      console.error('Error updating package delivery status:', err);
+      setError('Failed to update package delivery status');
+    }
+  };
+
   useEffect(() => {
     console.log('🚀 AdminNew component mounted, starting auth check');
     // Check admin authentication first
@@ -470,6 +500,7 @@ const AdminNew = () => {
       loadTeamRegistrations();
       loadQrUpiSettings();
       loadBankDetails();
+      loadPackageDeliveryData();
     }
   }, [isAdminAuthenticated]);
 
@@ -1671,6 +1702,25 @@ const AdminNew = () => {
             </a>
             <a
               href="#"
+              className={`nav-item ${activeSection === 'points' ? 'active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = '/admin/points';
+              }}
+            >
+              <span>🎯</span>
+              <span>Points Scheme</span>
+            </a>
+            <a
+              href="#"
+              className={`nav-item ${activeSection === 'package-delivery' ? 'active' : ''}`}
+              onClick={() => handleSectionChange('package-delivery')}
+            >
+              <span>📦</span>
+              <span>Package Delivered</span>
+            </a>
+            <a
+              href="#"
               className={`nav-item ${activeSection === 'analytics' ? 'active' : ''}`}
               onClick={() => handleSectionChange('analytics')}
             >
@@ -1705,6 +1755,8 @@ const AdminNew = () => {
                  activeSection === 'registrations' ? 'Team Registrations Management' :
                  activeSection === 'qr-upi' ? 'QR & UPI Settings' :
                  activeSection === 'bank-details' ? 'Bank Details Management' :
+                 activeSection === 'points' ? 'Points Scheme Management' :
+                 activeSection === 'package-delivery' ? 'Package Delivery Management' :
                  activeSection === 'analytics' ? 'Analytics' : 'Settings'}
               </h1>
             </div>
@@ -1860,7 +1912,7 @@ const AdminNew = () => {
                           className="form-input"
                           value={eventForm.name}
                           onChange={(e) => setEventForm({...eventForm, name: e.target.value})}
-                          placeholder="e.g., BAJA Championship 2024"
+                          placeholder="e.g., BAJA Championship 2025"
                           required
                         />
                       </div>
@@ -2534,6 +2586,118 @@ const AdminNew = () => {
             )}
 
             {/* Other Sections */}
+            {activeSection === 'points' && (
+              <div className="dashboard-card">
+                <div className="card-header">
+                  <h3 className="card-title">🎯 Points Scheme Management</h3>
+                </div>
+                <div style={{ textAlign: 'center', padding: '3rem 0' }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎯</div>
+                  <p style={{ color: '#aaa' }}>Points Scheme Management coming soon...</p>
+                </div>
+              </div>
+            )}
+
+            {activeSection === 'package-delivery' && (
+              <div className="dashboard-card">
+                <div className="card-header">
+                  <h3 className="card-title">📦 Package Delivery Status</h3>
+                  <p style={{ color: '#aaa', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                    Track package delivery status for all teams
+                  </p>
+                </div>
+                <div className="card-body">
+                  {error && error.includes('migration') ? (
+                    <div style={{
+                      padding: '2rem',
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      borderRadius: '8px',
+                      marginBottom: '1rem'
+                    }}>
+                      <div style={{ fontSize: '2rem', marginBottom: '1rem', textAlign: 'center' }}>⚠️</div>
+                      <h4 style={{ color: '#ef4444', marginBottom: '1rem', textAlign: 'center' }}>Database Migration Required</h4>
+                      <p style={{ color: '#aaa', marginBottom: '1rem', textAlign: 'center' }}>
+                        The package_delivered column needs to be added to your database.
+                      </p>
+                      <div style={{
+                        background: '#1a1a1a',
+                        padding: '1rem',
+                        borderRadius: '4px',
+                        fontFamily: 'monospace',
+                        fontSize: '0.875rem',
+                        color: '#4ade80',
+                        overflow: 'auto'
+                      }}>
+                        <p style={{ margin: '0 0 0.5rem 0', color: '#aaa' }}>Run this SQL in Supabase SQL Editor:</p>
+                        <code>ALTER TABLE team_registrations<br/>
+                        ADD COLUMN IF NOT EXISTS package_delivered BOOLEAN DEFAULT false;</code>
+                      </div>
+                      <p style={{ color: '#aaa', marginTop: '1rem', fontSize: '0.875rem', textAlign: 'center' }}>
+                        Or check the file: <code style={{ color: '#4ade80' }}>add-package-delivery-column.sql</code>
+                      </p>
+                    </div>
+                  ) : packageDeliveryData.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '3rem 0' }}>
+                      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📦</div>
+                      <p style={{ color: '#aaa' }}>No teams found</p>
+                    </div>
+                  ) : (
+                    <div style={{ overflowX: 'auto' }}>
+                      <table className="data-table">
+                        <thead>
+                          <tr>
+                            <th style={{ width: '50px' }}>#</th>
+                            <th>Team Name</th>
+                            <th>Leader Name</th>
+                            <th>Phone Number</th>
+                            <th style={{ textAlign: 'center', width: '150px' }}>Package Delivered</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {packageDeliveryData.map((team, index) => (
+                            <tr key={team.id}>
+                              <td>{index + 1}</td>
+                              <td style={{ fontWeight: 'bold' }}>{team.team_name}</td>
+                              <td>{team.leader_name}</td>
+                              <td>{team.leader_phone || 'N/A'}</td>
+                              <td style={{ textAlign: 'center' }}>
+                                <label style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  cursor: 'pointer',
+                                  gap: '0.5rem'
+                                }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={team.package_delivered || false}
+                                    onChange={(e) => handlePackageDeliveryChange(team.id, e.target.checked)}
+                                    style={{
+                                      width: '18px',
+                                      height: '18px',
+                                      cursor: 'pointer',
+                                      accentColor: '#4ade80'
+                                    }}
+                                  />
+                                  <span style={{
+                                    color: team.package_delivered ? '#4ade80' : '#aaa',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 'bold'
+                                  }}>
+                                    {team.package_delivered ? '✓ Delivered' : 'Pending'}
+                                  </span>
+                                </label>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {activeSection === 'analytics' && (
               <div className="dashboard-card">
                 <div className="card-header">

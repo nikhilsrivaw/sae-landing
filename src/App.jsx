@@ -15,9 +15,10 @@ const Team = React.lazy(() => import('./pages/Team'));
 // const Glimpse = React.lazy(() => import('./pages/Glimpse'));
 const Creators = React.lazy(() => import('./pages/Creators'));
 // const Events = React.lazy(() => import('./pages/Events'));
-// const Leaderboard = React.lazy(() => import('./pages/LeaderboardNew'));
-const LeaderboardComingSoon = React.lazy(() => import('./pages/LeaderboardComingSoon'));
+const Leaderboard = React.lazy(() => import('./pages/LeaderboardNew'));
+// const LeaderboardComingSoon = React.lazy(() => import('./pages/LeaderboardComingSoon'));
 const AdminNew = React.lazy(() => import('./pages/AdminNew'));
+const PointsManagement = React.lazy(() => import('./pages/PointsManagement'));
 
 // Loading component
 const Loading = () => (
@@ -51,8 +52,9 @@ function App() {
                 {/* <Route path="/glimpse" element={<Glimpse />} /> */}
                 <Route path="/creators" element={<Creators />} />
                 {/* <Route path="/events" element={<Events />} /> */}
-                <Route path="/leaderboard" element={<LeaderboardComingSoon />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/admin" element={<AdminNew />} />
+                <Route path="/admin/points" element={<PointsManagement />} />
                 <Route path="*" element={<Home />} />
               </Routes>
             </Suspense>

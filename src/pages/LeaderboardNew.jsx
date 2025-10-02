@@ -489,7 +489,13 @@ const LeaderboardNew = () => {
       `,
       fontFamily: '"Courier New", monospace',
       marginBottom: '0.5rem',
-      textShadow: '0 0 40px rgba(220, 38, 38, 0.3)'
+      textAlign: 'center',
+      marginLeft: '-0.15em',
+      marginRight: 0,
+      paddingLeft: 0,
+      paddingRight: 0,
+      width: '100%',
+      display: 'block'
     },
 
     lastUpdated: {
@@ -1345,7 +1351,10 @@ const LeaderboardNew = () => {
           <div style={{...styles.headerCornerBracket, bottom: '-3px', left: '-3px', borderRight: 'none', borderTop: 'none'}}></div>
           <div style={{...styles.headerCornerBracket, bottom: '-3px', right: '-3px', borderLeft: 'none', borderTop: 'none'}}></div>
 
-          <h1 style={styles.championshipTitle}>
+          <h1 style={{
+            ...styles.championshipTitle,
+            textIndent: '-0.15em'
+          }}>
             BURNOUT LEADERBOARD
           </h1>
           <div style={styles.lastUpdated}>
@@ -2707,6 +2716,15 @@ const LeaderboardNew = () => {
 
             .popup-radar-mobile {
               display: none !important;
+            }
+
+            /* Championship header mobile fixes */
+            h1 {
+              text-align: center !important;
+              margin-left: 0 !important;
+              margin-right: 0 !important;
+              padding-left: 0 !important;
+              padding-right: 0 !important;
             }
           }
 

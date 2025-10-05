@@ -14,8 +14,8 @@ const simpleHash = (password, salt = 'SAE_ADMIN_SALT') => {
 
 // Fixed admin credentials (change these as needed)
 const FIXED_ADMIN_CREDENTIALS = {
-  username: 'admin',
-  password: 'sae2024'
+  username: 'mmmut',
+  password: 'mmmut2024'
 };
 
 // Admin authentication service
